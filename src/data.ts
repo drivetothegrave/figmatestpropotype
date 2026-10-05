@@ -231,3 +231,75 @@ export const DEFAULT_COMMENTS: Record<string, string> = {
   s3: 'Аренда офиса',
   p3: 'Покупка оборудования',
 };
+
+/* ---------- Демо: генерация новых платежей на подпись ---------- */
+
+const DEMO_TEMPLATES: { counterparty: string; recipient: string; avatarLabel: string; description: string; comment: string; sums: number[] }[] = [
+  {
+    counterparty: 'БЦ Лесная, ООО',
+    recipient: 'Бизнес-центр «Лесная», ООО',
+    avatarLabel: 'БЦ',
+    description: 'Арендная плата по договору №14/А от 01.02.2025. НДС не облагается',
+    comment: 'Аренда офиса',
+    sums: [180000, 12500, 24000],
+  },
+  {
+    counterparty: 'Склад-Сервис, ООО',
+    recipient: 'Склад-Сервис, ООО',
+    avatarLabel: 'СС',
+    description: 'Аренда складского помещения по договору №7 от 15.01.2025, в т. ч. НДС 20%',
+    comment: 'Аренда склада',
+    sums: [95000, 47500],
+  },
+  {
+    counterparty: 'Телеком Плюс, АО',
+    recipient: 'Телеком Плюс, АО',
+    avatarLabel: 'ТП',
+    description: 'Оплата услуг связи и интернета по счёту №5521, в т. ч. НДС 20%',
+    comment: 'Связь и интернет',
+    sums: [8900, 14300],
+  },
+  {
+    counterparty: 'Техносфера, ООО',
+    recipient: 'Техносфера, ООО',
+    avatarLabel: 'Т',
+    description: 'Оплата по счёту №318 за ноутбуки и мониторы, в т. ч. НДС 20%',
+    comment: 'Покупка оборудования',
+    sums: [312000, 86000],
+  },
+  {
+    counterparty: 'Петрова А.С.',
+    recipient: 'Петрова Анна Сергеевна',
+    avatarLabel: 'ПА',
+    description: 'Заработная плата за март 2026. НДФЛ удержан',
+    comment: 'Зарплата',
+    sums: [64000, 72500],
+  },
+];
+
+/** Новый платёж на подпись «на сегодня» со случайным шаблоном и комментарием */
+export function createDemoSignPayment(): { payment: Payment; comment: string } {
+  const template = DEMO_TEMPLATES[Math.floor(Math.random() * DEMO_TEMPLATES.length)];
+  const sum = template.sums[Math.floor(Math.random() * template.sums.length)];
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const number = 6900 + Math.floor(Math.random() * 100);
+  return {
+    comment: template.comment,
+    payment: {
+      id: `demo-${now.getTime()}-${Math.floor(Math.random() * 1000)}`,
+      sum: -sum,
+      status: 'sign',
+      counterparty: template.counterparty,
+      description: template.description,
+      meta: `№${number}, ${time}`,
+      avatarLabel: template.avatarLabel,
+      dateTime: `2 апреля 2026, ${time}`,
+      operationName: `Платёж по реквизитам №${number}`,
+      recipient: template.recipient,
+      createdAt: `2 апреля 2026, ${time}`,
+      ...signInfo,
+      ...requisites,
+    },
+  };
+}

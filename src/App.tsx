@@ -6,11 +6,21 @@ import { SignList } from './components/SignList';
 import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
-import { DEFAULT_COMMENTS, PAYMENT_DAYS, Payment, PaymentDay, formatRub, paymentsWord } from './data';
+import { DemoPanel } from './components/DemoPanel';
+import {
+  DEFAULT_COMMENTS,
+  PAYMENT_DAYS,
+  Payment,
+  PaymentDay,
+  createDemoSignPayment,
+  formatRub,
+  paymentsWord,
+} from './data';
 
 const COMMENTS_KEY = 'payment-comments';
 const HISTORY_KEY = 'comment-history';
 const SIGNED_KEY = 'signed-payments';
+const EXTRA_KEY = 'extra-payments';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -35,6 +45,8 @@ export const App: React.FC = () => {
   const [comments, setComments] = React.useState<Record<string, string>>(() => load(COMMENTS_KEY, DEFAULT_COMMENTS));
   const [history, setHistory] = React.useState<string[]>(() => load(HISTORY_KEY, DEFAULT_HISTORY));
   const [signedIds, setSignedIds] = React.useState<string[]>(() => load(SIGNED_KEY, []));
+  // Платежи, добавленные через панель настроек прототипа
+  const [extraPayments, setExtraPayments] = React.useState<Payment[]>(() => load(EXTRA_KEY, []));
   const [paymentId, setPaymentId] = React.useState<string>();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   // Платёж, к которому редактируем комментарий (может отличаться от открытого в дровере)
@@ -44,9 +56,12 @@ export const App: React.FC = () => {
   const [successMessage, setSuccessMessage] = React.useState<string>();
 
   // Подписанные платежи уходят в историю со статусом «В процессе»
-  const days: PaymentDay[] = PAYMENT_DAYS.map((day) => ({
+  const days: PaymentDay[] = PAYMENT_DAYS.map((day, index) => ({
     ...day,
-    payments: day.payments.map((p) => (signedIds.includes(p.id) ? { ...p, status: 'progress' as const } : p)),
+    // Новые демо-платежи — сверху сегодняшнего дня
+    payments: [...(index === 0 ? [...extraPayments].reverse() : []), ...day.payments].map((p) =>
+      signedIds.includes(p.id) ? { ...p, status: 'progress' as const } : p,
+    ),
   }));
   const signDays = days
     .map((day) => ({ ...day, payments: day.payments.filter((p) => p.status === 'sign') }))
@@ -91,6 +106,37 @@ export const App: React.FC = () => {
         : `Подписано ${paymentsWord(signRequest.length)} на ${formatRub(total)}`,
     );
     setSignRequest([]);
+  };
+
+  const addDemoSignPayment = () => {
+    const { payment: next, comment } = createDemoSignPayment();
+    const nextExtra = [...extraPayments, next];
+    setExtraPayments(nextExtra);
+    save(EXTRA_KEY, nextExtra);
+    const nextComments = { ...comments, [next.id]: comment };
+    setComments(nextComments);
+    save(COMMENTS_KEY, nextComments);
+  };
+
+  const restoreSigned = () => {
+    setSignedIds([]);
+    save(SIGNED_KEY, []);
+  };
+
+  const resetPrototype = () => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY].forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // без localStorage сбрасываем только состояние
+      }
+    });
+    setComments(DEFAULT_COMMENTS);
+    setHistory(DEFAULT_HISTORY);
+    setSignedIds([]);
+    setExtraPayments([]);
+    setIsDrawerOpen(false);
+    setSuccessMessage(undefined);
   };
 
   return (
@@ -154,6 +200,14 @@ export const App: React.FC = () => {
         onRemoveFromHistory={(item) => updateHistory(history.filter((h) => h !== item))}
         onClose={closeComment}
         onSave={saveComment}
+      />
+
+      <DemoPanel
+        signCount={signCount}
+        signedCount={signedIds.length}
+        onAddSignPayment={addDemoSignPayment}
+        onRestoreSigned={restoreSigned}
+        onReset={resetPrototype}
       />
 
       <SignConfirmModal

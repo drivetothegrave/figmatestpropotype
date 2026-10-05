@@ -539,3 +539,49 @@ button {
 .sign-confirm__list .ds-cell + .ds-cell {
   box-shadow: var(--Top-Line);
 }
+
+/* ---------- Панель настроек прототипа (служебная, не часть интерфейса) ---------- */
+
+.demo-panel {
+  position: fixed;
+  right: var(--spacing-6x);
+  bottom: var(--spacing-6x);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-3x);
+}
+
+.demo-panel__toggle {
+  box-shadow: var(--Floating);
+}
+
+.demo-panel__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2x);
+  width: calc(var(--spacing-40x) * 2);
+  padding: var(--spacing-4x);
+  border-radius: var(--popup-rounding-strong);
+  background: var(--popup-primary);
+  box-shadow: var(--Floating);
+  animation: suggest-in 0.15s ease-out;
+}
+
+.demo-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2x);
+  padding-bottom: var(--spacing-1x);
+}
+
+.demo-panel__secondary {
+  color: var(--primitive-secondary);
+}
+
+/* У Button фиксированная ширина 320px — в панели растягиваем по карточке */
+.demo-panel__card .button {
+  --button-width: 100%;
+}
