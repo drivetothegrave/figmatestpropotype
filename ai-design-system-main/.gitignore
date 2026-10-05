@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+
+# Build outputs
+/dist
+/demo/dist
+*.tsbuildinfo
+.vercel/
+
+# Dev
+.DS_Store
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Design specs
+docs
+docs/superpowers/

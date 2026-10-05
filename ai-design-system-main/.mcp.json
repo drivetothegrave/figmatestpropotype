@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tochka-ui": {
+      "type": "http",
+      "url": "https://ui-kit-mcp-server-tochka-ui.query.consul-prod/mcp"
+    }
+  }
+}
