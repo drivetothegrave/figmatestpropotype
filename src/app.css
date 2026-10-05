@@ -39,7 +39,7 @@ button {
 .app__main {
   flex: 1 1 auto;
   min-width: 0;
-  padding: var(--spacing-6x) var(--spacing-24x) var(--page-bottom-padding) var(--spacing-5x);
+  padding: var(--spacing-6x) var(--page-horizontal-padding) var(--page-bottom-padding);
 }
 
 /* ---------- Левая колонка ---------- */
@@ -113,6 +113,7 @@ button {
 /* Максимальная ширина блока истории — 1024px (960 + 64) */
 .history-tabs {
   max-width: calc(var(--spacing-40x) * 6 + var(--spacing-16x));
+  margin: 0 auto;
 }
 
 /* Табы начинаются на одной линии с белым блоком, отступ до блока — 16px */
