@@ -140,6 +140,29 @@ button {
   min-width: 0;
 }
 
+/* Фильтры и поиск — одной высоты 32px, как в макете (Chip, Icon Button и Search Bar) */
+.history-card__filters .chip {
+  /* 18px текст + 2 × 4px отступ + 2 × 2px рамка = 30px → min-height чипа 32px */
+  padding-top: var(--spacing-1x);
+  padding-bottom: var(--spacing-1x);
+}
+
+.history-card__search .ds-search {
+  /* 20px строка + 2 × 6px = 32px */
+  gap: var(--spacing-2-5x);
+  padding: var(--spacing-1-5x) var(--spacing-2-5x);
+  border-radius: var(--rounding-2-5x);
+}
+
+.history-card__search .ds-search__icon.ds-icon {
+  --icon-size: var(--icon-size-18);
+}
+
+/* У input браузерный отступ 1px сверху и снизу — без него строка ровно 20px */
+.history-card__search .ds-search__input {
+  padding: 0;
+}
+
 .history-card__empty {
   padding: var(--spacing-10x) var(--spacing-5x);
   color: var(--primitive-secondary);
