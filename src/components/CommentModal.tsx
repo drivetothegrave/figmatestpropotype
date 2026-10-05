@@ -21,6 +21,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({ isOpen, initialValue
       isOpen={isOpen}
       onClose={onClose}
       isOverlayCloseEnabled
+      className="comment-modal"
       header={<ModalHeader title="Комментарий к платежу" onClose={onClose} />}
       footer={
         <ModalFooter

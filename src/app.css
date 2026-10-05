@@ -324,3 +324,11 @@ button {
 .payment-drawer__navigator h3 {
   padding-bottom: var(--spacing-2-5x);
 }
+
+/* ---------- Модалка комментария ---------- */
+
+/* TextArea из t-ds всегда рендерит шапку (min-height 18px + gap), даже без label и счётчика.
+   В макете поле без заголовка — прячем пустую шапку, чтобы над текстом не было лишнего отступа. */
+.comment-modal .text-area__header:not(:has(.text-area__title, .text-area__counter)) {
+  display: none;
+}
