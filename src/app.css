@@ -110,14 +110,21 @@ button {
 
 /* ---------- История платежей ---------- */
 
+/* Максимальная ширина блока истории — 1024px (960 + 64) */
+.history-tabs {
+  max-width: calc(var(--spacing-40x) * 6 + var(--spacing-16x));
+}
+
+/* Табы начинаются на одной линии с белым блоком, отступ до блока — 16px */
 .history-tabs .tabs-carousel__bar {
-  padding: 0 var(--spacing-5x);
+  padding-bottom: var(--spacing-4x);
 }
 
 .history-card {
   padding: var(--spacing-5x) 0 var(--spacing-4x);
   border-radius: var(--card-rounding) var(--card-rounding) 0 0;
   background: var(--container-default);
+  box-shadow: var(--Card);
 }
 
 .history-card__filters {
