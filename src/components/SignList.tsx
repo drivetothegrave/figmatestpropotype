@@ -153,7 +153,7 @@ export const SignList: React.FC<SignListProps> = ({
           {isFiltered && visible.length > 0 && (
             <p className="ts-400-s sign-list__hint">
               Показаны платежи по запросу «{query.trim()}» — подпишутся только они.{' '}
-              <button type="button" className="sign-list__link ts-400-s hoverOpacity" onClick={() => setQuery('')}>
+              <button type="button" className="sign-list__link ts-500-s hoverOpacity" onClick={() => setQuery('')}>
                 Показать все {paymentsWord(allPayments.length)}
               </button>
             </p>
