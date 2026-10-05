@@ -215,6 +215,34 @@ button {
   --button-color: var(--primitive-primary);
 }
 
+/* Чёрный тултип над иконкой быстрого действия */
+.quick-action {
+  position: relative;
+  display: inline-flex;
+}
+
+.quick-action__tooltip {
+  position: absolute;
+  bottom: calc(100% - var(--spacing-1x));
+  left: 50%;
+  z-index: 2;
+  padding: var(--spacing-1-5x) var(--spacing-2-5x);
+  border-radius: var(--rounding-2x);
+  background: var(--primitive-primary);
+  color: var(--primitive-default);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, var(--spacing-1x));
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.quick-action:hover .quick-action__tooltip,
+.quick-action:has(:focus-visible) .quick-action__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .payment-row:hover .payment-row__actions,
 .payment-row:focus-within .payment-row__actions {
   opacity: 1;

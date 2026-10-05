@@ -29,17 +29,19 @@ const PaymentRow: React.FC<{
   onSelect: () => void;
   onComment: () => void;
 }> = ({ payment, comment, isSelected, onSelect, onComment }) => {
+  // tooltip — короткая подпись как у кнопок в дровере, ariaLabel — полное действие для скринридеров
   const quickActions = [
     {
+      tooltip: 'Комментарий',
       label: comment ? 'Изменить комментарий' : 'Оставить комментарий',
       icon: <BubbleListShort />,
       onClick: onComment,
     },
-    { label: 'Скачать', icon: <ArrowDownUnderline /> },
-    { label: 'Распечатать', icon: <Printer /> },
-    { label: 'Поделиться', icon: <Share /> },
-    { label: 'Запланировать', icon: <CalendarAcsArrowRotationRight /> },
-    { label: 'Повторить', icon: <ArrowReturnRight /> },
+    { tooltip: 'Скачать', label: 'Скачать', icon: <ArrowDownUnderline /> },
+    { tooltip: 'Распечатать', label: 'Распечатать', icon: <Printer /> },
+    { tooltip: 'Поделиться', label: 'Поделиться', icon: <Share /> },
+    { tooltip: 'Запланировать', label: 'Запланировать', icon: <CalendarAcsArrowRotationRight /> },
+    { tooltip: 'Повторить', label: 'Повторить', icon: <ArrowReturnRight /> },
   ];
 
   return (
@@ -83,14 +85,18 @@ const PaymentRow: React.FC<{
       {/* Быстрые действия — появляются при наведении/фокусе на строке */}
       <div className="payment-row__actions" onClick={(e) => e.stopPropagation()}>
         {quickActions.map((action) => (
-          <IconButton
-            key={action.label}
-            icon={action.icon}
-            ariaLabel={action.label}
-            variant="transparent"
-            size="l"
-            onClick={action.onClick}
-          />
+          <span key={action.tooltip} className="quick-action">
+            <IconButton
+              icon={action.icon}
+              ariaLabel={action.label}
+              variant="transparent"
+              size="l"
+              onClick={action.onClick}
+            />
+            <span className="quick-action__tooltip ts-400-s" aria-hidden="true">
+              {action.tooltip}
+            </span>
+          </span>
         ))}
       </div>
     </div>
