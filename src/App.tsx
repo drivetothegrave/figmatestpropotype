@@ -1,15 +1,18 @@
 import React from 'react';
-import { MainPageNavigationBar } from '@pluginwoman/t-ds';
+import { MainPageNavigationBar, TabsCarousel } from '@pluginwoman/t-ds';
 import { LeftBar } from './components/LeftBar';
 import { PaymentHistory } from './components/PaymentHistory';
+import { SignList } from './components/SignList';
 import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
-import { Payment } from './data';
+import { SignConfirmModal } from './components/SignConfirmModal';
+import { DEFAULT_COMMENTS, PAYMENT_DAYS, Payment, PaymentDay, formatRub, paymentsWord } from './data';
 
 const COMMENTS_KEY = 'payment-comments';
 const HISTORY_KEY = 'comment-history';
+const SIGNED_KEY = 'signed-payments';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
-const DEFAULT_HISTORY = ['Аренда офиса', 'Покупка оборудования'];
+const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -29,13 +32,27 @@ function save(key: string, value: unknown) {
 }
 
 export const App: React.FC = () => {
-  const [comments, setComments] = React.useState<Record<string, string>>(() => load(COMMENTS_KEY, {}));
+  const [comments, setComments] = React.useState<Record<string, string>>(() => load(COMMENTS_KEY, DEFAULT_COMMENTS));
   const [history, setHistory] = React.useState<string[]>(() => load(HISTORY_KEY, DEFAULT_HISTORY));
-  const [payment, setPayment] = React.useState<Payment>();
+  const [signedIds, setSignedIds] = React.useState<string[]>(() => load(SIGNED_KEY, []));
+  const [paymentId, setPaymentId] = React.useState<string>();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   // Платёж, к которому редактируем комментарий (может отличаться от открытого в дровере)
   const [commentTarget, setCommentTarget] = React.useState<Payment>();
   const isModalOpen = commentTarget !== undefined;
+  const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
+  const [successMessage, setSuccessMessage] = React.useState<string>();
+
+  // Подписанные платежи уходят в историю со статусом «В процессе»
+  const days: PaymentDay[] = PAYMENT_DAYS.map((day) => ({
+    ...day,
+    payments: day.payments.map((p) => (signedIds.includes(p.id) ? { ...p, status: 'progress' as const } : p)),
+  }));
+  const signDays = days
+    .map((day) => ({ ...day, payments: day.payments.filter((p) => p.status === 'sign') }))
+    .filter((day) => day.payments.length > 0);
+  const signCount = signDays.reduce((acc, day) => acc + day.payments.length, 0);
+  const payment = days.flatMap((day) => day.payments).find((p) => p.id === paymentId);
 
   const updateHistory = (next: string[]) => {
     setHistory(next);
@@ -43,11 +60,10 @@ export const App: React.FC = () => {
   };
 
   const openPayment = (next: Payment) => {
-    setPayment(next);
+    setPaymentId(next.id);
     setIsDrawerOpen(true);
   };
 
-  // Из быстрых действий в списке — сразу модалка, без дровера
   const openComment = (next: Payment) => setCommentTarget(next);
   const closeComment = () => setCommentTarget(undefined);
 
@@ -63,6 +79,20 @@ export const App: React.FC = () => {
     closeComment();
   };
 
+  const confirmSign = () => {
+    const ids = signRequest.map((p) => p.id);
+    const next = [...signedIds, ...ids.filter((id) => !signedIds.includes(id))];
+    setSignedIds(next);
+    save(SIGNED_KEY, next);
+    const total = signRequest.reduce((acc, p) => acc + Math.abs(p.sum), 0);
+    setSuccessMessage(
+      signRequest.length === 1
+        ? `Платёж на ${formatRub(total)} подписан`
+        : `Подписано ${paymentsWord(signRequest.length)} на ${formatRub(total)}`,
+    );
+    setSignRequest([]);
+  };
+
   return (
     <div className="app">
       <MainPageNavigationBar activeNavItem="main" customer="Носковец О.Н., ИП" avatarInitials="НО" />
@@ -70,11 +100,39 @@ export const App: React.FC = () => {
       <div className="app__body">
         <LeftBar />
         <main className="app__main">
-          <PaymentHistory
-            comments={comments}
-            selectedId={isDrawerOpen ? payment?.id : undefined}
-            onSelect={openPayment}
-            onComment={openComment}
+          <TabsCarousel
+            size="2xl"
+            className="history-tabs"
+            tabs={[
+              {
+                label: 'История',
+                content: (
+                  <PaymentHistory
+                    days={days}
+                    comments={comments}
+                    selectedId={isDrawerOpen ? paymentId : undefined}
+                    onSelect={openPayment}
+                    onComment={openComment}
+                  />
+                ),
+              },
+              {
+                label: 'На подпись',
+                badge: signCount > 0 ? signCount : undefined,
+                content: (
+                  <SignList
+                    days={signDays}
+                    comments={comments}
+                    selectedId={isDrawerOpen ? paymentId : undefined}
+                    successMessage={successMessage}
+                    onSuccessHidden={() => setSuccessMessage(undefined)}
+                    onSelect={openPayment}
+                    onComment={openComment}
+                    onSign={setSignRequest}
+                  />
+                ),
+              },
+            ]}
           />
         </main>
       </div>
@@ -84,8 +142,9 @@ export const App: React.FC = () => {
         comment={payment ? comments[payment.id] : undefined}
         isOpen={isDrawerOpen}
         // Escape закрывает сначала модалку, а не дровер под ней
-        onClose={() => !isModalOpen && setIsDrawerOpen(false)}
+        onClose={() => !isModalOpen && signRequest.length === 0 && setIsDrawerOpen(false)}
         onCommentClick={() => payment && openComment(payment)}
+        onSign={(p) => setSignRequest([p])}
       />
 
       <CommentModal
@@ -95,6 +154,14 @@ export const App: React.FC = () => {
         onRemoveFromHistory={(item) => updateHistory(history.filter((h) => h !== item))}
         onClose={closeComment}
         onSave={saveComment}
+      />
+
+      <SignConfirmModal
+        isOpen={signRequest.length > 0}
+        payments={signRequest}
+        comments={comments}
+        onClose={() => setSignRequest([])}
+        onConfirm={confirmSign}
       />
     </div>
   );

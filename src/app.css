@@ -445,3 +445,97 @@ button {
 .suggest-popup__remove {
   --button-color: var(--primitive-neutral-4);
 }
+
+/* ---------- Платежи на подпись ---------- */
+
+.sign-list__alert {
+  padding: 0 var(--spacing-5x) var(--spacing-4x);
+}
+
+.sign-list__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-4x) var(--spacing-5x);
+}
+
+.sign-list__summary h2 {
+  flex: 1 1 auto;
+}
+
+.sign-list__link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primitive-brand);
+  cursor: pointer;
+}
+
+.sign-list__hint {
+  padding: 0 var(--spacing-5x) var(--spacing-2x);
+  color: var(--primitive-secondary);
+}
+
+.sign-list__select-all {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-2x) var(--spacing-5x);
+  cursor: pointer;
+}
+
+/* Футер «Подписать» прилипает к низу экрана внутри белого блока */
+.sign-list__footer {
+  border-radius: 0;
+}
+
+.payment-row__leading {
+  display: flex;
+  align-items: flex-start;
+}
+
+.payment-row__tag {
+  display: flex;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Тег комментария в дровере с иконкой редактирования */
+.comment-tag__content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5x);
+  max-width: 100%;
+}
+
+.comment-tag__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comment-tag__edit {
+  flex: 0 0 auto;
+  color: var(--primitive-secondary);
+}
+
+/* Основное действие в дровере («Подписать») — заливка брендом */
+.payment-drawer__action .icon-button.payment-drawer__action-primary {
+  color: var(--primitive-default);
+}
+
+.payment-drawer__notification {
+  width: 100%;
+}
+
+/* Окно подтверждения подписи */
+.sign-confirm__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sign-confirm__list .ds-cell + .ds-cell {
+  box-shadow: var(--Top-Line);
+}

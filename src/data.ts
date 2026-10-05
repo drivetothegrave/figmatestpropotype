@@ -2,8 +2,8 @@ export type PaymentStatus = 'done' | 'progress' | 'sign' | 'credited' | 'second-
 
 export interface Payment {
   id: string;
-  amount: string;
-  isIncome?: boolean;
+  /** Сумма в рублях: отрицательная — списание, положительная — поступление */
+  sum: number;
   status: PaymentStatus;
   counterparty: string;
   description: string;
@@ -18,6 +18,9 @@ export interface Payment {
   bik: string;
   bank: string;
   corrAccount: string;
+  /** Для платежей на подпись */
+  createdAt?: string;
+  createdBy?: string;
 }
 
 export interface PaymentDay {
@@ -41,6 +44,29 @@ export const STATUS_COLOR: Record<PaymentStatus, string> = {
   'second-sign': 'var(--primitive-secondary)',
 };
 
+const rub = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
+
+/** 250000 → «250 000 ₽» */
+export function formatRub(value: number): string {
+  return `${rub.format(Math.abs(value))} ₽`;
+}
+
+/** −250000 → «– 250 000 ₽», 50000 → «+ 50 000 ₽» */
+export function formatAmount(sum: number): string {
+  return `${sum < 0 ? '–' : '+'} ${formatRub(sum)}`;
+}
+
+/** plural(3, ['платёж', 'платежа', 'платежей']) → «платежа» */
+export function plural(n: number, forms: [string, string, string]): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1];
+  return forms[2];
+}
+
+export const paymentsWord = (n: number) => `${n} ${plural(n, ['платёж', 'платежа', 'платежей'])}`;
+
 const requisites = {
   inn: '8176 9703 71',
   kpp: '771 001 001',
@@ -50,13 +76,17 @@ const requisites = {
   corrAccount: '3010 1810 8452 5000 0999',
 };
 
+const signInfo = {
+  createdBy: 'Солодов Олег Алексеевич',
+};
+
 export const PAYMENT_DAYS: PaymentDay[] = [
   {
     title: 'Сегодня, 2 апреля',
     payments: [
       {
         id: 'p1',
-        amount: '– 250 000 ₽',
+        sum: -250000,
         status: 'done',
         counterparty: 'Лаванда, ООО',
         description:
@@ -69,8 +99,38 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         ...requisites,
       },
       {
+        id: 's1',
+        sum: -180000,
+        status: 'sign',
+        counterparty: 'БЦ Лесная, ООО',
+        description: 'Арендная плата за апрель 2026 по договору №14/А от 01.02.2025. НДС не облагается',
+        meta: '№6890, 12:15',
+        avatarLabel: 'БЦ',
+        dateTime: '2 апреля 2026, 12:15',
+        operationName: 'Платёж по реквизитам №6890',
+        recipient: 'Бизнес-центр «Лесная», ООО',
+        createdAt: '2 апреля 2026, 12:15',
+        ...signInfo,
+        ...requisites,
+      },
+      {
+        id: 's2',
+        sum: -95000,
+        status: 'sign',
+        counterparty: 'Склад-Сервис, ООО',
+        description: 'Аренда складского помещения за апрель 2026 по договору №7 от 15.01.2025, в т. ч. НДС 20%',
+        meta: '№6889, 11:02',
+        avatarLabel: 'СС',
+        dateTime: '2 апреля 2026, 11:02',
+        operationName: 'Платёж по реквизитам №6889',
+        recipient: 'Склад-Сервис, ООО',
+        createdAt: '2 апреля 2026, 11:02',
+        ...signInfo,
+        ...requisites,
+      },
+      {
         id: 'p2',
-        amount: '– 2 000 ₽',
+        sum: -2000,
         status: 'progress',
         counterparty: 'Дмитрий Олегович С.',
         description: '+7 (906) 917‑10‑18',
@@ -88,7 +148,7 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     payments: [
       {
         id: 'p3',
-        amount: '– 250 000 ₽',
+        sum: -250000,
         status: 'sign',
         counterparty: 'Величко, Д.А., ИП',
         description: 'По договору №8923 от 10 октября 2022 в т.ч. НДС 20%',
@@ -97,12 +157,28 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         dateTime: '1 апреля 2026, 13:40',
         operationName: 'Платёж по реквизитам №6884',
         recipient: 'Величко Дмитрий Александрович, ИП',
+        createdAt: '1 апреля 2026, 13:40',
+        ...signInfo,
+        ...requisites,
+      },
+      {
+        id: 's3',
+        sum: -12500,
+        status: 'sign',
+        counterparty: 'БЦ Лесная, ООО',
+        description: 'Возмещение коммунальных услуг за март 2026 по договору №14/А от 01.02.2025',
+        meta: '№6881, 10:30',
+        avatarLabel: 'БЦ',
+        dateTime: '1 апреля 2026, 10:30',
+        operationName: 'Платёж по реквизитам №6881',
+        recipient: 'Бизнес-центр «Лесная», ООО',
+        createdAt: '1 апреля 2026, 10:30',
+        ...signInfo,
         ...requisites,
       },
       {
         id: 'p4',
-        amount: '+ 50 000 ₽',
-        isIncome: true,
+        sum: 50000,
         status: 'credited',
         counterparty: 'Промт, ООО',
         description: 'Оплата услуг контрагенту по договору подряда №206 от 12.03.2019, в т. ч. НДС 18%',
@@ -120,7 +196,7 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     payments: [
       {
         id: 'p5',
-        amount: '– 250 000 ₽',
+        sum: -250000,
         status: 'second-sign',
         counterparty: 'Засыпкина Д.В., ИП',
         description: 'По договору №8923 от 10 октября 2022 в т.ч. НДС 20%',
@@ -133,7 +209,7 @@ export const PAYMENT_DAYS: PaymentDay[] = [
       },
       {
         id: 'p6',
-        amount: '– 77 000 ₽',
+        sum: -77000,
         status: 'done',
         counterparty: 'Кириенко С.В., ИП',
         description: 'Оплата услуг контрагенту по договору подряда №206 от 12.03.2019, в т. ч. НДС 10%',
@@ -147,3 +223,11 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     ],
   },
 ];
+
+/** Платежи на подпись сразу «протегированы» — чтобы было что фильтровать */
+export const DEFAULT_COMMENTS: Record<string, string> = {
+  s1: 'Аренда офиса',
+  s2: 'Аренда склада',
+  s3: 'Аренда офиса',
+  p3: 'Покупка оборудования',
+};

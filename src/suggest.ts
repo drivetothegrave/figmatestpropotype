@@ -51,3 +51,33 @@ export function matchSuggestions(items: string[], query: string, limit = 5): str
 export function matchesQuery(text: string, query: string): boolean {
   return matchSuggestions([text], query, 1).length > 0;
 }
+
+interface Searchable {
+  id: string;
+  counterparty: string;
+  description: string;
+  sum: number;
+}
+
+/** Совпадает ли платёж с запросом: контрагент, назначение, сумма или комментарий */
+export function paymentMatches(payment: Searchable, comment: string | undefined, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const digits = q.replace(/\s/g, '');
+  const plain = [payment.counterparty, payment.description].join(' ').toLowerCase();
+  return (
+    plain.includes(q) ||
+    (/^\d+$/.test(digits) && String(Math.abs(payment.sum)).includes(digits)) ||
+    (comment !== undefined && matchesQuery(comment, query))
+  );
+}
+
+/** Оставляет в днях только подходящие платежи и убирает пустые дни */
+export function filterDays<D extends { payments: P[] }, P extends Searchable>(
+  days: D[],
+  predicate: (payment: P) => boolean,
+): D[] {
+  return days
+    .map((day) => ({ ...day, payments: day.payments.filter(predicate) }))
+    .filter((day) => day.payments.length > 0);
+}
