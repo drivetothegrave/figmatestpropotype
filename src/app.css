@@ -503,24 +503,6 @@ button {
   cursor: pointer;
 }
 
-/* Тег комментария в дровере с иконкой редактирования */
-.comment-tag__content {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1-5x);
-  max-width: 100%;
-}
-
-.comment-tag__text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.comment-tag__edit {
-  flex: 0 0 auto;
-  color: var(--primitive-secondary);
-}
-
 /* Основное действие в дровере («Подписать») — заливка брендом */
 .payment-drawer__action .icon-button.payment-drawer__action-primary {
   color: var(--primitive-default);

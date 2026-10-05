@@ -108,16 +108,7 @@ export const PaymentDrawer: React.FC<PaymentDrawerProps> = ({
                 size="l"
                 className={['comment-tag', comment ? '' : 'comment-tag--empty'].filter(Boolean).join(' ')}
               >
-                {comment ? (
-                  <span className="comment-tag__content">
-                    <span className="comment-tag__text">{comment}</span>
-                    <span className="ds-icon ds-icon--xs comment-tag__edit" aria-hidden="true">
-                      <Pencil />
-                    </span>
-                  </span>
-                ) : (
-                  'Добавить комментарий к платежу'
-                )}
+                {comment || 'Добавить комментарий к платежу'}
               </Tag>
             </button>
 
