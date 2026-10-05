@@ -45,9 +45,7 @@ export const PaymentDrawer: React.FC<PaymentDrawerProps> = ({
   onClose,
   onCommentClick,
 }) => (
-  <>
-    {isOpen && <div className="drawer-backdrop" onClick={onClose} aria-hidden="true" />}
-    <Drawer
+  <Drawer
       isOpen={isOpen}
       onClose={onClose}
       className="payment-drawer"
@@ -142,5 +140,4 @@ export const PaymentDrawer: React.FC<PaymentDrawerProps> = ({
         </div>
       )}
     </Drawer>
-  </>
 );

@@ -221,20 +221,7 @@ button {
 
 /* ---------- Дровер платежа ---------- */
 
-.drawer-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: var(--overlay-popup);
-  animation: backdrop-in 0.3s ease-out;
-}
-
-@keyframes backdrop-in {
-  from {
-    opacity: 0;
-  }
-}
-
+/* Дровер открывается поверх контента без затемнения, только с тенью Popout */
 .payment-drawer .drawer__panel {
   background: var(--popup-secondary);
   box-shadow: var(--Popout);
