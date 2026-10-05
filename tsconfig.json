@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": false,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@pluginwoman/t-ds": ["ai-design-system-main/src/index.ts"],
+      "@pluginwoman/t-ds/icons": ["ai-design-system-main/src/icons.ts"],
+      "@pluginwoman/t-ds/icons/*": ["ai-design-system-main/src/assets/Icon/*.tsx"]
+    }
+  },
+  "include": ["src"]
+}

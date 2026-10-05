@@ -1,0 +1,111 @@
+body {
+    margin: 0px;
+    padding: 0px;
+}
+
+.promo-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16x);
+    width: 100%;
+    max-width: 1160px;
+    padding-top: var(--spacing-20x);
+    padding-right: var(--page-horizontal-padding);
+    padding-bottom: var(--spacing-30x);
+    padding-left: var(--page-horizontal-padding);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.promo-page__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16x);
+    width: 100%;
+}
+
+.promo-page__banner {
+    max-width: none;
+}
+
+.promo-page .promo-page-banner-group {
+    max-width: none;
+}
+
+.promo-page__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--content-group-list-spacing);
+    min-width: 0;
+}
+
+.promo-page__cards-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5x);
+}
+
+.promo-page__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-5x);
+}
+
+.section-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--content-element-list-spacing);
+}
+
+.promo-page__section-text {
+    margin: 0;
+    color: var(--primitive-secondary);
+}
+
+.promo-page__image-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--marketing-purple-2-fixed);
+}
+
+.promo-page__cta-sentinel {
+    position: relative;
+    top: 30vh;
+    height: 0;
+}
+
+@media screen and (max-width: 1023px) {
+    .promo-page {
+        gap: var(--content-section-list-spacing);
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .promo-page__content {
+        gap: var(--content-section-list-spacing);
+        padding-right: var(--page-horizontal-padding);
+        padding-left: var(--page-horizontal-padding);
+        box-sizing: border-box;
+    }
+
+    .promo-page__section {
+        gap: var(--content-element-list-spacing);
+    }
+
+    .promo-page__cards-stack {
+        gap: var(--content-element-list-spacing);
+    }
+
+    .promo-page__cards {
+        grid-template-columns: 1fr;
+        gap: var(--content-element-list-spacing);
+    }
+
+}
+
+.promo-page__section--cta {
+    gap: 0;
+}

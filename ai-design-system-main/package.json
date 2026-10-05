@@ -1,0 +1,131 @@
+{
+  "name": "@pluginwoman/t-ds",
+  "version": "1.5.8",
+  "description": "T Design System - React components library",
+  "type": "module",
+  "main": "./dist/t-ds.cjs",
+  "module": "./dist/t-ds.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/t-ds.es.js",
+      "require": "./dist/t-ds.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./icons": {
+      "import": "./dist/icons.es.js",
+      "require": "./dist/icons.cjs",
+      "types": "./dist/icons.d.ts"
+    },
+    "./icons/12/Filled": {
+      "import": "./dist/icons/12/Filled.es.js",
+      "require": "./dist/icons/12/Filled.cjs",
+      "types": "./dist/assets/Icon/12/Filled.d.ts"
+    },
+    "./icons/16/Stroked": {
+      "import": "./dist/icons/16/Stroked.es.js",
+      "require": "./dist/icons/16/Stroked.cjs",
+      "types": "./dist/assets/Icon/16/Stroked.d.ts"
+    },
+    "./icons/16/Filled": {
+      "import": "./dist/icons/16/Filled.es.js",
+      "require": "./dist/icons/16/Filled.cjs",
+      "types": "./dist/assets/Icon/16/Filled.d.ts"
+    },
+    "./icons/20/Filled": {
+      "import": "./dist/icons/20/Filled.es.js",
+      "require": "./dist/icons/20/Filled.cjs",
+      "types": "./dist/assets/Icon/20/Filled.d.ts"
+    },
+    "./icons/20/Stroked": {
+      "import": "./dist/icons/20/Stroked.es.js",
+      "require": "./dist/icons/20/Stroked.cjs",
+      "types": "./dist/assets/Icon/20/Stroked.d.ts"
+    },
+    "./icons/20/Stroked1px": {
+      "import": "./dist/icons/20/Stroked1px.es.js",
+      "require": "./dist/icons/20/Stroked1px.cjs",
+      "types": "./dist/assets/Icon/20/Stroked1px.d.ts"
+    },
+    "./icons/20/Graphic": {
+      "import": "./dist/icons/20/Graphic.es.js",
+      "require": "./dist/icons/20/Graphic.cjs",
+      "types": "./dist/assets/Icon/20/Graphic.d.ts"
+    },
+    "./icons/24/Stroked": {
+      "import": "./dist/icons/24/Stroked.es.js",
+      "require": "./dist/icons/24/Stroked.cjs",
+      "types": "./dist/assets/Icon/24/Stroked.d.ts"
+    },
+    "./icons/24/Filled": {
+      "import": "./dist/icons/24/Filled.es.js",
+      "require": "./dist/icons/24/Filled.cjs",
+      "types": "./dist/assets/Icon/24/Filled.d.ts"
+    },
+    "./icons/32/Stroked": {
+      "import": "./dist/icons/32/Stroked.es.js",
+      "require": "./dist/icons/32/Stroked.cjs",
+      "types": "./dist/assets/Icon/32/Stroked.d.ts"
+    },
+    "./icons/32/Filled": {
+      "import": "./dist/icons/32/Filled.es.js",
+      "require": "./dist/icons/32/Filled.cjs",
+      "types": "./dist/assets/Icon/32/Filled.d.ts"
+    },
+    "./style": "./dist/style.css",
+    "./style.css": "./dist/style.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "AGENTS.md",
+    "AGENTS.tokens.md",
+    "AGENTS.components.md",
+    "AGENTS.icons.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PluginWoman/t-ds.git"
+  },
+  "author": "PluginWoman",
+  "license": "MIT",
+  "keywords": [
+    "design-system",
+    "react",
+    "components",
+    "ui"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "cd demo && vite",
+    "build": "rm -rf dist && vite build && tsc --emitDeclarationOnly --project tsconfig.json --outDir dist && cp AGENTS.md AGENTS.tokens.md AGENTS.components.md AGENTS.icons.md dist/",
+    "build:demo": "cd demo && vite build",
+    "preview:demo": "cd demo && vite preview",
+    "prepublishOnly": "npm run type-check && npm run build && npm run lint:package && npm run test:package",
+    "lint:package": "node scripts/check-package-lint.mjs",
+    "test:package": "node scripts/check-package-exports.mjs && tsc --noEmit --module esnext --moduleResolution bundler --target es2020 --jsx react-jsx --skipLibCheck scripts/check-package-types.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.39.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4"
+  },
+  "dependencies": {
+    "react-number-format": "^5.4.5"
+  }
+}

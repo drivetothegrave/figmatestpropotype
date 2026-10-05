@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build:demo",
+  "outputDirectory": "demo/dist",
+  "installCommand": "npm ci",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

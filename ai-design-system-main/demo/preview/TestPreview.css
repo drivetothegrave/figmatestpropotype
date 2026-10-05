@@ -1,0 +1,12 @@
+.test-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5x);
+  width: 720px;
+  max-width: 100%;
+}
+
+.test-preview__title {
+  margin: 0;
+  color: var(--primitive-primary);
+}

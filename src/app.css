@@ -1,0 +1,331 @@
+/* Только токены t-ds: цвета, отступы, скругления и тени — из CSS-переменных, типографика — классами ts-* */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--page-secondary);
+  color: var(--primitive-primary);
+  font-family: var(--font-family-tt-norms-tochka-extended);
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- Раскладка ---------- */
+
+.app__body {
+  display: flex;
+  align-items: flex-start;
+}
+
+.app__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--spacing-6x) var(--spacing-24x) var(--page-bottom-padding) var(--spacing-5x);
+}
+
+/* ---------- Левая колонка ---------- */
+
+.left-bar {
+  position: sticky;
+  top: 0;
+  flex: 0 0 calc(var(--spacing-40x) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.left-bar__drop {
+  padding: var(--spacing-7-5x) var(--spacing-5x) 0;
+}
+
+.left-bar__drop-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-0-5x);
+  width: 100%;
+  padding: var(--spacing-6x) var(--spacing-5x);
+  border: 1.5px dashed var(--translucent-primitives-neutral-4);
+  border-radius: var(--rounding-3x);
+  background: transparent;
+  cursor: pointer;
+}
+
+.left-bar__drop-title {
+  color: var(--primitive-brand);
+}
+
+.left-bar__drop-subtitle {
+  color: var(--primitive-secondary);
+}
+
+.left-bar__section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2-5x);
+  padding: var(--spacing-4x) var(--spacing-5x);
+}
+
+.left-bar__section-header h2 {
+  flex: 1 1 auto;
+}
+
+.left-bar__collapse {
+  color: var(--primitive-primary);
+}
+
+.left-bar__cell {
+  padding-left: var(--spacing-5x);
+  padding-right: var(--spacing-5x);
+  box-sizing: border-box;
+}
+
+.left-bar__action-icon {
+  --icon-size: var(--icon-size-l);
+  color: var(--primitive-brand);
+}
+
+.left-bar__more-icon {
+  color: var(--primitive-secondary);
+}
+
+/* ---------- История платежей ---------- */
+
+.history-tabs .tabs-carousel__bar {
+  padding: 0 var(--spacing-5x);
+}
+
+.history-card {
+  padding: var(--spacing-5x) 0 var(--spacing-4x);
+  border-radius: var(--card-rounding) var(--card-rounding) 0 0;
+  background: var(--container-default);
+}
+
+.history-card__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2-5x);
+  padding: 0 var(--spacing-5x) var(--spacing-4x);
+}
+
+.history-card__search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.history-card__empty {
+  padding: var(--spacing-10x) var(--spacing-5x);
+  color: var(--primitive-secondary);
+  text-align: center;
+}
+
+.history-day {
+  padding-bottom: var(--spacing-4x);
+}
+
+.history-day__title {
+  padding: var(--spacing-4x) var(--spacing-5x);
+}
+
+.payment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-5x);
+  width: 100%;
+  padding: var(--spacing-4x) var(--spacing-5x);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.payment-row:hover,
+.payment-row.is-selected {
+  background: var(--container-transparent-1);
+}
+
+.payment-row:focus-visible {
+  outline: 2px solid var(--primitive-brand);
+  outline-offset: -2px;
+}
+
+.payment-row__sum {
+  display: flex;
+  flex: 0 0 var(--spacing-30x);
+  flex-direction: column;
+  gap: var(--spacing-1-5x);
+}
+
+.payment-row__amount {
+  white-space: nowrap;
+}
+
+.payment-row__data {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-1-5x);
+  min-width: 0;
+}
+
+.payment-row__secondary {
+  color: var(--primitive-secondary);
+}
+
+/* ---------- Тег комментария (список и дровер) ---------- */
+
+.comment-tag {
+  --tag-surface-color: var(--container-transparent-1);
+  --tag-text-color: var(--primitive-primary);
+  max-width: 100%;
+}
+
+.comment-tag .tag__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comment-tag--empty {
+  --tag-text-color: var(--primitive-neutral-4);
+}
+
+/* ---------- Дровер платежа ---------- */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--overlay-popup);
+  animation: backdrop-in 0.3s ease-out;
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.payment-drawer .drawer__panel {
+  background: var(--popup-secondary);
+  box-shadow: var(--Popout);
+}
+
+.payment-drawer__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5x);
+  height: var(--spacing-16x);
+  padding: 0 var(--spacing-5x);
+}
+
+.payment-drawer__header-meta {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--spacing-2-5x);
+  white-space: nowrap;
+}
+
+.payment-drawer__secondary {
+  color: var(--primitive-secondary);
+}
+
+.payment-drawer__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  padding: 0 var(--spacing-5x) var(--spacing-7-5x);
+}
+
+.payment-drawer__event {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding-top: var(--spacing-7-5x);
+}
+
+.payment-drawer__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+  width: 100%;
+  text-align: center;
+}
+
+.payment-drawer__comment {
+  display: flex;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.payment-drawer__actions {
+  display: flex;
+  width: 100%;
+  padding: var(--spacing-4x) 0;
+}
+
+.payment-drawer__action {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4x);
+  text-align: center;
+}
+
+.payment-drawer__action .icon-button {
+  --icon-button-radius: var(--rounding-pill);
+  color: var(--primitive-brand);
+  box-shadow: var(--Card);
+}
+
+.payment-drawer__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5x);
+}
+
+.payment-drawer__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-5x) var(--spacing-4x);
+  padding-top: var(--spacing-2-5x);
+}
+
+.payment-drawer__navigator {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-5x) var(--spacing-5x) var(--spacing-2-5x);
+  border-radius: var(--card-rounding);
+  background: var(--container-default);
+  box-shadow: var(--Card);
+}
+
+.payment-drawer__navigator h3 {
+  padding-bottom: var(--spacing-2-5x);
+}
