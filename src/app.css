@@ -39,7 +39,7 @@ button {
 .app__main {
   flex: 1 1 auto;
   min-width: 0;
-  padding: var(--spacing-6x) var(--page-horizontal-padding) var(--page-bottom-padding);
+  padding: var(--spacing-7-5x) var(--page-horizontal-padding) var(--page-bottom-padding);
 }
 
 /* ---------- Левая колонка ---------- */
@@ -566,4 +566,295 @@ button {
 /* У Button фиксированная ширина 320px — в панели растягиваем по карточке */
 .demo-panel__card .button {
   --button-width: 100%;
+}
+
+/* ---------- Навбар: доп. пункты «Операции» и «Знания» ---------- */
+
+.app-nav__slot {
+  display: contents;
+}
+
+/* ---------- Главная — компактный таймлайн ---------- */
+
+.main-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-section-list-spacing);
+  max-width: calc(var(--spacing-40x) * 6 + var(--spacing-16x));
+  margin: 0 auto;
+}
+
+.main-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-element-list-spacing);
+}
+
+.accounts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4x);
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-4x) var(--spacing-5x);
+  border-radius: var(--rounding-2-5x);
+  background: var(--container-default);
+  box-shadow: var(--Card);
+}
+
+.account-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2-5x);
+}
+
+.account-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.compact-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-5x) 0;
+  border-radius: var(--rounding-2-5x);
+  background: var(--container-default);
+  box-shadow: var(--Card);
+}
+
+.compact-timeline__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6x);
+  padding: 0 var(--spacing-5x);
+}
+
+.compact-timeline__insights {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-2-5x);
+}
+
+.compact-timeline__all {
+  --button-width: auto;
+  margin: 0 var(--spacing-5x);
+}
+
+/* Инсайд-плашка: Tag xl + индикатор-точка */
+.insight {
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.insight__tag {
+  --tag-surface-color: var(--container-transparent-1);
+  --tag-text-color: var(--primitive-primary);
+}
+
+.insight--warning .insight__tag {
+  --tag-surface-color: var(--bg-warning-1);
+}
+
+.insight__content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+  white-space: nowrap;
+}
+
+.insight__dot {
+  flex: 0 0 auto;
+  width: var(--spacing-2x);
+  height: var(--spacing-2x);
+  border-radius: var(--rounding-pill);
+  background: var(--primitive-brand);
+}
+
+.insight--warning .insight__dot {
+  background: var(--primitive-warning);
+}
+
+/* Рекомендация внутри таймлайна */
+.timeline-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-5x);
+  padding: var(--spacing-2x) var(--spacing-5x) var(--spacing-4x);
+}
+
+.timeline-banner__label {
+  flex: 0 0 var(--spacing-30x);
+  color: var(--primitive-brand);
+}
+
+.timeline-banner__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacing-3x) var(--spacing-5x);
+}
+
+.timeline-banner__content p {
+  flex: 1 1 calc(var(--spacing-40x) * 2);
+}
+
+.timeline-banner__buttons {
+  display: flex;
+  gap: var(--spacing-2-5x);
+}
+
+.timeline-banner__brand-button {
+  --button-bg: var(--bg-brand-1);
+  --button-bg-hovered: var(--bg-brand-2);
+  --button-color: var(--primitive-brand);
+}
+
+/* Поиск на главной: подсказки + превью операций + «Показать все» */
+.compact-search__hint-icon {
+  color: var(--primitive-neutral-4);
+}
+
+.compact-search__popup {
+  max-height: none;
+}
+
+.compact-search__all {
+  box-shadow: var(--Top-Line);
+}
+
+.compact-search__empty {
+  padding: var(--spacing-3x) var(--spacing-5x);
+  color: var(--primitive-secondary);
+}
+
+/* ---------- «Операции» — развёрнутый таймлайн ---------- */
+
+.app__operations {
+  padding: var(--spacing-7-5x) var(--page-horizontal-padding) var(--page-bottom-padding);
+}
+
+.operations-page {
+  max-width: calc(var(--spacing-40x) * 6 + var(--spacing-16x));
+  margin: 0 auto;
+}
+
+.operations-analytics {
+  display: flex;
+  gap: var(--spacing-4x);
+  margin-bottom: var(--spacing-4x);
+}
+
+.analytics-card {
+  padding: var(--spacing-2-5x) var(--spacing-5x);
+  border-radius: var(--rounding-2-5x);
+  background: var(--container-default);
+  box-shadow: var(--Card);
+}
+
+.analytics-card--revenue {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--spacing-14x);
+}
+
+.analytics-card__stats {
+  display: flex;
+  gap: var(--spacing-7-5x);
+  white-space: nowrap;
+}
+
+.analytics-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5x);
+}
+
+.analytics-stat__label {
+  color: var(--primitive-secondary);
+}
+
+.analytics-stat__value--success {
+  color: var(--primitive-success);
+}
+
+.analytics-card--risk {
+  display: flex;
+  flex: 0 0 calc(var(--spacing-40x) + var(--spacing-20x));
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-2-5x);
+}
+
+.bar-graph {
+  display: flex;
+  flex: 1 1 auto;
+  height: var(--spacing-20x);
+}
+
+.bar-graph__legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-2x) var(--spacing-2-5x) var(--spacing-4-5x) 0;
+  color: var(--primitive-secondary);
+}
+
+.bar-graph__bars {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.bar-graph__column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2x);
+  padding: var(--spacing-2x) var(--spacing-1-5x) var(--spacing-1x);
+}
+
+.bar-graph__track {
+  position: relative;
+  flex: 1 1 auto;
+  width: var(--spacing-3-5x);
+}
+
+.bar-graph__bar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--rounding-1x);
+  background: var(--category-lavender);
+}
+
+.bar-graph__label {
+  color: var(--primitive-secondary);
+}
+
+/* Переключатель вида списка */
+.history-card__view {
+  display: flex;
+  gap: var(--spacing-2-5x);
+}
+
+.history-card__view .icon-button.is-active {
+  --button-bg: transparent;
+  --button-bg-hovered: transparent;
+  box-shadow: inset 0 0 0 2px var(--primitive-neutral-3);
+}
+
+.history-card__found {
+  padding: 0 var(--spacing-5x) var(--spacing-2x);
+  color: var(--primitive-secondary);
 }

@@ -23,6 +23,8 @@ interface PaymentRowProps {
   onSelect: () => void;
   /** Клик по тегу комментария — отфильтровать список по нему */
   onTagClick?: (comment: string) => void;
+  /** Компактная строка без номера и времени (главная, компактный вид) */
+  isCompact?: boolean;
 }
 
 export const PaymentRow: React.FC<PaymentRowProps> = ({
@@ -34,11 +36,14 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
   quickActions,
   onSelect,
   onTagClick,
+  isCompact = false,
 }) => (
   <div
     role="button"
     tabIndex={0}
-    className={['payment-row', isSelected ? 'is-selected' : ''].filter(Boolean).join(' ')}
+    className={['payment-row', isSelected ? 'is-selected' : '', isCompact ? 'payment-row--compact' : '']
+      .filter(Boolean)
+      .join(' ')}
     onClick={onSelect}
     onKeyDown={(e) => {
       if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
@@ -90,7 +95,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
             {comment}
           </Tag>
         ))}
-      <span className="ts-400-xs payment-row__secondary">{payment.meta}</span>
+      {!isCompact && <span className="ts-400-xs payment-row__secondary">{payment.meta}</span>}
     </div>
 
     <Avatar size={32} shape="circle" label={payment.avatarLabel} />

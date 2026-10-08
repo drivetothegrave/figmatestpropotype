@@ -1,6 +1,9 @@
 import React from 'react';
-import { MainPageNavigationBar, TabsCarousel } from '@pluginwoman/t-ds';
+import { Alert } from '@pluginwoman/t-ds';
 import { LeftBar } from './components/LeftBar';
+import { AppNavigationBar, AppPage } from './components/AppNavigationBar';
+import { MainPage } from './components/MainPage';
+import { OperationsPage, OperationsTab } from './components/OperationsPage';
 import { PaymentHistory } from './components/PaymentHistory';
 import { SignList } from './components/SignList';
 import { PaymentDrawer } from './components/PaymentDrawer';
@@ -54,6 +57,10 @@ export const App: React.FC = () => {
   const isModalOpen = commentTarget !== undefined;
   const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
   const [successMessage, setSuccessMessage] = React.useState<string>();
+  // Навигация: главная (компактный таймлайн) ↔ «Операции» (развёрнутый)
+  const [page, setPage] = React.useState<AppPage>('main');
+  const [operationsTab, setOperationsTab] = React.useState<OperationsTab>('all');
+  const [operationsQuery, setOperationsQuery] = React.useState('');
 
   // Подписанные платежи уходят в историю со статусом «В процессе»
   const days: PaymentDay[] = PAYMENT_DAYS.map((day, index) => ({
@@ -67,7 +74,26 @@ export const App: React.FC = () => {
     .map((day) => ({ ...day, payments: day.payments.filter((p) => p.status === 'sign') }))
     .filter((day) => day.payments.length > 0);
   const signCount = signDays.reduce((acc, day) => acc + day.payments.length, 0);
-  const payment = days.flatMap((day) => day.payments).find((p) => p.id === paymentId);
+  const signSum = signDays.flatMap((day) => day.payments).reduce((acc, p) => acc + Math.abs(p.sum), 0);
+  const allPayments = days.flatMap((day) => day.payments);
+  const payment = allPayments.find((p) => p.id === paymentId);
+
+  const navigate = (next: AppPage) => {
+    setPage(next);
+    if (next === 'operations') {
+      setOperationsTab('all');
+      setOperationsQuery('');
+    }
+    window.scrollTo({ top: 0 });
+  };
+
+  // С главной: инсайд «На подпись», «Все операции», поиск/подсказка — в нужную вкладку с запросом
+  const openOperations = (tab: 'all' | 'sign', query = '') => {
+    setOperationsTab(tab);
+    setOperationsQuery(query);
+    setPage('operations');
+    window.scrollTo({ top: 0 });
+  };
 
   const updateHistory = (next: string[]) => {
     setHistory(next);
@@ -141,47 +167,61 @@ export const App: React.FC = () => {
 
   return (
     <div className="app">
-      <MainPageNavigationBar activeNavItem="main" customer="Носковец О.Н., ИП" avatarInitials="НО" />
+      <AppNavigationBar page={page} onNavigate={navigate} />
 
-      <div className="app__body">
-        <LeftBar />
-        <main className="app__main">
-          <TabsCarousel
-            size="2xl"
-            className="history-tabs"
-            tabs={[
-              {
-                label: 'История',
-                content: (
-                  <PaymentHistory
-                    days={days}
-                    comments={comments}
-                    selectedId={isDrawerOpen ? paymentId : undefined}
-                    onSelect={openPayment}
-                    onComment={openComment}
-                  />
-                ),
-              },
-              {
-                label: 'На подпись',
-                badge: signCount > 0 ? signCount : undefined,
-                content: (
-                  <SignList
-                    days={signDays}
-                    comments={comments}
-                    selectedId={isDrawerOpen ? paymentId : undefined}
-                    successMessage={successMessage}
-                    onSuccessHidden={() => setSuccessMessage(undefined)}
-                    onSelect={openPayment}
-                    onComment={openComment}
-                    onSign={setSignRequest}
-                  />
-                ),
-              },
-            ]}
+      {successMessage && (
+        <Alert key={successMessage} type="success" onHide={() => setSuccessMessage(undefined)}>
+          {successMessage}
+        </Alert>
+      )}
+
+      {page === 'main' ? (
+        <div className="app__body">
+          <LeftBar />
+          <main className="app__main">
+            <MainPage
+              payments={allPayments}
+              comments={comments}
+              signCount={signCount}
+              signSum={signSum}
+              selectedId={isDrawerOpen ? paymentId : undefined}
+              onOpenPayment={openPayment}
+              onComment={openComment}
+              onOpenOperations={openOperations}
+            />
+          </main>
+        </div>
+      ) : (
+        <main className="app__operations">
+          <OperationsPage
+            tab={operationsTab}
+            onTabChange={setOperationsTab}
+            signCount={signCount}
+            history={
+              <PaymentHistory
+                days={days}
+                comments={comments}
+                query={operationsQuery}
+                onQueryChange={setOperationsQuery}
+                selectedId={isDrawerOpen ? paymentId : undefined}
+                onSelect={openPayment}
+                onComment={openComment}
+              />
+            }
+            signList={
+              <SignList
+                days={signDays}
+                comments={comments}
+                selectedId={isDrawerOpen ? paymentId : undefined}
+                successMessage={successMessage}
+                onSelect={openPayment}
+                onComment={openComment}
+                onSign={setSignRequest}
+              />
+            }
           />
         </main>
-      </div>
+      )}
 
       <PaymentDrawer
         payment={payment}

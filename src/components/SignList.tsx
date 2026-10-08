@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Checkbox, Chip, Footer, IconButton } from '@pluginwoman/t-ds';
+import { Checkbox, Chip, Footer, IconButton } from '@pluginwoman/t-ds';
 import { BubbleListShort, Pen } from '@pluginwoman/t-ds/icons';
 import { Filters } from '@pluginwoman/t-ds/icons/20/Stroked';
 import { Payment, PaymentDay, formatRub, paymentsWord } from '../data';
@@ -14,9 +14,8 @@ interface SignListProps {
   days: PaymentDay[];
   comments: Record<string, string>;
   selectedId?: string;
-  /** Сообщение после подписания (показывается Alert'ом) */
+  /** Сообщение после подписания — по нему сбрасываем поиск и выбор */
   successMessage?: string;
-  onSuccessHidden: () => void;
   onSelect: (payment: Payment) => void;
   onComment: (payment: Payment) => void;
   /** Запросить подписание — App покажет подтверждение */
@@ -36,7 +35,6 @@ export const SignList: React.FC<SignListProps> = ({
   comments,
   selectedId,
   successMessage,
-  onSuccessHidden,
   onSelect,
   onComment,
   onSign,
@@ -101,14 +99,6 @@ export const SignList: React.FC<SignListProps> = ({
 
   return (
     <div className="history-card sign-list">
-      {successMessage && (
-        <div className="sign-list__alert">
-          <Alert key={successMessage} type="success" onHide={onSuccessHidden}>
-            {successMessage}
-          </Alert>
-        </div>
-      )}
-
       <div className="history-card__filters">
         <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
         {FILTERS.map((label) => (

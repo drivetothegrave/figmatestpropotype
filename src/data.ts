@@ -85,6 +85,19 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     title: 'Сегодня, 2 апреля',
     payments: [
       {
+        id: 'p0',
+        sum: -250000,
+        status: 'done',
+        counterparty: 'УФК по Сибирской области',
+        description: 'Оплата налогов за 3 квартал 2026',
+        meta: '№6891, 14:05',
+        avatarLabel: 'УФК',
+        dateTime: '2 апреля 2026, 14:05',
+        operationName: 'Налоговый платёж №6891',
+        recipient: 'УФК по Сибирской области (Межрайонная ИФНС №4)',
+        ...requisites,
+      },
+      {
         id: 'p1',
         sum: -250000,
         status: 'done',
