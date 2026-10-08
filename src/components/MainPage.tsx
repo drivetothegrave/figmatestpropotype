@@ -5,6 +5,7 @@ import { Payment, formatRub } from '../data';
 import { CompactSearch } from './CompactSearch';
 import { PaymentRow } from './PaymentRow';
 import { historyQuickActions } from './PaymentHistory';
+import { BIG_EXPENSE, InsightSettings, RISK_INFO } from '../insights';
 
 const ACCOUNTS = [
   { name: 'Расчётный, **6584', balance: '23 422 785,37 ₽' },
@@ -24,10 +25,16 @@ interface MainPageProps {
   onComment: (payment: Payment) => void;
   /** Перейти в «Операции»: вкладка и (опционально) поисковый запрос */
   onOpenOperations: (tab: 'all' | 'sign', query?: string) => void;
+  /** Комментарий сразу нескольким операциям — для инсайда «без комментария» */
+  onBulkComment: (payments: Payment[]) => void;
+  /** Какие инсайды и рекомендации показывать — из настроек прототипа */
+  insights: InsightSettings;
 }
 
+type InsightTone = 'brand' | 'warning' | 'error' | 'success' | 'neutral';
+
 /** Инсайд-плашка над компактным таймлайном (Tag с индикатором) */
-const Insight: React.FC<{ tone: 'brand' | 'warning'; onClick: () => void; children: React.ReactNode }> = ({
+const Insight: React.FC<{ tone: InsightTone; onClick: () => void; children: React.ReactNode }> = ({
   tone,
   onClick,
   children,
@@ -52,8 +59,55 @@ export const MainPage: React.FC<MainPageProps> = ({
   onOpenPayment,
   onComment,
   onOpenOperations,
+  onBulkComment,
+  insights,
 }) => {
   const [isRecommendationHidden, setIsRecommendationHidden] = React.useState(false);
+  // Если рекомендацию снова включили в настройках — показываем, даже если её скрывали
+  React.useEffect(() => {
+    if (insights.recommendation) setIsRecommendationHidden(false);
+  }, [insights.recommendation]);
+
+  // Крупные списания без комментария — повод их подписать для отчётности
+  const uncommented = payments.filter((p) => p.sum <= -BIG_EXPENSE && !comments[p.id]);
+
+  const insightItems: { key: string; tone: InsightTone; label: React.ReactNode; onClick: () => void }[] = [];
+  if (insights.sign && signCount > 0) {
+    insightItems.push({
+      key: 'sign',
+      tone: 'brand',
+      label: `${signCount} на подпись · ${formatRub(signSum)}`,
+      onClick: () => onOpenOperations('sign'),
+    });
+  }
+  if (insights.risk !== 'off') {
+    const risk = RISK_INFO[insights.risk];
+    insightItems.push({ key: 'risk', tone: risk.tone, label: risk.insight, onClick: () => onOpenOperations('all') });
+  }
+  if (insights.noComment && uncommented.length > 0) {
+    insightItems.push({
+      key: 'no-comment',
+      tone: 'neutral',
+      label: `${uncommented.length} ${uncommented.length === 1 ? 'крупный' : 'крупных'} без комментария`,
+      onClick: () => onBulkComment(uncommented),
+    });
+  }
+  if (insights.tax) {
+    insightItems.push({
+      key: 'tax',
+      tone: 'warning',
+      label: 'Налог УСН до 28 октября · 37 500 ₽',
+      onClick: () => onOpenOperations('all', 'налог'),
+    });
+  }
+  if (insights.income) {
+    insightItems.push({
+      key: 'income',
+      tone: 'success',
+      label: 'Поступления +18% к прошлой неделе',
+      onClick: () => onOpenOperations('all'),
+    });
+  }
   const [globalQuery, setGlobalQuery] = React.useState('');
   const latest = payments.slice(0, LATEST_LIMIT);
 
@@ -112,29 +166,33 @@ export const MainPage: React.FC<MainPageProps> = ({
         <h2 className="ts-600-2xl main-page__title">История операций</h2>
 
         <div className="compact-timeline">
-          <div className="compact-timeline__filters">
+          {/* Больше трёх инсайдов — поиск на всю ширину, плашки строкой под ним */}
+          <div
+            className={['compact-timeline__filters', insightItems.length > 3 ? 'compact-timeline__filters--stacked' : '']
+              .filter(Boolean)
+              .join(' ')}
+          >
             <CompactSearch
               payments={payments}
               comments={comments}
               onOpenPayment={onOpenPayment}
               onShowAll={(query) => onOpenOperations('all', query)}
             />
-            <div className="compact-timeline__insights">
-              {signCount > 0 && (
-                <Insight tone="brand" onClick={() => onOpenOperations('sign')}>
-                  {signCount} на подпись · {formatRub(signSum)}
-                </Insight>
-              )}
-              <Insight tone="warning" onClick={() => onOpenOperations('all')}>
-                Риск повысился
-              </Insight>
-            </div>
+            {insightItems.length > 0 && (
+              <div className="compact-timeline__insights">
+                {insightItems.map((item) => (
+                  <Insight key={item.key} tone={item.tone} onClick={item.onClick}>
+                    {item.label}
+                  </Insight>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="compact-timeline__list">
             {latest.slice(0, 1).map(row)}
 
-            {!isRecommendationHidden && (
+            {insights.recommendation && !isRecommendationHidden && (
               <div className="timeline-banner">
                 <span className="ts-500-s timeline-banner__label">Рекомендация</span>
                 <div className="timeline-banner__content">

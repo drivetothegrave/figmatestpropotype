@@ -1,6 +1,7 @@
 import React from 'react';
 import { Cell, LinearProgress, TabsCarousel } from '@pluginwoman/t-ds';
 import { ArrowDownUnderline } from '@pluginwoman/t-ds/icons';
+import { RISK_INFO, RiskMode } from '../insights';
 
 export type OperationsTab = 'all' | 'sign' | 'drafts';
 
@@ -22,10 +23,14 @@ interface OperationsPageProps {
   signCount: number;
   history: React.ReactNode;
   signList: React.ReactNode;
+  /** Режим риска из настроек прототипа; «выкл» — карточка показывает низкий риск */
+  risk: RiskMode;
 }
 
 /** Экран «Развёрнутый таймлайн» — отдельная страница «Операции» */
-export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange, signCount, history, signList }) => (
+export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange, signCount, history, signList, risk }) => {
+  const riskInfo = RISK_INFO[risk === 'off' ? 'low' : risk];
+  return (
   <div className="operations-page">
     <TabsCarousel
       size="2xl"
@@ -76,15 +81,15 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange
                 </div>
 
                 <div className="analytics-card analytics-card--risk">
-                  <Cell title="Низкий риск по операциям" titleClassName="ts-500-s" verticalPadding="none" />
+                  <Cell title={riskInfo.title} titleClassName="ts-500-s" verticalPadding="none" />
                   <LinearProgress
                     variant="steps"
-                    value={1}
+                    value={riskInfo.level}
                     maxSteps={3}
-                    progressColor="var(--primitive-success)"
+                    progressColor={riskInfo.color}
                     trackColor="var(--translucent-primitives-neutral-1)"
                   />
-                  <span className="ts-400-xs analytics-stat__label">Беспокоиться не о чем</span>
+                  <span className="ts-400-xs analytics-stat__label">{riskInfo.description}</span>
                 </div>
               </div>
               {history}
@@ -99,4 +104,5 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange
       ]}
     />
   </div>
-);
+  );
+};

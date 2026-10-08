@@ -10,6 +10,7 @@ import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
+import { DEFAULT_INSIGHTS, InsightSettings } from './insights';
 import {
   DEFAULT_COMMENTS,
   PAYMENT_DAYS,
@@ -24,6 +25,7 @@ const COMMENTS_KEY = 'payment-comments';
 const HISTORY_KEY = 'comment-history';
 const SIGNED_KEY = 'signed-payments';
 const EXTRA_KEY = 'extra-payments';
+const INSIGHTS_KEY = 'insight-settings';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -57,6 +59,15 @@ export const App: React.FC = () => {
   const isModalOpen = commentTargets.length > 0;
   const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
   const [successMessage, setSuccessMessage] = React.useState<string>();
+  // Инсайды и рекомендация на главной — включаются в настройках прототипа
+  const [insights, setInsights] = React.useState<InsightSettings>(() => ({
+    ...DEFAULT_INSIGHTS,
+    ...load<Partial<InsightSettings>>(INSIGHTS_KEY, {}),
+  }));
+  const updateInsights = (next: InsightSettings) => {
+    setInsights(next);
+    save(INSIGHTS_KEY, next);
+  };
   // Навигация: главная (компактный таймлайн) ↔ «Операции» (развёрнутый)
   const [page, setPage] = React.useState<AppPage>('main');
   const [operationsTab, setOperationsTab] = React.useState<OperationsTab>('all');
@@ -161,7 +172,7 @@ export const App: React.FC = () => {
   };
 
   const resetPrototype = () => {
-    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY].forEach((key) => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY].forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch {
@@ -172,6 +183,7 @@ export const App: React.FC = () => {
     setHistory(DEFAULT_HISTORY);
     setSignedIds([]);
     setExtraPayments([]);
+    setInsights(DEFAULT_INSIGHTS);
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
   };
@@ -199,6 +211,8 @@ export const App: React.FC = () => {
               onOpenPayment={openPayment}
               onComment={openComment}
               onOpenOperations={openOperations}
+              onBulkComment={openBulkComment}
+              insights={insights}
             />
           </main>
         </div>
@@ -208,6 +222,7 @@ export const App: React.FC = () => {
             tab={operationsTab}
             onTabChange={setOperationsTab}
             signCount={signCount}
+            risk={insights.risk}
             history={
               <PaymentHistory
                 days={days}
@@ -265,6 +280,8 @@ export const App: React.FC = () => {
         onAddSignPayment={addDemoSignPayment}
         onRestoreSigned={restoreSigned}
         onReset={resetPrototype}
+        insights={insights}
+        onInsightsChange={updateInsights}
       />
 
       <SignConfirmModal

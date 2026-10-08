@@ -535,6 +535,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2x);
+  max-height: calc(100vh - var(--spacing-30x));
+  overflow-y: auto;
   width: calc(var(--spacing-40x) * 2);
   padding: var(--spacing-4x);
   border-radius: var(--popup-rounding-strong);
@@ -621,14 +623,21 @@ button {
 
 .compact-timeline__filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-6x);
+  gap: var(--spacing-3x) var(--spacing-6x);
   padding: 0 var(--spacing-5x);
+}
+
+/* Поиск занимает строку целиком, если инсайдам не хватает места рядом */
+.compact-timeline__filters .compact-search {
+  flex: 1 1 calc(var(--spacing-40x) + var(--spacing-30x));
 }
 
 .compact-timeline__insights {
   display: flex;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
   gap: var(--spacing-2-5x);
 }
 
@@ -672,6 +681,26 @@ button {
 
 .insight--warning .insight__dot {
   background: var(--primitive-warning);
+}
+
+.insight--error .insight__tag {
+  --tag-surface-color: var(--bg-error-1);
+}
+
+.insight--error .insight__dot {
+  background: var(--primitive-error);
+}
+
+.insight--success .insight__tag {
+  --tag-surface-color: var(--bg-success-1);
+}
+
+.insight--success .insight__dot {
+  background: var(--primitive-success);
+}
+
+.insight--neutral .insight__dot {
+  background: var(--primitive-neutral-4);
 }
 
 /* Рекомендация внутри таймлайна */
@@ -1007,4 +1036,27 @@ button {
 /* Место под плашку действий, чтобы она не закрывала последние строки */
 .history-card--with-bar {
   padding-bottom: var(--spacing-24x);
+}
+
+.demo-panel__section {
+  padding-top: var(--spacing-2x);
+  color: var(--primitive-secondary);
+}
+
+.demo-panel__label {
+  padding-top: var(--spacing-1x);
+}
+
+.demo-panel__toggle-row {
+  align-items: center;
+}
+
+.demo-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1-5x);
+}
+
+.compact-timeline__filters--stacked .compact-search {
+  flex-basis: 100%;
 }
