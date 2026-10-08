@@ -118,6 +118,15 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
             {label}
           </Chip>
         ))}
+        {/* Режим выделения — чип в панели фильтров, без отдельной строки */}
+        <Chip
+          variant="chip"
+          isSelected={isSelecting}
+          isDisabled={visible.length === 0}
+          onClick={() => (isSelecting ? stopSelecting() : setIsSelecting(true))}
+        >
+          {isSelecting ? 'Отменить' : 'Выбрать'}
+        </Chip>
         <div className="history-card__view" role="group" aria-label="Вид списка">
           <IconButton
             icon={<LayoutRowsTwo />}
@@ -138,26 +147,13 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         </div>
       </div>
 
-      {visible.length > 0 && (
-        <div className="history-card__toolbar">
-          <p className="ts-400-s history-card__found">
-            {query.trim() !== '' && (
-              <>
-                Найдено: {foundCount} по запросу «{query.trim()}».{' '}
-                <button type="button" className="sign-list__link ts-500-s hoverOpacity" onClick={() => onQueryChange('')}>
-                  Сбросить поиск
-                </button>
-              </>
-            )}
-          </p>
-          <button
-            type="button"
-            className="sign-list__link ts-500-m hoverOpacity"
-            onClick={() => (isSelecting ? stopSelecting() : setIsSelecting(true))}
-          >
-            {isSelecting ? 'Отменить' : 'Выбрать'}
+      {query.trim() !== '' && foundCount > 0 && (
+        <p className="ts-400-s history-card__found">
+          Найдено: {foundCount} по запросу «{query.trim()}».{' '}
+          <button type="button" className="sign-list__link ts-500-s hoverOpacity" onClick={() => onQueryChange('')}>
+            Сбросить поиск
           </button>
-        </div>
+        </p>
       )}
 
       {visibleDays.map((day) => {

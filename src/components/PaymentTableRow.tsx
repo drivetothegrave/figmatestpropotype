@@ -1,16 +1,7 @@
 import React from 'react';
 import { Avatar, Tag } from '@pluginwoman/t-ds';
-import { Payment, PaymentStatus, STATUS_LABEL, formatAmount } from '../data';
+import { Payment, STATUS_COLOR, STATUS_LABEL, formatAmount } from '../data';
 import { QuickAction, QuickActionsBar } from './PaymentRow';
-
-/** Тон плашки статуса */
-const STATUS_TONE: Record<PaymentStatus, 'success' | 'neutral' | 'brand'> = {
-  done: 'success',
-  credited: 'success',
-  progress: 'neutral',
-  'second-sign': 'neutral',
-  sign: 'brand',
-};
 
 /** «№6884, 13:40» → «13:40» */
 export const timeOf = (payment: Payment) => payment.meta.split(', ').pop() ?? '';
@@ -68,10 +59,11 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       <span className="ts-500-m payment-table-row__ellipsis">{payment.counterparty}</span>
     </span>
 
-    <span className="payment-table-row__status">
-      <Tag shape="circle" size="l" variant="outlined" className={`status-tag status-tag--${STATUS_TONE[payment.status]}`}>
-        {STATUS_LABEL[payment.status]}
-      </Tag>
+    <span
+      className="ts-500-s payment-table-row__status payment-table-row__ellipsis"
+      style={{ color: STATUS_COLOR[payment.status] }}
+    >
+      {STATUS_LABEL[payment.status]}
     </span>
 
     <span className="payment-table-row__purpose">
