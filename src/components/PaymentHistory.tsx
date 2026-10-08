@@ -5,8 +5,6 @@ import {
   ArrowReturnRight,
   BubbleListShort,
   CalendarAcsArrowRotationRight,
-  LayoutRowsTwo,
-  LinesThreeHorizontal,
   Printer,
   Share,
 } from '@pluginwoman/t-ds/icons';
@@ -17,6 +15,7 @@ import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
 import { PaymentTableRow } from './PaymentTableRow';
 import { SelectionBar } from './SelectionBar';
+import { ViewToggle } from './ViewToggle';
 
 const FILTERS = ['Все операции', 'За всё время', 'Категория'];
 
@@ -52,10 +51,13 @@ interface PaymentHistoryProps {
   onComment: (payment: Payment) => void;
   /** Комментарий сразу нескольким выделенным операциям */
   onBulkComment: (payments: Payment[]) => void;
+  /** Вид списка общий для вкладок «Операций» */
+  isCompactView: boolean;
+  onViewChange: (isCompact: boolean) => void;
 }
 
 /** Итоги дня: поступления и списания */
-const DayTotals: React.FC<{ payments: Payment[] }> = ({ payments }) => {
+export const DayTotals: React.FC<{ payments: Payment[] }> = ({ payments }) => {
   const income = payments.filter((p) => p.sum > 0).reduce((acc, p) => acc + p.sum, 0);
   const expense = payments.filter((p) => p.sum < 0).reduce((acc, p) => acc + Math.abs(p.sum), 0);
   return (
@@ -75,8 +77,9 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   onSelect,
   onComment,
   onBulkComment,
+  isCompactView,
+  onViewChange,
 }) => {
-  const [isCompactView, setIsCompactView] = React.useState(false);
   const [isSelecting, setIsSelecting] = React.useState(false);
   const [checked, setChecked] = React.useState<Set<string>>(new Set());
 
@@ -127,24 +130,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         >
           {isSelecting ? 'Отменить' : 'Выбрать'}
         </Chip>
-        <div className="history-card__view" role="group" aria-label="Вид списка">
-          <IconButton
-            icon={<LayoutRowsTwo />}
-            ariaLabel="Подробный вид"
-            variant="secondary"
-            size="xs"
-            className={!isCompactView ? 'is-active' : undefined}
-            onClick={() => setIsCompactView(false)}
-          />
-          <IconButton
-            icon={<LinesThreeHorizontal />}
-            ariaLabel="Компактный вид"
-            variant="secondary"
-            size="xs"
-            className={isCompactView ? 'is-active' : undefined}
-            onClick={() => setIsCompactView(true)}
-          />
-        </div>
+        <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
 
       {query.trim() !== '' && foundCount > 0 && (

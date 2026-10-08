@@ -6,8 +6,12 @@ import { Payment, PaymentDay, formatRub, paymentsWord } from '../data';
 import { filterDays, paymentMatches } from '../suggest';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
+import { PaymentTableRow } from './PaymentTableRow';
+import { ViewToggle } from './ViewToggle';
+import { DayTotals } from './PaymentHistory';
 
-const FILTERS = ['Все операции', 'За всё время'];
+// На подпись нужны только период и счёт
+const FILTERS = ['За всё время', 'Счёт'];
 
 interface SignListProps {
   /** Только платежи со статусом «На подпись» */
@@ -20,6 +24,9 @@ interface SignListProps {
   onComment: (payment: Payment) => void;
   /** Запросить подписание — App покажет подтверждение */
   onSign: (payments: Payment[]) => void;
+  /** Вид списка общий для вкладок «Операций» */
+  isCompactView: boolean;
+  onViewChange: (isCompact: boolean) => void;
 }
 
 const sumOf = (payments: Payment[]) => payments.reduce((acc, p) => acc + Math.abs(p.sum), 0);
@@ -38,6 +45,8 @@ export const SignList: React.FC<SignListProps> = ({
   onSelect,
   onComment,
   onSign,
+  isCompactView,
+  onViewChange,
 }) => {
   const [query, setQuery] = React.useState('');
   const [isSelecting, setIsSelecting] = React.useState(false);
@@ -101,17 +110,33 @@ export const SignList: React.FC<SignListProps> = ({
     <div className="history-card sign-list">
       <div className="history-card__filters">
         <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
-        {FILTERS.map((label) => (
-          <Chip key={label} variant="dropdown">
-            {label}
-          </Chip>
-        ))}
         <SearchWithSuggest
           value={query}
           onChange={setQuery}
           suggestions={allPayments.map((p) => comments[p.id]).filter((c): c is string => Boolean(c))}
           placeholder="Контрагент, сумма, комментарий"
         />
+        {FILTERS.map((label) => (
+          <Chip key={label} variant="dropdown">
+            {label}
+          </Chip>
+        ))}
+        <Chip
+          variant="chip"
+          isSelected={isSelecting}
+          isDisabled={visible.length === 0}
+          onClick={() => {
+            if (isSelecting) {
+              setIsSelecting(false);
+              setChecked(new Set());
+            } else {
+              setIsSelecting(true);
+            }
+          }}
+        >
+          {isSelecting ? 'Отменить' : 'Выбрать'}
+        </Chip>
+        <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
 
       {allPayments.length === 0 ? (
@@ -119,25 +144,17 @@ export const SignList: React.FC<SignListProps> = ({
       ) : (
         <>
           <div className="sign-list__summary">
+            {isSelecting && visible.length > 0 && (
+              <Checkbox
+                isChecked={allVisibleChecked}
+                isIndeterminate={!allVisibleChecked && selected.length > 0}
+                onChange={(value) => setChecked(value ? new Set(visible.map((p) => p.id)) : new Set())}
+                label="Выбрать все"
+              />
+            )}
             <h2 className="ts-600-2xl">
               {visible.length > 0 ? `${paymentsWord(visible.length)} на ${formatRub(sumOf(visible))}` : 'Ничего не нашлось'}
             </h2>
-            {visible.length > 0 && (
-              <button
-                type="button"
-                className="sign-list__link ts-500-m hoverOpacity"
-                onClick={() => {
-                  if (isSelecting) {
-                    setIsSelecting(false);
-                    setChecked(new Set());
-                  } else {
-                    setIsSelecting(true);
-                  }
-                }}
-              >
-                {isSelecting ? 'Отменить' : 'Выбрать'}
-              </button>
-            )}
           </div>
 
           {isFiltered && visible.length > 0 && (
@@ -149,44 +166,49 @@ export const SignList: React.FC<SignListProps> = ({
             </p>
           )}
 
-          {isSelecting && visible.length > 0 && (
-            <label className="sign-list__select-all ts-400-m">
-              <Checkbox
-                isChecked={allVisibleChecked}
-                isIndeterminate={!allVisibleChecked && selected.length > 0}
-                onChange={(value) => setChecked(value ? new Set(visible.map((p) => p.id)) : new Set())}
-                label="Выбрать все"
-              />
-              Выбрать все
-            </label>
-          )}
-
-          {visibleDays.map((day) => (
-            <section key={day.title} className="history-day">
-              <h3 className="ts-600-xl history-day__title">{day.title}</h3>
-              {day.payments.map((payment) => (
-                <PaymentRow
-                  key={payment.id}
-                  payment={payment}
-                  comment={comments[payment.id]}
-                  isSelected={payment.id === selectedId}
-                  hasStatus={false}
-                  leading={
-                    isSelecting ? (
+          {visibleDays.map((day) => {
+            const dayIds = day.payments.map((p) => p.id);
+            const dayChecked = dayIds.filter((id) => checked.has(id)).length;
+            return (
+              <section key={day.title} className="history-day">
+                <div className="history-day__header">
+                  {isSelecting && (
+                    <Checkbox
+                      isChecked={dayChecked === dayIds.length}
+                      isIndeterminate={dayChecked > 0 && dayChecked < dayIds.length}
+                      onChange={(value) => dayIds.forEach((id) => toggle(id, value))}
+                      label={`Выбрать все платежи за ${day.title}`}
+                    />
+                  )}
+                  <h3 className="ts-600-xl history-day__title">{day.title}</h3>
+                  {isCompactView && <DayTotals payments={day.payments} />}
+                </div>
+                {day.payments.map((payment) => {
+                  const common = {
+                    payment,
+                    comment: comments[payment.id],
+                    isSelected: payment.id === selectedId || checked.has(payment.id),
+                    hasStatus: false,
+                    leading: isSelecting ? (
                       <Checkbox
                         isChecked={checked.has(payment.id)}
                         onChange={(value) => toggle(payment.id, value)}
                         label={`Выбрать платёж ${payment.counterparty}`}
                       />
-                    ) : undefined
-                  }
-                  quickActions={quickActions(payment)}
-                  onSelect={() => (isSelecting ? toggle(payment.id, !checked.has(payment.id)) : onSelect(payment))}
-                  onTagClick={setQuery}
-                />
-              ))}
-            </section>
-          ))}
+                    ) : undefined,
+                    quickActions: quickActions(payment),
+                    onSelect: () => (isSelecting ? toggle(payment.id, !checked.has(payment.id)) : onSelect(payment)),
+                    onTagClick: setQuery,
+                  };
+                  return isCompactView ? (
+                    <PaymentTableRow key={payment.id} {...common} />
+                  ) : (
+                    <PaymentRow key={payment.id} {...common} />
+                  );
+                })}
+              </section>
+            );
+          })}
 
           {visible.length > 0 && (
             <Footer

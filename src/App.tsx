@@ -61,6 +61,8 @@ export const App: React.FC = () => {
   const [page, setPage] = React.useState<AppPage>('main');
   const [operationsTab, setOperationsTab] = React.useState<OperationsTab>('all');
   const [operationsQuery, setOperationsQuery] = React.useState('');
+  // Вид списка (подробный/компактный) — общий для вкладок «Операций»
+  const [isCompactView, setIsCompactView] = React.useState(false);
 
   // Подписанные платежи уходят в историю со статусом «В процессе»
   const days: PaymentDay[] = PAYMENT_DAYS.map((day, index) => ({
@@ -216,6 +218,8 @@ export const App: React.FC = () => {
                 onSelect={openPayment}
                 onComment={openComment}
                 onBulkComment={openBulkComment}
+                isCompactView={isCompactView}
+                onViewChange={setIsCompactView}
               />
             }
             signList={
@@ -227,6 +231,8 @@ export const App: React.FC = () => {
                 onSelect={openPayment}
                 onComment={openComment}
                 onSign={setSignRequest}
+                isCompactView={isCompactView}
+                onViewChange={setIsCompactView}
               />
             }
           />

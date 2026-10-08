@@ -11,6 +11,8 @@ interface PaymentTableRowProps {
   comment?: string;
   isSelected: boolean;
   leading?: React.ReactNode;
+  /** На вкладке «На подпись» статус у всех одинаковый — скрываем колонку */
+  hasStatus?: boolean;
   quickActions: QuickAction[];
   onSelect: () => void;
   onTagClick?: (comment: string) => void;
@@ -25,6 +27,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   comment,
   isSelected,
   leading,
+  hasStatus = true,
   quickActions,
   onSelect,
   onTagClick,
@@ -59,12 +62,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       <span className="ts-500-m payment-table-row__ellipsis">{payment.counterparty}</span>
     </span>
 
-    <span
-      className="ts-500-s payment-table-row__status payment-table-row__ellipsis"
-      style={{ color: STATUS_COLOR[payment.status] }}
-    >
-      {STATUS_LABEL[payment.status]}
-    </span>
+    {hasStatus && (
+      <span
+        className="ts-500-s payment-table-row__status payment-table-row__ellipsis"
+        style={{ color: STATUS_COLOR[payment.status] }}
+      >
+        {STATUS_LABEL[payment.status]}
+      </span>
+    )}
 
     <span className="payment-table-row__purpose">
       {comment &&

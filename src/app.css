@@ -476,14 +476,6 @@ button {
   color: var(--primitive-secondary);
 }
 
-.sign-list__select-all {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-4x);
-  padding: var(--spacing-2x) var(--spacing-5x);
-  cursor: pointer;
-}
-
 /* Футер «Подписать» прилипает к низу экрана внутри белого блока */
 .sign-list__footer {
   border-radius: 0;
