@@ -854,7 +854,201 @@ button {
   box-shadow: inset 0 0 0 2px var(--primitive-neutral-3);
 }
 
-.history-card__found {
+.history-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4x);
   padding: 0 var(--spacing-5x) var(--spacing-2x);
+}
+
+.history-card__found {
   color: var(--primitive-secondary);
+}
+
+/* ---------- Заголовок дня: чекбокс выделения и итоги ---------- */
+
+.history-day__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-4x) var(--spacing-5x);
+}
+
+.history-day__header .history-day__title {
+  flex: 1 1 auto;
+  padding: 0;
+}
+
+.day-totals {
+  display: flex;
+  gap: var(--spacing-4x);
+  white-space: nowrap;
+}
+
+.day-totals__income {
+  color: var(--primitive-success);
+}
+
+/* ---------- Компактный вид: строка-таблица ---------- */
+
+.payment-table-row {
+  align-items: center;
+  padding-top: var(--spacing-3x);
+  padding-bottom: var(--spacing-3x);
+  box-shadow: var(--Top-Line);
+}
+
+.payment-table-row__leading {
+  display: flex;
+  align-items: center;
+}
+
+.payment-table-row__sum {
+  flex: 0 0 var(--spacing-30x);
+  white-space: nowrap;
+}
+
+.payment-table-row__counterparty {
+  display: flex;
+  flex: 0 0 calc(var(--spacing-40x) + var(--spacing-14x));
+  align-items: center;
+  gap: var(--spacing-2-5x);
+  min-width: 0;
+}
+
+.payment-table-row__status {
+  display: flex;
+  flex: 0 0 var(--spacing-40x);
+  min-width: 0;
+}
+
+.payment-table-row__purpose {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--spacing-2x);
+  min-width: 0;
+}
+
+.payment-table-row__purpose .payment-row__tag,
+.payment-table-row__purpose > .comment-tag {
+  flex: 0 1 auto;
+  max-width: 50%;
+}
+
+.payment-table-row__time {
+  flex: 0 0 auto;
+  color: var(--primitive-secondary);
+}
+
+.payment-table-row__ellipsis {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Плашка статуса — Tag с обводкой в цвет статуса */
+.status-tag {
+  --tag-surface-color: transparent;
+  max-width: 100%;
+}
+
+.status-tag .tag__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-tag--success {
+  --tag-border-color: var(--bg-success-3);
+  --tag-text-color: var(--primitive-success);
+}
+
+.status-tag--neutral {
+  --tag-border-color: var(--primitive-neutral-3);
+  --tag-text-color: var(--primitive-secondary);
+}
+
+.status-tag--brand {
+  --tag-border-color: var(--bg-brand-4);
+  --tag-text-color: var(--primitive-brand);
+}
+
+/* ---------- Чёрная плашка действий над выделенными ---------- */
+
+.selection-bar {
+  position: fixed;
+  bottom: var(--spacing-6x);
+  left: 50%;
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6x);
+  padding: var(--spacing-3x) var(--spacing-4x) var(--spacing-3x) var(--spacing-5x);
+  border-radius: var(--popup-rounding-strong);
+  background: var(--primitive-primary);
+  color: var(--primitive-default);
+  box-shadow: var(--Floating);
+  transform: translateX(-50%);
+  animation: selection-bar-in 0.2s ease-out;
+}
+
+@keyframes selection-bar-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, var(--spacing-4x));
+  }
+}
+
+.selection-bar__close {
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.selection-bar__count {
+  white-space: nowrap;
+}
+
+.selection-bar__sums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+}
+
+.selection-bar__income {
+  color: var(--bg-success-5);
+}
+
+.selection-bar__expense {
+  color: var(--bg-error-5);
+}
+
+.selection-bar__actions {
+  display: flex;
+  gap: var(--spacing-1x);
+}
+
+.selection-bar__action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1x);
+  padding: var(--spacing-1x) var(--spacing-3x);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Место под плашку действий, чтобы она не закрывала последние строки */
+.history-card--with-bar {
+  padding-bottom: var(--spacing-24x);
 }

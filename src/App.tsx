@@ -52,9 +52,9 @@ export const App: React.FC = () => {
   const [extraPayments, setExtraPayments] = React.useState<Payment[]>(() => load(EXTRA_KEY, []));
   const [paymentId, setPaymentId] = React.useState<string>();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  // Платёж, к которому редактируем комментарий (может отличаться от открытого в дровере)
-  const [commentTarget, setCommentTarget] = React.useState<Payment>();
-  const isModalOpen = commentTarget !== undefined;
+  // Платежи, которым редактируем комментарий: один (строка, дровер) или несколько (выделение)
+  const [commentTargets, setCommentTargets] = React.useState<Payment[]>([]);
+  const isModalOpen = commentTargets.length > 0;
   const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
   const [successMessage, setSuccessMessage] = React.useState<string>();
   // Навигация: главная (компактный таймлайн) ↔ «Операции» (развёрнутый)
@@ -105,14 +105,23 @@ export const App: React.FC = () => {
     setIsDrawerOpen(true);
   };
 
-  const openComment = (next: Payment) => setCommentTarget(next);
-  const closeComment = () => setCommentTarget(undefined);
+  const openComment = (next: Payment) => setCommentTargets([next]);
+  const openBulkComment = (next: Payment[]) => setCommentTargets(next);
+  const closeComment = () => setCommentTargets([]);
+
+  // Общий комментарий выбранных платежей — если он у всех одинаковый
+  const commentInitial = (() => {
+    const values = Array.from(new Set(commentTargets.map((p) => comments[p.id] ?? '')));
+    return values.length === 1 ? values[0] : '';
+  })();
 
   const saveComment = (value: string) => {
-    if (!commentTarget) return;
+    if (commentTargets.length === 0) return;
     const next = { ...comments };
-    if (value) next[commentTarget.id] = value;
-    else delete next[commentTarget.id];
+    commentTargets.forEach((target) => {
+      if (value) next[target.id] = value;
+      else delete next[target.id];
+    });
     setComments(next);
     save(COMMENTS_KEY, next);
     // Новый комментарий — в начало истории подсказок
@@ -206,6 +215,7 @@ export const App: React.FC = () => {
                 selectedId={isDrawerOpen ? paymentId : undefined}
                 onSelect={openPayment}
                 onComment={openComment}
+                onBulkComment={openBulkComment}
               />
             }
             signList={
@@ -235,7 +245,8 @@ export const App: React.FC = () => {
 
       <CommentModal
         isOpen={isModalOpen}
-        initialValue={commentTarget ? comments[commentTarget.id] ?? '' : ''}
+        initialValue={commentInitial}
+        title={commentTargets.length > 1 ? `Комментарий к ${commentTargets.length} платежам` : undefined}
         history={history}
         onRemoveFromHistory={(item) => updateHistory(history.filter((h) => h !== item))}
         onClose={closeComment}

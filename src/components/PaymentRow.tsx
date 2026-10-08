@@ -11,6 +11,20 @@ export interface QuickAction {
   onClick?: () => void;
 }
 
+/** Быстрые действия — появляются поверх правой части строки при наведении/фокусе */
+export const QuickActionsBar: React.FC<{ actions: QuickAction[] }> = ({ actions }) => (
+  <div className="payment-row__actions" onClick={(e) => e.stopPropagation()}>
+    {actions.map((action) => (
+      <span key={action.tooltip} className="quick-action">
+        <IconButton icon={action.icon} ariaLabel={action.label} variant="transparent" size="l" onClick={action.onClick} />
+        <span className="quick-action__tooltip ts-400-s" aria-hidden="true">
+          {action.tooltip}
+        </span>
+      </span>
+    ))}
+  </div>
+);
+
 interface PaymentRowProps {
   payment: Payment;
   comment?: string;
@@ -100,22 +114,6 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
 
     <Avatar size={32} shape="circle" label={payment.avatarLabel} />
 
-    {/* Быстрые действия — появляются при наведении/фокусе на строке */}
-    <div className="payment-row__actions" onClick={(e) => e.stopPropagation()}>
-      {quickActions.map((action) => (
-        <span key={action.tooltip} className="quick-action">
-          <IconButton
-            icon={action.icon}
-            ariaLabel={action.label}
-            variant="transparent"
-            size="l"
-            onClick={action.onClick}
-          />
-          <span className="quick-action__tooltip ts-400-s" aria-hidden="true">
-            {action.tooltip}
-          </span>
-        </span>
-      ))}
-    </div>
+    <QuickActionsBar actions={quickActions} />
   </div>
 );

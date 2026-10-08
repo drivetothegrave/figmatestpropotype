@@ -6,6 +6,8 @@ import { matchSuggestions } from '../suggest';
 interface CommentModalProps {
   isOpen: boolean;
   initialValue: string;
+  /** Заголовок — для нескольких платежей «Комментарий к 3 платежам» */
+  title?: string;
   /** Ранее введённые комментарии — для подсказок */
   history: string[];
   onRemoveFromHistory: (item: string) => void;
@@ -16,6 +18,7 @@ interface CommentModalProps {
 export const CommentModal: React.FC<CommentModalProps> = ({
   isOpen,
   initialValue,
+  title = 'Комментарий к платежу',
   history,
   onRemoveFromHistory,
   onClose,
@@ -53,7 +56,7 @@ export const CommentModal: React.FC<CommentModalProps> = ({
         onClose={onClose}
         isOverlayCloseEnabled
         className="comment-modal"
-        header={<ModalHeader title="Комментарий к платежу" onClose={onClose} />}
+        header={<ModalHeader title={title} onClose={onClose} />}
         footer={
           <ModalFooter
             layout="1-button"
