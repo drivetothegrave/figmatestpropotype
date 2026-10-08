@@ -887,9 +887,9 @@ button {
 
 .payment-table-row {
   align-items: center;
-  padding-top: var(--spacing-3x);
-  padding-bottom: var(--spacing-3x);
-  box-shadow: var(--Top-Line);
+  /* Без разделителей — строки отделены воздухом */
+  padding-top: var(--spacing-3-5x);
+  padding-bottom: var(--spacing-3-5x);
 }
 
 .payment-table-row__leading {
