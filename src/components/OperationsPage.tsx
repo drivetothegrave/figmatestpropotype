@@ -29,7 +29,7 @@ interface OperationsPageProps {
 
 /** Экран «Развёрнутый таймлайн» — отдельная страница «Операции» */
 export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange, signCount, history, signList, risk }) => {
-  const riskInfo = RISK_INFO[risk === 'off' ? 'low' : risk];
+  const riskInfo = (risk !== 'off' && RISK_INFO[risk]) || RISK_INFO.low;
   return (
   <div className="operations-page">
     <TabsCarousel
