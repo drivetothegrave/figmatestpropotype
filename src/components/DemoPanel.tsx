@@ -16,8 +16,6 @@ interface DemoPanelProps {
 
 const INSIGHT_TOGGLES: { key: Exclude<keyof InsightSettings, 'risk'>; title: string }[] = [
   { key: 'sign', title: 'На подпись' },
-  { key: 'noComment', title: 'Крупные без комментария' },
-  { key: 'tax', title: 'Налог скоро' },
   { key: 'income', title: 'Поступления выросли' },
   { key: 'recommendation', title: 'Рекомендация про налоги' },
 ];

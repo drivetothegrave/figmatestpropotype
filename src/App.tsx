@@ -211,7 +211,6 @@ export const App: React.FC = () => {
               onOpenPayment={openPayment}
               onComment={openComment}
               onOpenOperations={openOperations}
-              onBulkComment={openBulkComment}
               insights={insights}
             />
           </main>

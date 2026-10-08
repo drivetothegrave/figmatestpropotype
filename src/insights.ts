@@ -6,10 +6,6 @@ export interface InsightSettings {
   /** «N на подпись · сумма» */
   sign: boolean;
   risk: RiskMode;
-  /** «N крупных без комментария» — открывает массовый комментарий */
-  noComment: boolean;
-  /** «Налог УСН до 28 октября» */
-  tax: boolean;
   /** «Поступления +18% к прошлой неделе» */
   income: boolean;
   /** Рекомендация «Откладывайте на налоги 7%» внутри таймлайна */
@@ -19,14 +15,9 @@ export interface InsightSettings {
 export const DEFAULT_INSIGHTS: InsightSettings = {
   sign: true,
   risk: 'medium',
-  noComment: true,
-  tax: false,
   income: false,
   recommendation: true,
 };
-
-/** Крупное списание — от этой суммы просим оставить комментарий */
-export const BIG_EXPENSE = 50000;
 
 export const RISK_INFO: Record<Exclude<RiskMode, 'off'>, {
   insight: string;

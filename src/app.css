@@ -1049,14 +1049,20 @@ button {
 
 .demo-panel__toggle-row {
   align-items: center;
+  padding: var(--spacing-1x) 0;
+}
+
+/* Иконка в основной кнопке — в цвет текста кнопки (белая); у SVG цвет зашит в fill */
+.demo-panel__card .button--primary .button__accessory {
+  color: var(--primitive-default);
+}
+
+.demo-panel__card .button--primary .button__accessory path {
+  fill: currentColor;
 }
 
 .demo-panel__chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-1-5x);
-}
-
-.compact-timeline__filters--stacked .compact-search {
-  flex-basis: 100%;
 }
