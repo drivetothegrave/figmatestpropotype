@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Chip, IconButton } from '@pluginwoman/t-ds';
+import { Cell, Checkbox, Chip, IconButton } from '@pluginwoman/t-ds';
 import {
   ArrowDownUnderline,
   ArrowReturnRight,
@@ -11,15 +11,32 @@ import {
 import { Filters } from '@pluginwoman/t-ds/icons/20/Stroked';
 import { Payment, PaymentDay, formatRub, inRub } from '../data';
 import { filterDays } from '../suggest';
-import { completions, isSmart, parseQuery, removeToken, smartMatches, summarize } from '../smartQuery';
-import { SmartSummary } from './SmartSummary';
+import {
+  FilterState,
+  QueryToken,
+  completions,
+  extraFilters,
+  filterMatches,
+  hasFilters,
+  mergeFilters,
+  parseQuery,
+  periodOptions,
+  removeToken,
+  summarize,
+  toFilterState,
+} from '../smartQuery';
+import { SmartTotal } from './SmartSummary';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
 import { PaymentTableRow } from './PaymentTableRow';
 import { SelectionBar } from './SelectionBar';
 import { ViewToggle } from './ViewToggle';
 
-const FILTERS = ['Все операции', 'За всё время', 'Категория'];
+const DIRECTIONS: { value?: 'in' | 'out'; label: string }[] = [
+  { label: 'Все операции' },
+  { value: 'in', label: 'Входящие' },
+  { value: 'out', label: 'Исходящие' },
+];
 
 /** Быстрые действия строки истории — общие для главной и «Операций» */
 export function historyQuickActions(
@@ -45,9 +62,12 @@ export function historyQuickActions(
 interface PaymentHistoryProps {
   days: PaymentDay[];
   comments: Record<string, string>;
-  /** Поиск управляется снаружи — чтобы главная могла открыть «Операции» с запросом */
+  /** Свободный текст поиска — управляется снаружи, чтобы главная могла открыть «Операции» с запросом */
   query: string;
   onQueryChange: (query: string) => void;
+  /** Фильтры в чипах: направление, период и дополнительные (сумма, контрагент, статус, валюта) */
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
   selectedId?: string;
   onSelect: (payment: Payment) => void;
   onComment: (payment: Payment) => void;
@@ -76,6 +96,8 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   comments,
   query,
   onQueryChange,
+  filters,
+  onFiltersChange,
   selectedId,
   onSelect,
   onComment,
@@ -90,8 +112,39 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   const commentTexts = Object.values(comments);
   // Запрос разбирается на фильтры: «входящие за май от 50 тыс» и т. п.
   const counterparties = days.flatMap((day) => day.payments.map((p) => p.counterparty));
+  // Набранное в поле сразу отражается в чипах; по Enter распознанное «переезжает» в чипы
   const parsed = parseQuery(query, counterparties);
-  const visibleDays = filterDays<PaymentDay, Payment>(days, (payment) => smartMatches(payment, comments[payment.id], parsed));
+  const effective = mergeFilters(filters, toFilterState(parsed));
+  const visibleDays = filterDays<PaymentDay, Payment>(days, (payment) =>
+    filterMatches(payment, comments[payment.id], effective, parsed.text),
+  );
+
+  /** Убрать из поля распознанные фрагменты нужных видов — фильтр теперь задаёт чип */
+  const stripTyped = (kinds: QueryToken['kind'][]) =>
+    parsed.tokens.filter((t) => kinds.includes(t.kind)).reduce((q, t) => removeToken(q, t), query);
+
+  const commit = () => {
+    onFiltersChange(effective);
+    onQueryChange(parsed.text);
+  };
+
+  const setDirection = (direction?: 'in' | 'out') => {
+    onFiltersChange({ ...filters, direction });
+    onQueryChange(stripTyped(['direction']));
+  };
+
+  const setPeriod = (period?: FilterState['period']) => {
+    onFiltersChange({ ...filters, period });
+    onQueryChange(stripTyped(['period']));
+  };
+
+  const clearExtra = () => {
+    onFiltersChange({ direction: filters.direction, period: filters.period });
+    onQueryChange(stripTyped(['amount', 'status', 'currency', 'counterparty']));
+  };
+
+  const extra = extraFilters(effective);
+  const directionLabel = DIRECTIONS.find((d) => d.value === effective.direction)?.label ?? 'Все операции';
   const foundCount = visibleDays.reduce((acc, day) => acc + day.payments.length, 0);
   const visible = visibleDays.flatMap((day) => day.payments);
   const selected = visible.filter((p) => checked.has(p.id));
@@ -120,18 +173,56 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   return (
     <div className={['history-card', isSelecting && selected.length > 0 ? 'history-card--with-bar' : ''].join(' ')}>
       <div className="history-card__filters">
-        <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
+        {extra.length > 0 ? (
+          // Фильтры без своего чипа — счётчик в кнопке фильтров, крестик сбрасывает
+          <span title={extra.join(' · ')}>
+            <Chip
+              variant="action"
+              isSelected
+              leftAccessory="icon"
+              leftIcon={<Filters />}
+              onClose={clearExtra}
+              className="filters-chip"
+            >
+              {extra.length}
+            </Chip>
+          </span>
+        ) : (
+          <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
+        )}
         <SearchWithSuggest
           value={query}
           onChange={onQueryChange}
+          onSubmit={commit}
           suggestions={commentTexts}
           completions={query.trim() ? completions(query, parsed, counterparties) : []}
         />
-        {FILTERS.map((label) => (
-          <Chip key={label} variant="dropdown">
-            {label}
-          </Chip>
-        ))}
+        <Chip
+          variant="dropdown"
+          isSelected={Boolean(effective.direction)}
+          value={directionLabel}
+          popupContent={DIRECTIONS.map((d) => (
+            <Cell key={d.label} title={d.label} verticalPadding="2x" onClick={() => setDirection(d.value)} />
+          ))}
+        >
+          {directionLabel}
+        </Chip>
+        <Chip
+          variant="dropdown"
+          isSelected={Boolean(effective.period)}
+          value={effective.period?.label ?? 'За всё время'}
+          popupContent={[{ label: 'За всё время' }, ...periodOptions()].map((p) => (
+            <Cell
+              key={p.label}
+              title={p.label}
+              verticalPadding="2x"
+              onClick={() => setPeriod('from' in p ? (p as FilterState['period']) : undefined)}
+            />
+          ))}
+        >
+          {effective.period?.label ?? 'За всё время'}
+        </Chip>
+        <Chip variant="dropdown">Категория</Chip>
         {/* Режим выделения — чип в панели фильтров, без отдельной строки */}
         <Chip
           variant="chip"
@@ -144,14 +235,20 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
 
-      {query.trim() !== '' && (
-        <SmartSummary
-          className="history-card__smart"
-          tokens={parsed.tokens}
-          text={parsed.text}
-          {...summarize(visibleDays.flatMap((day) => day.payments))}
-          onRemove={(token) => onQueryChange(removeToken(query, token))}
-        />
+      {(query.trim() !== '' || hasFilters(effective)) && (
+        <SmartTotal className="history-card__found" {...summarize(visibleDays.flatMap((day) => day.payments))}>
+          {' · '}
+          <button
+            type="button"
+            className="sign-list__link ts-500-s hoverOpacity"
+            onClick={() => {
+              onFiltersChange({});
+              onQueryChange('');
+            }}
+          >
+            Сбросить
+          </button>
+        </SmartTotal>
       )}
 
       {visibleDays.map((day) => {

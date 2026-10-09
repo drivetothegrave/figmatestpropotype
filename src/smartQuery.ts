@@ -135,7 +135,7 @@ const RULES: Rule[] = [
   },
   {
     kind: 'period',
-    re: /(?:^|\s)(?:за\s+|на\s+)?(?:этой|эту|текущей|текущую)\s+недел[а-яa-z0-9]*/,
+    re: /(?:^|\s)(?:за\s+|на\s+)?(?:эта|этой|эту|текущая|текущей|текущую)\s+недел[а-яa-z0-9]*/,
     apply: (_, q) => ((q.period = { from: startOfWeek(TODAY_ISO), to: TODAY_ISO }), 'Эта неделя'),
   },
   {
@@ -328,4 +328,61 @@ export function completions(query: string, parsed: ParsedQuery, counterparties: 
       .forEach((name) => out.unshift(base.slice(0, base.length - last.length) + counterpartyKey(name)));
   }
   return Array.from(new Set(out.map((s) => s.replace(/\s+/g, ' ').trim()))).filter((s) => norm(s) !== norm(base)).slice(0, 3);
+}
+
+/* ---------- Состояние фильтров «Операций» ---------- */
+
+/** Фильтры, вынесенные из запроса в чипы: направление, период и «дополнительные» */
+export interface FilterState {
+  direction?: 'in' | 'out';
+  period?: { from: string; to: string; label: string };
+  amount?: { min?: number; max?: number; label: string };
+  status?: { value: PaymentStatus; label: string };
+  currency?: { label: string };
+  counterparty?: { value: string; label: string };
+}
+
+/** Что распознано в запросе → состояние фильтров */
+export function toFilterState(q: ParsedQuery): FilterState {
+  const label = (kind: TokenKind) => q.tokens.filter((t) => t.kind === kind).map((t) => t.label).join(' ');
+  return {
+    ...(q.direction ? { direction: q.direction } : {}),
+    ...(q.period ? { period: { ...q.period, label: label('period') } } : {}),
+    ...(q.amount ? { amount: { ...q.amount, label: label('amount') } } : {}),
+    ...(q.status ? { status: { value: q.status, label: label('status') } } : {}),
+    ...(q.currency ? { currency: { label: label('currency') } } : {}),
+    ...(q.counterparty ? { counterparty: { value: q.counterparty, label: q.counterparty } } : {}),
+  };
+}
+
+/** Набранное в поле поверх сохранённых фильтров */
+export const mergeFilters = (base: FilterState, typed: FilterState): FilterState => ({ ...base, ...typed });
+
+/** Дополнительные фильтры — те, для которых нет своего чипа (уходят в кнопку фильтров) */
+export const extraFilters = (f: FilterState) =>
+  [f.amount?.label, f.status?.label, f.currency?.label, f.counterparty?.label].filter((x): x is string => Boolean(x));
+
+export const hasFilters = (f: FilterState) => Boolean(f.direction || f.period || extraFilters(f).length);
+
+export function filterMatches(payment: Payment, comment: string | undefined, f: FilterState, text: string): boolean {
+  return smartMatches(payment, comment, {
+    direction: f.direction,
+    period: f.period,
+    amount: f.amount,
+    status: f.status?.value,
+    currency: Boolean(f.currency),
+    counterparty: f.counterparty?.value,
+    text,
+    tokens: [],
+  });
+}
+
+/** Варианты периода для чипа «За всё время» */
+export function periodOptions(): { label: string; from: string; to: string }[] {
+  const phrases = ['эта неделя', 'этот месяц', 'прошлый месяц', '3 квартал'];
+  const t = fromIso(TODAY_ISO);
+  for (let i = 2; i <= 4; i += 1) phrases.push(MONTHS_NOM[(t.getMonth() - i + 12) % 12].toLowerCase());
+  return phrases
+    .map((phrase) => toFilterState(parseQuery(phrase, [])).period)
+    .filter((p): p is { from: string; to: string; label: string } => Boolean(p));
 }

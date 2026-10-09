@@ -5,7 +5,7 @@ import { Magnifier } from '@pluginwoman/t-ds/icons';
 import { Payment, formatAmount } from '../data';
 import { matchSuggestions } from '../suggest';
 import { completions, isSmart, parseQuery, smartMatches, summarize } from '../smartQuery';
-import { SmartSummary } from './SmartSummary';
+import { SmartTotal } from './SmartSummary';
 
 interface CompactSearchProps {
   payments: Payment[];
@@ -137,10 +137,8 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
             onMouseDown={(e) => e.preventDefault()}
           >
             {smart && (
-              <SmartSummary
+              <SmartTotal
                 className="compact-search__summary"
-                tokens={parsed.tokens}
-                text={parsed.text}
                 count={total.count}
                 income={total.income}
                 expense={total.expense}

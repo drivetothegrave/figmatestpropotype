@@ -11,6 +11,7 @@ import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
+import { FilterState, parseQuery, toFilterState } from './smartQuery';
 import {
   DEFAULT_COMMENTS,
   BASE_PAYMENTS,
@@ -79,6 +80,8 @@ export const App: React.FC = () => {
   const [page, setPage] = React.useState<AppPage>('main');
   const [operationsTab, setOperationsTab] = React.useState<OperationsTab>('all');
   const [operationsQuery, setOperationsQuery] = React.useState('');
+  // Фильтры «Операций» в чипах — заполняются и из умного поиска
+  const [operationsFilters, setOperationsFilters] = React.useState<FilterState>({});
   // Вид списка (подробный/компактный) — общий для вкладок «Операций»
   const [isCompactView, setIsCompactView] = React.useState(false);
 
@@ -99,6 +102,7 @@ export const App: React.FC = () => {
     if (next === 'operations') {
       setOperationsTab('all');
       setOperationsQuery('');
+      setOperationsFilters({});
     }
     window.scrollTo({ top: 0 });
   };
@@ -106,7 +110,10 @@ export const App: React.FC = () => {
   // С главной: инсайд «На подпись», «Все операции», поиск/подсказка — в нужную вкладку с запросом
   const openOperations = (tab: 'all' | 'sign', query = '') => {
     setOperationsTab(tab);
-    setOperationsQuery(query);
+    // Распознанное из запроса — сразу в чипы, в поле остаётся свободный текст
+    const parsed = parseQuery(query, allPayments.map((p) => p.counterparty));
+    setOperationsFilters(toFilterState(parsed));
+    setOperationsQuery(parsed.text);
     setPage('operations');
     window.scrollTo({ top: 0 });
   };
@@ -231,6 +238,8 @@ export const App: React.FC = () => {
                 comments={comments}
                 query={operationsQuery}
                 onQueryChange={setOperationsQuery}
+                filters={operationsFilters}
+                onFiltersChange={setOperationsFilters}
                 selectedId={isDrawerOpen ? paymentId : undefined}
                 onSelect={openPayment}
                 onComment={openComment}

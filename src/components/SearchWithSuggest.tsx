@@ -12,6 +12,8 @@ interface SearchWithSuggestProps {
   className?: string;
   /** Продолжения запроса («входящие» → «входящие за сентябрь») — показываются первыми */
   completions?: string[];
+  /** Enter без выбранной подсказки — применить запрос */
+  onSubmit?: () => void;
 }
 
 /** Поиск по истории с «умными» подсказками из комментариев (экран «Саджесты в поиске») */
@@ -22,6 +24,7 @@ export const SearchWithSuggest: React.FC<SearchWithSuggestProps> = ({
   placeholder = 'Контрагент, сумма, назначение',
   className = '',
   completions = [],
+  onSubmit,
 }) => {
   const [isFocused, setIsFocused] = React.useState(false);
   const [isClosed, setIsClosed] = React.useState(false);
@@ -49,7 +52,15 @@ export const SearchWithSuggest: React.FC<SearchWithSuggestProps> = ({
       className={['history-card__search', className].filter(Boolean).join(' ')}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
-      onKeyDown={keyboard.onKeyDown}
+      onKeyDown={(e) => {
+        keyboard.onKeyDown(e);
+        // Enter без выбранной подсказки — применяем запрос (распознанное уходит в чипы)
+        if (e.key === 'Enter' && !e.defaultPrevented && onSubmit) {
+          e.preventDefault();
+          onSubmit();
+          setIsClosed(true);
+        }
+      }}
     >
       <Search
         value={value}

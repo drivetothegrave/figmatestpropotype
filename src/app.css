@@ -1069,52 +1069,24 @@ button {
   border-radius: var(--rounding-3x);
 }
 
-/* ---------- Умный поиск: «Понял как» ---------- */
+/* ---------- Умный поиск: итог по найденному ---------- */
 
-.smart-summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1-5x);
-}
-
-.smart-summary__tokens {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-1-5x);
-}
-
-.smart-summary__label {
-  color: var(--primitive-secondary);
-}
-
-/* Распознанный фильтр в выпадашке — как тег */
-.smart-summary__token {
-  padding: var(--spacing-0-5x) var(--spacing-2x);
-  border-radius: var(--rounding-2x);
-  background: var(--bg-brand-1);
-  color: var(--primitive-brand);
-}
-
-.smart-summary__text {
-  color: var(--primitive-secondary);
-}
-
-.smart-summary__total {
+.smart-total {
   color: var(--primitive-primary);
 }
 
-.smart-summary__income {
+.smart-total__income {
   color: var(--primitive-success);
 }
 
-/* В выпадашке на главной — шапка над подсказками */
+/* В выпадашке на главной — шапка над вариантами запроса */
 .compact-search__summary {
   padding: var(--spacing-2x) var(--spacing-5x) var(--spacing-3x);
   box-shadow: var(--Bottom-Line);
 }
 
-/* В «Операциях» — строка под фильтрами, чипы снимаются крестиком */
-.history-card__smart {
-  padding: 0 var(--spacing-5x) var(--spacing-2x);
+/* Кнопка фильтров с активными доп. фильтрами: иконка + счётчик + крестик */
+.filters-chip .chip__accessory--left {
+  --icon-size: var(--icon-size-18);
 }
+
