@@ -10,7 +10,9 @@ import {
 } from '@pluginwoman/t-ds/icons';
 import { Filters } from '@pluginwoman/t-ds/icons/20/Stroked';
 import { Payment, PaymentDay, formatRub, inRub } from '../data';
-import { filterDays, paymentMatches } from '../suggest';
+import { filterDays } from '../suggest';
+import { completions, isSmart, parseQuery, removeToken, smartMatches, summarize } from '../smartQuery';
+import { SmartSummary } from './SmartSummary';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
 import { PaymentTableRow } from './PaymentTableRow';
@@ -86,7 +88,10 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 
   // Подсказки в поиске — только из комментариев, которые есть у операций
   const commentTexts = Object.values(comments);
-  const visibleDays = filterDays(days, (payment) => paymentMatches(payment, comments[payment.id], query));
+  // Запрос разбирается на фильтры: «входящие за май от 50 тыс» и т. п.
+  const counterparties = days.flatMap((day) => day.payments.map((p) => p.counterparty));
+  const parsed = parseQuery(query, counterparties);
+  const visibleDays = filterDays<PaymentDay, Payment>(days, (payment) => smartMatches(payment, comments[payment.id], parsed));
   const foundCount = visibleDays.reduce((acc, day) => acc + day.payments.length, 0);
   const visible = visibleDays.flatMap((day) => day.payments);
   const selected = visible.filter((p) => checked.has(p.id));
@@ -116,7 +121,12 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
     <div className={['history-card', isSelecting && selected.length > 0 ? 'history-card--with-bar' : ''].join(' ')}>
       <div className="history-card__filters">
         <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
-        <SearchWithSuggest value={query} onChange={onQueryChange} suggestions={commentTexts} />
+        <SearchWithSuggest
+          value={query}
+          onChange={onQueryChange}
+          suggestions={commentTexts}
+          completions={query.trim() ? completions(query, parsed, counterparties) : []}
+        />
         {FILTERS.map((label) => (
           <Chip key={label} variant="dropdown">
             {label}
@@ -134,13 +144,14 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
 
-      {query.trim() !== '' && foundCount > 0 && (
-        <p className="ts-400-s history-card__found">
-          Найдено: {foundCount} по запросу «{query.trim()}».{' '}
-          <button type="button" className="sign-list__link ts-500-s hoverOpacity" onClick={() => onQueryChange('')}>
-            Сбросить поиск
-          </button>
-        </p>
+      {query.trim() !== '' && (
+        <SmartSummary
+          className="history-card__smart"
+          tokens={parsed.tokens}
+          text={parsed.text}
+          {...summarize(visibleDays.flatMap((day) => day.payments))}
+          onRemove={(token) => onQueryChange(removeToken(query, token))}
+        />
       )}
 
       {visibleDays.map((day) => {

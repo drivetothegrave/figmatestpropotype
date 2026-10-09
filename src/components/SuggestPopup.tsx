@@ -103,7 +103,8 @@ export function useSuggestKeyboard(items: string[], isOpen: boolean, onSelect: (
       e.preventDefault();
       onSelect(items[activeIndex]);
     } else if (e.key === 'Escape') {
-      // Сначала закрываем подсказки, а не модалку/дровер
+      // Сначала закрываем подсказки, а не модалку/дровер; и не даём браузеру очистить поле type="search"
+      e.preventDefault();
       e.stopPropagation();
       onClose();
     }

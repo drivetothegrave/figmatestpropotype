@@ -13,7 +13,9 @@ import { DemoPanel } from './components/DemoPanel';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
 import {
   DEFAULT_COMMENTS,
-  PAYMENT_DAYS,
+  BASE_PAYMENTS,
+  HISTORY_COMMENTS,
+  groupByDay,
   Payment,
   PaymentDay,
   createDemoSignPayment,
@@ -47,7 +49,7 @@ function save(key: string, value: unknown) {
 }
 
 export const App: React.FC = () => {
-  const [comments, setComments] = React.useState<Record<string, string>>(() => load(COMMENTS_KEY, DEFAULT_COMMENTS));
+  const [comments, setComments] = React.useState<Record<string, string>>(() => load(COMMENTS_KEY, { ...HISTORY_COMMENTS, ...DEFAULT_COMMENTS }));
   const [history, setHistory] = React.useState<string[]>(() => load(HISTORY_KEY, DEFAULT_HISTORY));
   const [signedIds, setSignedIds] = React.useState<string[]>(() => load(SIGNED_KEY, []));
   // Платежи, добавленные через панель настроек прототипа
@@ -80,20 +82,16 @@ export const App: React.FC = () => {
   // Вид списка (подробный/компактный) — общий для вкладок «Операций»
   const [isCompactView, setIsCompactView] = React.useState(false);
 
-  // Подписанные платежи уходят в историю со статусом «В процессе»
-  const days: PaymentDay[] = PAYMENT_DAYS.map((day, index) => ({
-    ...day,
-    // Новые демо-платежи — сверху сегодняшнего дня
-    payments: [...(index === 0 ? [...extraPayments].reverse() : []), ...day.payments].map((p) =>
-      signedIds.includes(p.id) ? { ...p, status: 'progress' as const } : p,
-    ),
-  }));
+  // Подписанные платежи уходят в историю со статусом «В процессе»; демо-платежи — к остальным
+  const allPayments: Payment[] = [...extraPayments, ...BASE_PAYMENTS].map((p) =>
+    signedIds.includes(p.id) ? { ...p, status: 'progress' as const } : p,
+  );
+  const days: PaymentDay[] = groupByDay(allPayments);
   const signDays = days
     .map((day) => ({ ...day, payments: day.payments.filter((p) => p.status === 'sign') }))
     .filter((day) => day.payments.length > 0);
   const signCount = signDays.reduce((acc, day) => acc + day.payments.length, 0);
   const signSum = signDays.flatMap((day) => day.payments).reduce((acc, p) => acc + Math.abs(p.sum), 0);
-  const allPayments = days.flatMap((day) => day.payments);
   const payment = allPayments.find((p) => p.id === paymentId);
 
   const navigate = (next: AppPage) => {
@@ -184,7 +182,7 @@ export const App: React.FC = () => {
         // без localStorage сбрасываем только состояние
       }
     });
-    setComments(DEFAULT_COMMENTS);
+    setComments({ ...HISTORY_COMMENTS, ...DEFAULT_COMMENTS });
     setHistory(DEFAULT_HISTORY);
     setSignedIds([]);
     setExtraPayments([]);
@@ -208,7 +206,7 @@ export const App: React.FC = () => {
           <LeftBar />
           <main className="app__main">
             <MainPage
-              payments={allPayments}
+              payments={days.flatMap((day) => day.payments)}
               comments={comments}
               signCount={signCount}
               signSum={signSum}

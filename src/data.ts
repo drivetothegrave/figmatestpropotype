@@ -11,6 +11,9 @@ export interface Payment {
   description: string;
   meta: string;
   avatarLabel: string;
+  /** Дата операции, YYYY-MM-DD */
+  date: string;
+  /** «9 октября 2026, 14:05» — вычисляется из даты и времени */
   dateTime: string;
   operationName: string;
   recipient: string;
@@ -20,12 +23,13 @@ export interface Payment {
   bik: string;
   bank: string;
   corrAccount: string;
-  /** Для платежей на подпись */
+  /** Для платежей на подпись — «Создано» */
   createdAt?: string;
   createdBy?: string;
 }
 
 export interface PaymentDay {
+  date: string;
   title: string;
   payments: Payment[];
 }
@@ -90,9 +94,9 @@ const signInfo = {
   createdBy: 'Солодов Олег Алексеевич',
 };
 
-export const PAYMENT_DAYS: PaymentDay[] = [
+/** Последние операции — исходные данные; даты задаются ниже, по дням */
+const RECENT_DAYS: { payments: Omit<Payment, 'date' | 'dateTime'>[] }[] = [
   {
-    title: 'Сегодня, 2 апреля',
     payments: [
       {
         id: 'p0',
@@ -102,7 +106,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата налогов за 3 квартал 2026',
         meta: '№6891, 14:05',
         avatarLabel: 'УФК',
-        dateTime: '2 апреля 2026, 14:05',
         operationName: 'Налоговый платёж №6891',
         recipient: 'УФК по Сибирской области (Межрайонная ИФНС №4)',
         ...requisites,
@@ -116,7 +119,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Входящий валютный платёж. Загрузите документы для валютного контроля',
         meta: 'USD ··0091, 11:45',
         avatarLabel: 'G',
-        dateTime: '2 апреля 2026, 11:45',
         operationName: 'Входящий валютный платёж',
         recipient: 'Global Trade Ltd',
         ...requisites,
@@ -129,7 +131,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата маркетинговых услуг по договору №18',
         meta: '№3090, 11:00',
         avatarLabel: 'А',
-        dateTime: '2 апреля 2026, 11:00',
         operationName: 'Входящий платёж №3090',
         recipient: 'Анютикина С.И., ИП',
         ...requisites,
@@ -143,7 +144,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
           'Оплата лицензионного вознаграждения за использование базовой лицензии за период с 01.11.22 по 30.11.22. НДС не предусмотрен.',
         meta: '№6884, 13:40',
         avatarLabel: 'Л',
-        dateTime: '2 апреля 2026, 13:40',
         operationName: 'Платёж по реквизитам №6884',
         recipient: 'Лаванда, ООО',
         ...requisites,
@@ -153,13 +153,11 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         sum: -180000,
         status: 'sign',
         counterparty: 'БЦ Лесная, ООО',
-        description: 'Арендная плата за апрель 2026 по договору №14/А от 01.02.2025. НДС не облагается',
+        description: 'Арендная плата за октябрь 2026 по договору №14/А от 01.02.2025. НДС не облагается',
         meta: '№6890, 12:15',
         avatarLabel: 'БЦ',
-        dateTime: '2 апреля 2026, 12:15',
         operationName: 'Платёж по реквизитам №6890',
         recipient: 'Бизнес-центр «Лесная», ООО',
-        createdAt: '2 апреля 2026, 12:15',
         ...signInfo,
         ...requisites,
       },
@@ -168,13 +166,11 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         sum: -95000,
         status: 'sign',
         counterparty: 'Склад-Сервис, ООО',
-        description: 'Аренда складского помещения за апрель 2026 по договору №7 от 15.01.2025, в т. ч. НДС 20%',
+        description: 'Аренда складского помещения за октябрь 2026 по договору №7 от 15.01.2025, в т. ч. НДС 20%',
         meta: '№6889, 11:02',
         avatarLabel: 'СС',
-        dateTime: '2 апреля 2026, 11:02',
         operationName: 'Платёж по реквизитам №6889',
         recipient: 'Склад-Сервис, ООО',
-        createdAt: '2 апреля 2026, 11:02',
         ...signInfo,
         ...requisites,
       },
@@ -186,7 +182,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: '+7 (906) 917‑10‑18',
         meta: '№6884, 13:40',
         avatarLabel: 'ДС',
-        dateTime: '2 апреля 2026, 13:40',
         operationName: 'Перевод по номеру телефона',
         recipient: 'Дмитрий Олегович С.',
         ...requisites,
@@ -199,7 +194,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата за использование ПО «Онлайн-касса»',
         meta: '№6372, 10:30',
         avatarLabel: 'Л',
-        dateTime: '2 апреля 2026, 10:30',
         operationName: 'Входящий платёж №6372',
         recipient: 'Лаванда, ООО',
         ...requisites,
@@ -207,7 +201,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     ],
   },
   {
-    title: 'Вчера, 1 апреля',
     payments: [
       {
         id: 'p3',
@@ -217,10 +210,8 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'По договору №8923 от 10 октября 2022 в т.ч. НДС 20%',
         meta: '№6884, 13:40',
         avatarLabel: 'В',
-        dateTime: '1 апреля 2026, 13:40',
         operationName: 'Платёж по реквизитам №6884',
         recipient: 'Величко Дмитрий Александрович, ИП',
-        createdAt: '1 апреля 2026, 13:40',
         ...signInfo,
         ...requisites,
       },
@@ -229,13 +220,11 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         sum: -12500,
         status: 'sign',
         counterparty: 'БЦ Лесная, ООО',
-        description: 'Возмещение коммунальных услуг за март 2026 по договору №14/А от 01.02.2025',
+        description: 'Возмещение коммунальных услуг за сентябрь 2026 по договору №14/А от 01.02.2025',
         meta: '№6881, 10:30',
         avatarLabel: 'БЦ',
-        dateTime: '1 апреля 2026, 10:30',
         operationName: 'Платёж по реквизитам №6881',
         recipient: 'Бизнес-центр «Лесная», ООО',
-        createdAt: '1 апреля 2026, 10:30',
         ...signInfo,
         ...requisites,
       },
@@ -247,7 +236,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата услуг контрагенту по договору подряда №206 от 12.03.2019, в т. ч. НДС 18%',
         meta: '№6884, 13:40',
         avatarLabel: 'П',
-        dateTime: '1 апреля 2026, 13:40',
         operationName: 'Входящий платёж №6884',
         recipient: 'Промт, ООО',
         ...requisites,
@@ -260,7 +248,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Возврат аванса по соглашению о расторжении',
         meta: '№6838, 12:10',
         avatarLabel: 'Р',
-        dateTime: '1 апреля 2026, 12:10',
         operationName: 'Входящий платёж №6838',
         recipient: 'Ромашка, ООО',
         ...requisites,
@@ -268,7 +255,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
     ],
   },
   {
-    title: '22 марта',
     payments: [
       {
         id: 'p5',
@@ -278,7 +264,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'По договору №8923 от 10 октября 2022 в т.ч. НДС 20%',
         meta: '№6884, 13:40',
         avatarLabel: 'З',
-        dateTime: '22 марта 2026, 13:40',
         operationName: 'Платёж по реквизитам №6884',
         recipient: 'Засыпкина Дарья Викторовна, ИП',
         ...requisites,
@@ -291,7 +276,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата подписки «Финансы» за сервис аналитики',
         meta: '№4162, 14:45',
         avatarLabel: 'Л',
-        dateTime: '22 марта 2026, 14:45',
         operationName: 'Входящий платёж №4162',
         recipient: 'Лотос, ИП',
         ...requisites,
@@ -304,7 +288,6 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         description: 'Оплата услуг контрагенту по договору подряда №206 от 12.03.2019, в т. ч. НДС 10%',
         meta: '№126, 13:40',
         avatarLabel: 'К',
-        dateTime: '22 марта 2026, 13:40',
         operationName: 'Платёж по реквизитам №126',
         recipient: 'Кириенко Сергей Владимирович, ИП',
         ...requisites,
@@ -320,6 +303,145 @@ export const DEFAULT_COMMENTS: Record<string, string> = {
   s3: 'Аренда офиса',
   p3: 'Покупка оборудования',
 };
+
+/* ---------- Даты ---------- */
+
+/** «Сегодня» в прототипе */
+export const TODAY_ISO = '2026-10-09';
+
+const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+export const MONTHS_NOM = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+const pad = (n: number) => String(n).padStart(2, '0');
+export const toIso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+export const fromIso = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+export const addDays = (iso: string, days: number) => {
+  const d = fromIso(iso);
+  d.setDate(d.getDate() + days);
+  return toIso(d);
+};
+
+/** «2026-10-09» → «9 октября» */
+export const dayMonth = (iso: string) => {
+  const d = fromIso(iso);
+  return `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`;
+};
+
+/** Заголовок дня: «Сегодня, 9 октября», «Вчера, 8 октября», «22 сентября», «5 мая 2025» */
+export function dayTitle(iso: string): string {
+  if (iso === TODAY_ISO) return `Сегодня, ${dayMonth(iso)}`;
+  if (iso === addDays(TODAY_ISO, -1)) return `Вчера, ${dayMonth(iso)}`;
+  return iso.slice(0, 4) === TODAY_ISO.slice(0, 4) ? dayMonth(iso) : `${dayMonth(iso)} ${iso.slice(0, 4)}`;
+}
+
+/** «№6884, 13:40» → «13:40» */
+const timeOfMeta = (meta: string) => meta.split(', ').pop() ?? '';
+
+function withDate(payment: Omit<Payment, 'date' | 'dateTime'>, date: string): Payment {
+  const dateTime = `${dayMonth(date)} ${date.slice(0, 4)}, ${timeOfMeta(payment.meta)}`;
+  return { ...payment, date, dateTime, ...(payment.status === 'sign' ? { createdAt: dateTime } : {}) };
+}
+
+// Последние операции: сегодня, вчера и 22 сентября
+const RECENT_DATES = [TODAY_ISO, addDays(TODAY_ISO, -1), '2026-09-22'];
+const RECENT: Payment[] = RECENT_DAYS.flatMap((day, i) => day.payments.map((p) => withDate(p, RECENT_DATES[i])));
+
+/* ---------- История за полгода — регулярные операции, чтобы было что искать ---------- */
+
+interface Recurring {
+  key: string;
+  day: number;
+  sum: number;
+  counterparty: string;
+  avatarLabel: string;
+  description: (month: string) => string;
+  comment?: string;
+  time: string;
+  /** В какие месяцы (0–11) — по умолчанию каждый */
+  months?: number[];
+}
+
+const RECURRING: Recurring[] = [
+  { key: 'office', day: 5, sum: -180000, counterparty: 'БЦ Лесная, ООО', avatarLabel: 'БЦ', time: '10:15', comment: 'Аренда офиса',
+    description: (m) => `Арендная плата за ${m} 2026 по договору №14/А от 01.02.2025. НДС не облагается` },
+  { key: 'stock', day: 10, sum: -95000, counterparty: 'Склад-Сервис, ООО', avatarLabel: 'СС', time: '11:30', comment: 'Аренда склада',
+    description: (m) => `Аренда складского помещения за ${m} 2026 по договору №7, в т. ч. НДС 20%` },
+  { key: 'telecom', day: 15, sum: -8900, counterparty: 'Телеком Плюс, АО', avatarLabel: 'ТП', time: '09:40', comment: 'Связь и интернет',
+    description: (m) => `Оплата услуг связи и интернета за ${m} по счёту №5521, в т. ч. НДС 20%` },
+  { key: 'salary', day: 25, sum: -64000, counterparty: 'Петрова А.С.', avatarLabel: 'ПА', time: '16:00', comment: 'Зарплата',
+    description: (m) => `Заработная плата за ${m} 2026. НДФЛ удержан` },
+  { key: 'lavanda', day: 12, sum: 249700, counterparty: 'Лаванда, ООО', avatarLabel: 'Л', time: '12:30',
+    description: () => 'Оплата за использование ПО «Онлайн-касса»' },
+  { key: 'promt', day: 20, sum: 50000, counterparty: 'Промт, ООО', avatarLabel: 'П', time: '13:40',
+    description: () => 'Оплата услуг по договору подряда №206 от 12.03.2019, в т. ч. НДС 18%' },
+  { key: 'anyut', day: 18, sum: 62600, counterparty: 'Анютикина С.И., ИП', avatarLabel: 'А', time: '11:00', months: [4, 6, 8],
+    description: () => 'Оплата маркетинговых услуг по договору №18' },
+  { key: 'orchid', day: 8, sum: 1438000, counterparty: 'Орхидея, АО', avatarLabel: 'О', time: '17:40', months: [4, 7],
+    description: () => 'Оплата поставки оборудования по счёту №311' },
+  { key: 'lotos', day: 22, sum: 303200, counterparty: 'Лотос, ИП', avatarLabel: 'Л', time: '14:45', months: [3, 5, 7],
+    description: () => 'Оплата подписки «Финансы» за сервис аналитики' },
+  { key: 'tax', day: 25, sum: -250000, counterparty: 'УФК по Сибирской области', avatarLabel: 'УФК', time: '14:05', months: [3, 6],
+    description: (m) => `Оплата налогов, авансовый платёж (${m})` },
+  { key: 'equipment', day: 3, sum: -312000, counterparty: 'Техносфера, ООО', avatarLabel: 'Т', time: '15:20', months: [5], comment: 'Покупка оборудования',
+    description: () => 'Оплата по счёту №318 за ноутбуки и мониторы, в т. ч. НДС 20%' },
+];
+
+const MONTHS_PREP = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+
+/** Комментарии к сгенерированной истории — чтобы «аренда офиса за июль» что-то находила */
+export const HISTORY_COMMENTS: Record<string, string> = {};
+
+// Апрель – начало октября 2026
+const HISTORY: Payment[] = [];
+for (let month = 3; month <= 9; month += 1) {
+  RECURRING.forEach((r) => {
+    if (r.months && !r.months.includes(month)) return;
+    const date = `2026-${pad(month + 1)}-${pad(r.day)}`;
+    // Только прошедшие дни до «вчера»; октябрьские аренды сейчас на подписи — их не дублируем
+    if (date >= addDays(TODAY_ISO, -1)) return;
+    if (month === 9 && (r.key === 'office' || r.key === 'stock')) return;
+    const id = `h-${r.key}-${month + 1}`;
+    const isIncome = r.sum > 0;
+    HISTORY.push(
+      withDate(
+        {
+          id,
+          sum: r.sum,
+          status: isIncome ? 'credited' : 'done',
+          counterparty: r.counterparty,
+          description: r.description(MONTHS_PREP[month]),
+          meta: `№${5000 + HISTORY.length * 7}, ${r.time}`,
+          avatarLabel: r.avatarLabel,
+          operationName: isIncome ? 'Входящий платёж' : 'Платёж по реквизитам',
+          recipient: r.counterparty,
+          ...requisites,
+        },
+        date,
+      ),
+    );
+    if (r.comment) HISTORY_COMMENTS[id] = r.comment;
+  });
+}
+
+const byNewest = (a: Payment, b: Payment) =>
+  b.date.localeCompare(a.date) || timeOfMeta(b.meta).localeCompare(timeOfMeta(a.meta));
+
+/** Все операции прототипа — от новых к старым */
+export const BASE_PAYMENTS: Payment[] = [...RECENT, ...HISTORY].sort(byNewest);
+
+/** Группировка по дням для таймлайна */
+export function groupByDay(payments: Payment[]): PaymentDay[] {
+  const days: PaymentDay[] = [];
+  [...payments].sort(byNewest).forEach((p) => {
+    const last = days[days.length - 1];
+    if (last && last.date === p.date) last.payments.push(p);
+    else days.push({ date: p.date, title: dayTitle(p.date), payments: [p] });
+  });
+  return days;
+}
 
 /* ---------- Демо: генерация новых платежей на подпись ---------- */
 
@@ -360,7 +482,7 @@ const DEMO_TEMPLATES: { counterparty: string; recipient: string; avatarLabel: st
     counterparty: 'Петрова А.С.',
     recipient: 'Петрова Анна Сергеевна',
     avatarLabel: 'ПА',
-    description: 'Заработная плата за март 2026. НДФЛ удержан',
+    description: 'Заработная плата за сентябрь 2026. НДФЛ удержан',
     comment: 'Зарплата',
     sums: [64000, 72500],
   },
@@ -383,10 +505,11 @@ export function createDemoSignPayment(): { payment: Payment; comment: string } {
       description: template.description,
       meta: `№${number}, ${time}`,
       avatarLabel: template.avatarLabel,
-      dateTime: `2 апреля 2026, ${time}`,
+      date: TODAY_ISO,
+      dateTime: `${dayMonth(TODAY_ISO)} 2026, ${time}`,
       operationName: `Платёж по реквизитам №${number}`,
       recipient: template.recipient,
-      createdAt: `2 апреля 2026, ${time}`,
+      createdAt: `${dayMonth(TODAY_ISO)} 2026, ${time}`,
       ...signInfo,
       ...requisites,
     },

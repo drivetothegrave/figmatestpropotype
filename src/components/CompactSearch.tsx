@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom';
 import { Cell, CellRightAccessory, Search } from '@pluginwoman/t-ds';
 import { Magnifier } from '@pluginwoman/t-ds/icons';
 import { Payment, formatAmount } from '../data';
-import { matchSuggestions, paymentMatches } from '../suggest';
+import { matchSuggestions } from '../suggest';
+import { completions, isSmart, parseQuery, smartMatches, summarize } from '../smartQuery';
+import { SmartSummary } from './SmartSummary';
 
 interface CompactSearchProps {
   payments: Payment[];
@@ -17,6 +19,7 @@ interface CompactSearchProps {
 const PREVIEW_LIMIT = 3;
 
 type Item =
+  | { kind: 'complete'; text: string }
   | { kind: 'comment'; text: string }
   | { kind: 'payment'; payment: Payment }
   | { kind: 'all'; count: number };
@@ -34,13 +37,19 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
   const ref = React.useRef<HTMLDivElement>(null);
 
   const q = query.trim();
-  const found = q ? payments.filter((p) => paymentMatches(p, comments[p.id], q)) : [];
-  const commentHints = q
-    ? matchSuggestions(Array.from(new Set(Object.values(comments))), q, 3).filter((c) => c !== q)
-    : [];
+  // «Умный» разбор: «входящие за май от 50 тыс» → фильтры + остаток текста
+  const counterparties = payments.map((p) => p.counterparty);
+  const parsed = parseQuery(q, counterparties);
+  const smart = isSmart(parsed);
+  const found = q ? payments.filter((p) => smartMatches(p, comments[p.id], parsed)) : [];
+  const total = summarize(found);
+  const hints = q ? completions(query, parsed, counterparties) : [];
+  const commentHints =
+    q && !smart ? matchSuggestions(Array.from(new Set(Object.values(comments))), q, 3).filter((c) => c !== q) : [];
 
   const items: Item[] = q
     ? [
+        ...hints.map((text) => ({ kind: 'complete' as const, text })),
         ...commentHints.map((text) => ({ kind: 'comment' as const, text })),
         ...found.slice(0, PREVIEW_LIMIT).map((payment) => ({ kind: 'payment' as const, payment })),
         ...(found.length > 0 ? [{ kind: 'all' as const, count: found.length }] : []),
@@ -54,7 +63,11 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
     if (!isOpen) return;
     const update = () => {
       const rect = ref.current?.getBoundingClientRect();
-      if (rect) setPosition({ top: rect.bottom, left: rect.left, width: rect.width });
+      if (rect) {
+        // Выпадашка не уже 440px — блок «Понял как» помещается; прижимаем к правому краю поля
+        const width = Math.max(rect.width, 440);
+        setPosition({ top: rect.bottom, left: rect.right - width, width });
+      }
     };
     update();
     window.addEventListener('resize', update);
@@ -66,6 +79,11 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
   }, [isOpen]);
 
   const choose = (item: Item) => {
+    if (item.kind === 'complete') {
+      // Дополняем запрос и остаёмся в поиске — видно, как изменился результат
+      setQuery(item.text + ' ');
+      return;
+    }
     if (item.kind === 'payment') {
       onOpenPayment(item.payment);
       (document.activeElement as HTMLElement | null)?.blur();
@@ -90,6 +108,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
       if (activeIndex >= 0) choose(items[activeIndex]);
       else onShowAll(q);
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       e.stopPropagation();
       (document.activeElement as HTMLElement | null)?.blur();
     }
@@ -117,10 +136,37 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
             style={{ top: position.top, left: position.left, width: position.width }}
             onMouseDown={(e) => e.preventDefault()}
           >
-            {items.length === 0 && (
+            {smart && (
+              <SmartSummary
+                className="compact-search__summary"
+                tokens={parsed.tokens}
+                text={parsed.text}
+                count={total.count}
+                income={total.income}
+                expense={total.expense}
+              />
+            )}
+            {!smart && items.length === 0 && (
               <p className="ts-400-m compact-search__empty">Ничего не нашлось</p>
             )}
             {items.map((item, index) => {
+              if (item.kind === 'complete') {
+                return (
+                  <Cell
+                    key={`h-${item.text}`}
+                    className={itemClass(index)}
+                    title={item.text}
+                    titleClassName="ts-400-m"
+                    verticalPadding="2x"
+                    leftAccessory={
+                      <span className="ds-icon ds-icon--s compact-search__hint-icon" aria-hidden="true">
+                        <Magnifier />
+                      </span>
+                    }
+                    onClick={() => choose(item)}
+                  />
+                );
+              }
               if (item.kind === 'comment') {
                 return (
                   <Cell

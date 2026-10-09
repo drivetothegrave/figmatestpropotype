@@ -10,6 +10,8 @@ interface SearchWithSuggestProps {
   suggestions: string[];
   placeholder?: string;
   className?: string;
+  /** Продолжения запроса («входящие» → «входящие за сентябрь») — показываются первыми */
+  completions?: string[];
 }
 
 /** Поиск по истории с «умными» подсказками из комментариев (экран «Саджесты в поиске») */
@@ -19,13 +21,19 @@ export const SearchWithSuggest: React.FC<SearchWithSuggestProps> = ({
   suggestions,
   placeholder = 'Контрагент, сумма, назначение',
   className = '',
+  completions = [],
 }) => {
   const [isFocused, setIsFocused] = React.useState(false);
   const [isClosed, setIsClosed] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 
   const items = value.trim()
-    ? matchSuggestions(Array.from(new Set(suggestions)), value).filter((item) => item !== value.trim())
+    ? Array.from(
+        new Set([
+          ...completions,
+          ...matchSuggestions(Array.from(new Set(suggestions)), value).filter((item) => item !== value.trim()),
+        ]),
+      ).slice(0, 6)
     : [];
   const isOpen = isFocused && !isClosed && items.length > 0;
 
