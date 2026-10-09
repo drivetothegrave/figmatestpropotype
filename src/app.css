@@ -1124,9 +1124,3 @@ button {
   position: relative;
   display: block;
 }
-
-/* Логотип банка контрагента в кружке */
-.bank-avatar {
-  display: inline-flex;
-  flex: 0 0 auto;
-}
