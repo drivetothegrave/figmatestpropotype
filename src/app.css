@@ -749,6 +749,11 @@ button {
   white-space: nowrap;
 }
 
+/* Приход в превью операций — зелёным, как в списке */
+.compact-search__amount--income .ds-cell-right-accessory__text-m {
+  color: var(--primitive-success);
+}
+
 .compact-search__group-title {
   padding: var(--spacing-2x) var(--spacing-5x);
   color: var(--primitive-secondary);

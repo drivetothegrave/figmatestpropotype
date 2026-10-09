@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Cell, Search } from '@pluginwoman/t-ds';
+import { Cell, CellRightAccessory, Search } from '@pluginwoman/t-ds';
 import { Magnifier } from '@pluginwoman/t-ds/icons';
-import { Payment } from '../data';
+import { Payment, formatAmount } from '../data';
 import { matchSuggestions } from '../suggest';
 import { completions, isSmart, parseQuery, smartMatches, summarize } from '../smartQuery';
 import { SmartTotal } from './SmartSummary';
@@ -145,6 +145,11 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
           description={comments[item.payment.id] ?? item.payment.description}
           descriptionClassName="ts-400-s compact-search__ellipsis"
           verticalPadding="2x"
+          rightAccessory={
+            <span className={item.payment.sum > 0 ? 'compact-search__amount--income' : undefined}>
+              <CellRightAccessory variant="text-m" text={formatAmount(item.payment.sum, item.payment.currency)} />
+            </span>
+          }
           onClick={() => choose(item)}
         />
       );
