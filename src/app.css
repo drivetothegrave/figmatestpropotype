@@ -1092,6 +1092,10 @@ button {
   color: var(--primitive-primary);
 }
 
+.smart-total__expense {
+  color: var(--primitive-primary);
+}
+
 .smart-total__count {
   color: var(--primitive-secondary);
 }

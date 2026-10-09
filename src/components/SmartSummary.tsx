@@ -15,6 +15,6 @@ export const SmartTotal: React.FC<SmartTotalProps> = ({ count, income, expense, 
       {count} {plural(count, ['операция', 'операции', 'операций'])}
     </span>
     {income > 0 && <span className="smart-total__income">+ {formatRub(income)}</span>}
-    {expense > 0 && <span>– {formatRub(expense)}</span>}
+    {expense > 0 && <span className="smart-total__expense">– {formatRub(expense)}</span>}
   </p>
 );
