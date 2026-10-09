@@ -1,11 +1,27 @@
 import React from 'react';
-import { Avatar, Button, Search, TabsCarousel, Tag } from '@pluginwoman/t-ds';
+import { Avatar, Button, Chip, ContextualNotification, Search, TabsCarousel } from '@pluginwoman/t-ds';
 import { DotsThreeHorizontal, Plus } from '@pluginwoman/t-ds/icons';
 import { Payment, formatRub } from '../data';
 import { CompactSearch } from './CompactSearch';
 import { PaymentRow } from './PaymentRow';
 import { historyQuickActions } from './PaymentHistory';
-import { InsightSettings, RISK_INFO } from '../insights';
+import { LayerOnLayerRectangleVertical, ArrowRightUp, WarningTriangle, WarningCircle } from '@pluginwoman/t-ds/icons/20/Stroked';
+import { InsightSettings, NOTICE_INFO } from '../insights';
+
+type Direction = 'all' | 'in' | 'out';
+
+const DIRECTIONS: { value: Direction; label: string }[] = [
+  { value: 'all', label: 'Все' },
+  { value: 'in', label: 'Входящие' },
+  { value: 'out', label: 'Исходящие' },
+];
+
+const NOTICE_ICON = {
+  brand: <LayerOnLayerRectangleVertical />,
+  success: <ArrowRightUp />,
+  warning: <WarningTriangle />,
+  error: <WarningCircle />,
+};
 
 const ACCOUNTS = [
   { name: 'Расчётный, **6584', balance: '23 422 785,37 ₽' },
@@ -25,27 +41,9 @@ interface MainPageProps {
   onComment: (payment: Payment) => void;
   /** Перейти в «Операции»: вкладка и (опционально) поисковый запрос */
   onOpenOperations: (tab: 'all' | 'sign', query?: string) => void;
-  /** Какие инсайды и рекомендации показывать — из настроек прототипа */
+  /** Какая нотификация и рекомендация показываются — из настроек прототипа */
   insights: InsightSettings;
 }
-
-type InsightTone = 'brand' | 'warning' | 'error' | 'success' | 'neutral';
-
-/** Инсайд-плашка над компактным таймлайном (Tag с индикатором) */
-const Insight: React.FC<{ tone: InsightTone; onClick: () => void; children: React.ReactNode }> = ({
-  tone,
-  onClick,
-  children,
-}) => (
-  <button type="button" className={`insight insight--${tone} hoverOpacity`} onClick={onClick}>
-    <Tag shape="circle" size="xl" className="insight__tag">
-      <span className="insight__content">
-        <span className="insight__dot" aria-hidden="true" />
-        {children}
-      </span>
-    </Tag>
-  </button>
-);
 
 /** Экран «Компактный таймлайн»: выжимка последних операций, инсайды и поиск */
 export const MainPage: React.FC<MainPageProps> = ({
@@ -65,29 +63,17 @@ export const MainPage: React.FC<MainPageProps> = ({
     if (insights.recommendation) setIsRecommendationHidden(false);
   }, [insights.recommendation]);
 
-  const insightItems: { key: string; tone: InsightTone; label: React.ReactNode; onClick: () => void }[] = [];
-  if (insights.sign && signCount > 0) {
-    insightItems.push({
-      key: 'sign',
-      tone: 'brand',
-      label: `${signCount} на подпись · ${formatRub(signSum)}`,
-      onClick: () => onOpenOperations('sign'),
-    });
-  }
-  if (insights.risk !== 'off') {
-    const risk = RISK_INFO[insights.risk];
-    insightItems.push({ key: 'risk', tone: risk.tone, label: risk.insight, onClick: () => onOpenOperations('all') });
-  }
-  if (insights.income) {
-    insightItems.push({
-      key: 'income',
-      tone: 'success',
-      label: 'Поступления +18% к прошлой неделе',
-      onClick: () => onOpenOperations('all'),
-    });
-  }
+  // Быстрый фильтр по направлению — фильтрует список прямо на главной
+  const [direction, setDirection] = React.useState<Direction>('all');
+
+  // Нотификация — одна за раз; крестик скрывает её, пока не выберут другую
+  const [dismissedNotice, setDismissedNotice] = React.useState<string>();
+  const notice = insights.notice !== 'off' && insights.notice !== dismissedNotice ? NOTICE_INFO[insights.notice] : undefined;
+
   const [globalQuery, setGlobalQuery] = React.useState('');
-  const latest = payments.slice(0, LATEST_LIMIT);
+  const latest = payments
+    .filter((p) => (direction === 'in' ? p.sum > 0 : direction === 'out' ? p.sum < 0 : true))
+    .slice(0, LATEST_LIMIT);
 
   const row = (payment: Payment) => (
     <PaymentRow
@@ -145,22 +131,52 @@ export const MainPage: React.FC<MainPageProps> = ({
 
         <div className="compact-timeline">
           <div className="compact-timeline__filters">
+            <div className="compact-timeline__chips">
+              {DIRECTIONS.map((item) => (
+                <Chip
+                  key={item.value}
+                  variant="tab"
+                  isSelected={direction === item.value}
+                  onClick={() => setDirection(item.value)}
+                >
+                  {item.label}
+                </Chip>
+              ))}
+              {/* «На подпись» по-прежнему уводит во вкладку «Операций» */}
+              {signCount > 0 && (
+                <Chip
+                  variant="tab"
+                  leftAccessory="icon"
+                  leftIcon={<span className="insight__dot" />}
+                  className="compact-timeline__sign-chip"
+                  onClick={() => onOpenOperations('sign')}
+                >
+                  {signCount} на подпись · {formatRub(signSum)}
+                </Chip>
+              )}
+            </div>
             <CompactSearch
               payments={payments}
               comments={comments}
               onOpenPayment={onOpenPayment}
               onShowAll={(query) => onOpenOperations('all', query)}
             />
-            {insightItems.length > 0 && (
-              <div className="compact-timeline__insights">
-                {insightItems.map((item) => (
-                  <Insight key={item.key} tone={item.tone} onClick={item.onClick}>
-                    {item.label}
-                  </Insight>
-                ))}
-              </div>
-            )}
           </div>
+
+          {notice && (
+            <ContextualNotification
+              className={`insight-notice insight-notice--${notice.tone}`}
+              hasTitle={false}
+              accessory="icon"
+              icon={NOTICE_ICON[notice.tone]}
+              text={
+                <>
+                  <span className="ts-500-s">{notice.title}</span> {notice.text}
+                </>
+              }
+              onClose={() => setDismissedNotice(insights.notice)}
+            />
+          )}
 
           <div className="compact-timeline__list">
             {latest.slice(0, 1).map(row)}
@@ -186,6 +202,7 @@ export const MainPage: React.FC<MainPageProps> = ({
             )}
 
             {latest.slice(1).map(row)}
+            {latest.length === 0 && <p className="ts-400-m history-card__empty">Операций пока нет</p>}
           </div>
 
           <Button variant="secondary" size="s" className="compact-timeline__all" onClick={() => onOpenOperations('all')}>

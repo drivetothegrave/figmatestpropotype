@@ -623,21 +623,19 @@ button {
 
 .compact-timeline__filters {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-3x) var(--spacing-6x);
+  gap: var(--spacing-6x);
   padding: 0 var(--spacing-5x);
 }
 
-/* Поиск занимает строку целиком, если инсайдам не хватает места рядом */
 .compact-timeline__filters .compact-search {
-  flex: 1 1 calc(var(--spacing-40x) + var(--spacing-30x));
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.compact-timeline__insights {
+.compact-timeline__chips {
   display: flex;
-  flex: 0 1 auto;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
   gap: var(--spacing-2-5x);
 }
 
@@ -646,61 +644,49 @@ button {
   margin: 0 var(--spacing-5x);
 }
 
-/* Инсайд-плашка: Tag xl + индикатор-точка */
-.insight {
-  display: flex;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.insight__tag {
-  --tag-surface-color: var(--container-transparent-1);
-  --tag-text-color: var(--primitive-primary);
-}
-
-.insight--warning .insight__tag {
-  --tag-surface-color: var(--bg-warning-1);
-}
-
-.insight__content {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2x);
-  white-space: nowrap;
-}
-
+/* Индикатор-точка у чипа «На подпись» */
 .insight__dot {
-  flex: 0 0 auto;
+  display: block;
   width: var(--spacing-2x);
   height: var(--spacing-2x);
+  margin: auto;
   border-radius: var(--rounding-pill);
   background: var(--primitive-brand);
 }
 
-.insight--warning .insight__dot {
-  background: var(--primitive-warning);
+/* Инсайд-нотификация — ContextualNotification в цвет события, одна за раз */
+.insight-notice {
+  width: auto;
+  margin: 0 var(--spacing-5x);
+  border: 0;
 }
 
-.insight--error .insight__tag {
-  --tag-surface-color: var(--bg-error-1);
+.insight-notice--brand {
+  background: var(--bg-brand-1);
 }
 
-.insight--error .insight__dot {
-  background: var(--primitive-error);
+.insight-notice--success {
+  background: var(--bg-success-1);
 }
 
-.insight--success .insight__tag {
-  --tag-surface-color: var(--bg-success-1);
+.insight-notice--success .contextual-notification__accessory {
+  color: var(--primitive-success);
 }
 
-.insight--success .insight__dot {
-  background: var(--primitive-success);
+.insight-notice--warning {
+  background: var(--bg-warning-1);
 }
 
-.insight--neutral .insight__dot {
-  background: var(--primitive-neutral-4);
+.insight-notice--warning .contextual-notification__accessory {
+  color: var(--primitive-warning-dark);
+}
+
+.insight-notice--error {
+  background: var(--bg-error-1);
+}
+
+.insight-notice--error .contextual-notification__accessory {
+  color: var(--primitive-error);
 }
 
 /* Рекомендация внутри таймлайна */

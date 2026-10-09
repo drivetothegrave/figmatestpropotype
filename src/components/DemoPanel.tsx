@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Cell, CellRightAccessory, Chip, IconButton } from '@pluginwoman/t-ds';
 import { ArrowRotationLeft, Cross, Gear, Plus } from '@pluginwoman/t-ds/icons';
 import { paymentsWord } from '../data';
-import { InsightSettings, RISK_LABEL, RiskMode } from '../insights';
+import { InsightNotice, InsightSettings, NOTICE_LABEL } from '../insights';
 
 interface DemoPanelProps {
   signCount: number;
@@ -14,13 +14,7 @@ interface DemoPanelProps {
   onInsightsChange: (next: InsightSettings) => void;
 }
 
-const INSIGHT_TOGGLES: { key: Exclude<keyof InsightSettings, 'risk'>; title: string }[] = [
-  { key: 'sign', title: 'На подпись' },
-  { key: 'income', title: 'Поступления выросли' },
-  { key: 'recommendation', title: 'Рекомендация про налоги' },
-];
-
-const RISK_MODES: RiskMode[] = ['off', 'low', 'medium', 'high'];
+const NOTICES: InsightNotice[] = ['off', 'duplicate', 'revenue', 'risk-medium', 'risk-high'];
 
 /** Служебная панель прототипа — не часть интерфейса банка, нужна для демо */
 export const DemoPanel: React.FC<DemoPanelProps> = ({
@@ -66,37 +60,33 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             {signedCount > 0 ? `Вернуть подписанные (${signedCount})` : 'Подписанных нет'}
           </Button>
 
-          <p className="ts-500-s demo-panel__section">Инсайды на главной</p>
-          {INSIGHT_TOGGLES.map((toggle) => (
-            <Cell
-              key={toggle.key}
-              title={toggle.title}
-              titleClassName="ts-400-s"
-              verticalPadding="none"
-              className="demo-panel__toggle-row"
-              rightAccessory={
-                <CellRightAccessory
-                  variant="switch"
-                  isChecked={insights[toggle.key]}
-                  onCheckedChange={(value) => onInsightsChange({ ...insights, [toggle.key]: value })}
-                />
-              }
-            />
-          ))}
-
-          <p className="ts-400-s demo-panel__label">Риск по операциям</p>
-          <div className="demo-panel__chips" role="radiogroup" aria-label="Режим риска">
-            {RISK_MODES.map((mode) => (
+          <p className="ts-500-s demo-panel__section">Главная</p>
+          <p className="ts-400-s demo-panel__label">Инсайд-нотификация — одна за раз</p>
+          <div className="demo-panel__chips" role="radiogroup" aria-label="Инсайд-нотификация">
+            {NOTICES.map((notice) => (
               <Chip
-                key={mode}
+                key={notice}
                 variant="chip"
-                isSelected={insights.risk === mode}
-                onClick={() => onInsightsChange({ ...insights, risk: mode })}
+                isSelected={insights.notice === notice}
+                onClick={() => onInsightsChange({ ...insights, notice })}
               >
-                {RISK_LABEL[mode]}
+                {NOTICE_LABEL[notice]}
               </Chip>
             ))}
           </div>
+          <Cell
+            title="Рекомендация про налоги"
+            titleClassName="ts-400-s"
+            verticalPadding="none"
+            className="demo-panel__toggle-row"
+            rightAccessory={
+              <CellRightAccessory
+                variant="switch"
+                isChecked={insights.recommendation}
+                onCheckedChange={(value) => onInsightsChange({ ...insights, recommendation: value })}
+              />
+            }
+          />
 
           <Button variant="transparent" size="s" onClick={onReset}>
             Сбросить прототип

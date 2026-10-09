@@ -23,13 +23,13 @@ interface OperationsPageProps {
   signCount: number;
   history: React.ReactNode;
   signList: React.ReactNode;
-  /** Режим риска из настроек прототипа; «выкл» — карточка показывает низкий риск */
+  /** Режим риска — следует за нотификацией о риске на главной */
   risk: RiskMode;
 }
 
 /** Экран «Развёрнутый таймлайн» — отдельная страница «Операции» */
 export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange, signCount, history, signList, risk }) => {
-  const riskInfo = (risk !== 'off' && RISK_INFO[risk]) || RISK_INFO.low;
+  const riskInfo = RISK_INFO[risk] ?? RISK_INFO.low;
   return (
   <div className="operations-page">
     <TabsCarousel

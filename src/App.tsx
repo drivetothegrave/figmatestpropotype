@@ -10,7 +10,7 @@ import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
-import { DEFAULT_INSIGHTS, InsightSettings } from './insights';
+import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
 import {
   DEFAULT_COMMENTS,
   PAYMENT_DAYS,
@@ -60,10 +60,13 @@ export const App: React.FC = () => {
   const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
   const [successMessage, setSuccessMessage] = React.useState<string>();
   // Инсайды и рекомендация на главной — включаются в настройках прототипа
-  const [insights, setInsights] = React.useState<InsightSettings>(() => ({
-    ...DEFAULT_INSIGHTS,
-    ...load<Partial<InsightSettings>>(INSIGHTS_KEY, {}),
-  }));
+  const [insights, setInsights] = React.useState<InsightSettings>(() => {
+    const saved = load<Partial<InsightSettings>>(INSIGHTS_KEY, {});
+    return {
+      notice: saved.notice ?? DEFAULT_INSIGHTS.notice,
+      recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
+    };
+  });
   const updateInsights = (next: InsightSettings) => {
     setInsights(next);
     save(INSIGHTS_KEY, next);
@@ -221,7 +224,7 @@ export const App: React.FC = () => {
             tab={operationsTab}
             onTabChange={setOperationsTab}
             signCount={signCount}
-            risk={insights.risk}
+            risk={riskOf(insights.notice)}
             history={
               <PaymentHistory
                 days={days}
