@@ -44,7 +44,7 @@ export const STATUS_LABEL: Record<PaymentStatus, string> = {
 };
 
 export const STATUS_COLOR: Record<PaymentStatus, string> = {
-  done: 'var(--primitive-success)',
+  done: 'var(--primitive-primary)',
   progress: 'var(--primitive-neutral-4)',
   sign: 'var(--primitive-brand)',
   credited: 'var(--primitive-success)',

@@ -270,7 +270,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
                 />
               )}
               <h3 className="ts-600-xl history-day__title">{day.title}</h3>
-              {isCompactView && <DayTotals payments={day.payments} />}
+              <DayTotals payments={day.payments} />
             </div>
             {day.payments.map((payment) => {
               const common = {

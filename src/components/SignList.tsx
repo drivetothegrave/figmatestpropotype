@@ -181,7 +181,7 @@ export const SignList: React.FC<SignListProps> = ({
                     />
                   )}
                   <h3 className="ts-600-xl history-day__title">{day.title}</h3>
-                  {isCompactView && <DayTotals payments={day.payments} />}
+                  <DayTotals payments={day.payments} />
                 </div>
                 {day.payments.map((payment) => {
                   const common = {
