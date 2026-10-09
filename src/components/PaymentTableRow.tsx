@@ -59,7 +59,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       </span>
       {hasStatus && (
         <span
-          className="ts-400-s payment-table-row__status payment-table-row__ellipsis"
+          className="ts-500-xs payment-table-row__status payment-table-row__ellipsis"
           style={{ color: STATUS_COLOR[payment.status] }}
         >
           {STATUS_LABEL[payment.status]}
