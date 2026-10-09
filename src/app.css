@@ -624,7 +624,7 @@ button {
 .compact-timeline__filters {
   display: flex;
   align-items: center;
-  gap: var(--spacing-6x);
+  gap: var(--spacing-4x);
   padding: 0 var(--spacing-5x);
 }
 
@@ -1051,4 +1051,20 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-1-5x);
+}
+
+/* Нотификация кликабельна — ведёт решать инсайд */
+.insight-notice__action {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.insight-notice__action:hover {
+  opacity: 0.8;
+}
+
+.insight-notice__action:focus-visible {
+  outline: 2px solid var(--primitive-brand);
+  outline-offset: 2px;
+  border-radius: var(--rounding-3x);
 }

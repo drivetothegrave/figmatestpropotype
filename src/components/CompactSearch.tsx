@@ -146,7 +146,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
                     title={item.payment.counterparty}
                     description={comments[item.payment.id] ?? item.payment.description}
                     verticalPadding="2x"
-                    rightAccessory={<CellRightAccessory variant="text-m" text={formatAmount(item.payment.sum)} />}
+                    rightAccessory={<CellRightAccessory variant="text-m" text={formatAmount(item.payment.sum, item.payment.currency)} />}
                     onClick={() => choose(item)}
                   />
                 );

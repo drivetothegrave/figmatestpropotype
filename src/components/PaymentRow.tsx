@@ -77,7 +77,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
         className="ts-600-m payment-row__amount"
         style={{ color: payment.sum > 0 ? 'var(--primitive-success)' : undefined }}
       >
-        {formatAmount(payment.sum)}
+        {formatAmount(payment.sum, payment.currency)}
       </span>
       {hasStatus && (
         <span className="ts-500-xs" style={{ color: STATUS_COLOR[payment.status] }}>

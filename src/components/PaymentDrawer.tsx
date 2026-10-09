@@ -93,7 +93,7 @@ export const PaymentDrawer: React.FC<PaymentDrawerProps> = ({
         <div className="payment-drawer__content">
           <div className="payment-drawer__event">
             <div className="payment-drawer__title">
-              <span className="ts-600-4xl">{formatAmount(payment.sum)}</span>
+              <span className="ts-600-4xl">{formatAmount(payment.sum, payment.currency)}</span>
               <span className="ts-500-m">{payment.operationName}</span>
             </div>
 

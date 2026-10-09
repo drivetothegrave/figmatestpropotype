@@ -9,12 +9,18 @@ export type RiskMode = 'low' | 'medium' | 'high';
 
 export interface InsightSettings {
   notice: InsightNotice;
+  /** Чип-задача «N на подпись · сумма» рядом с фильтрами */
+  signChip: boolean;
+  /** Чип-задача «N ждут документы · ВЭД» */
+  vedChip: boolean;
   /** Рекомендация «Откладывайте на налоги 7%» внутри таймлайна */
   recommendation: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
   notice: 'duplicate',
+  signChip: true,
+  vedChip: false,
   recommendation: false,
 };
 

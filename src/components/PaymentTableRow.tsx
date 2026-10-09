@@ -54,7 +54,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       className="ts-600-m payment-table-row__sum"
       style={{ color: payment.sum > 0 ? 'var(--primitive-success)' : undefined }}
     >
-      {formatAmount(payment.sum)}
+      {formatAmount(payment.sum, payment.currency)}
     </span>
 
     <span className="payment-table-row__counterparty">

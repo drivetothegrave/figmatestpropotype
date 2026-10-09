@@ -63,6 +63,8 @@ export const MainPage: React.FC<MainPageProps> = ({
     if (insights.recommendation) setIsRecommendationHidden(false);
   }, [insights.recommendation]);
 
+  const vedPayments = payments.filter((p) => p.status === 'docs');
+
   // Быстрый фильтр по направлению — фильтрует список прямо на главной
   const [direction, setDirection] = React.useState<Direction>('all');
 
@@ -143,7 +145,7 @@ export const MainPage: React.FC<MainPageProps> = ({
                 </Chip>
               ))}
               {/* «На подпись» по-прежнему уводит во вкладку «Операций» */}
-              {signCount > 0 && (
+              {insights.signChip && signCount > 0 && (
                 <Chip
                   variant="tab"
                   leftAccessory="icon"
@@ -152,6 +154,18 @@ export const MainPage: React.FC<MainPageProps> = ({
                   onClick={() => onOpenOperations('sign')}
                 >
                   {signCount} на подпись · {formatRub(signSum)}
+                </Chip>
+              )}
+              {/* ВЭД: валютные поступления ждут документов для валютного контроля */}
+              {insights.vedChip && vedPayments.length > 0 && (
+                <Chip
+                  variant="tab"
+                  leftAccessory="icon"
+                  leftIcon={<span className="insight__dot" />}
+                  className="compact-timeline__sign-chip"
+                  onClick={() => onOpenOperations('all', vedPayments[0].counterparty)}
+                >
+                  {vedPayments.length} {vedPayments.length === 1 ? 'ждёт' : 'ждут'} документы · ВЭД
                 </Chip>
               )}
             </div>
@@ -164,6 +178,13 @@ export const MainPage: React.FC<MainPageProps> = ({
           </div>
 
           {notice && (
+            // Клик по нотификации ведёт решать инсайд — переход пока не подключён
+            <div
+              role="button"
+              tabIndex={0}
+              className="insight-notice__action"
+              aria-label={`${notice.title} ${notice.text}`}
+            >
             <ContextualNotification
               className={`insight-notice insight-notice--${notice.tone}`}
               hasTitle={false}
@@ -176,6 +197,7 @@ export const MainPage: React.FC<MainPageProps> = ({
               }
               onClose={() => setDismissedNotice(insights.notice)}
             />
+            </div>
           )}
 
           <div className="compact-timeline__list">

@@ -16,6 +16,12 @@ interface DemoPanelProps {
 
 const NOTICES: InsightNotice[] = ['off', 'duplicate', 'revenue', 'risk-medium', 'risk-high'];
 
+const TOGGLES: { key: 'signChip' | 'vedChip' | 'recommendation'; title: string }[] = [
+  { key: 'signChip', title: 'Чип «На подпись»' },
+  { key: 'vedChip', title: 'Чип «ВЭД: ждут документы»' },
+  { key: 'recommendation', title: 'Рекомендация про налоги' },
+];
+
 /** Служебная панель прототипа — не часть интерфейса банка, нужна для демо */
 export const DemoPanel: React.FC<DemoPanelProps> = ({
   signCount,
@@ -74,19 +80,22 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
               </Chip>
             ))}
           </div>
-          <Cell
-            title="Рекомендация про налоги"
-            titleClassName="ts-400-s"
-            verticalPadding="none"
-            className="demo-panel__toggle-row"
-            rightAccessory={
-              <CellRightAccessory
-                variant="switch"
-                isChecked={insights.recommendation}
-                onCheckedChange={(value) => onInsightsChange({ ...insights, recommendation: value })}
-              />
-            }
-          />
+          {TOGGLES.map((toggle) => (
+            <Cell
+              key={toggle.key}
+              title={toggle.title}
+              titleClassName="ts-400-s"
+              verticalPadding="none"
+              className="demo-panel__toggle-row"
+              rightAccessory={
+                <CellRightAccessory
+                  variant="switch"
+                  isChecked={insights[toggle.key]}
+                  onCheckedChange={(value) => onInsightsChange({ ...insights, [toggle.key]: value })}
+                />
+              }
+            />
+          ))}
 
           <Button variant="transparent" size="s" onClick={onReset}>
             Сбросить прототип

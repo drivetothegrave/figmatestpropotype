@@ -64,6 +64,8 @@ export const App: React.FC = () => {
     const saved = load<Partial<InsightSettings>>(INSIGHTS_KEY, {});
     return {
       notice: saved.notice ?? DEFAULT_INSIGHTS.notice,
+      signChip: saved.signChip ?? DEFAULT_INSIGHTS.signChip,
+      vedChip: saved.vedChip ?? DEFAULT_INSIGHTS.vedChip,
       recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
     };
   });

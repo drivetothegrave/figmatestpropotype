@@ -9,7 +9,7 @@ import {
   Share,
 } from '@pluginwoman/t-ds/icons';
 import { Filters } from '@pluginwoman/t-ds/icons/20/Stroked';
-import { Payment, PaymentDay, formatRub } from '../data';
+import { Payment, PaymentDay, formatRub, inRub } from '../data';
 import { filterDays, paymentMatches } from '../suggest';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
@@ -57,7 +57,8 @@ interface PaymentHistoryProps {
 }
 
 /** Итоги дня: поступления и списания */
-export const DayTotals: React.FC<{ payments: Payment[] }> = ({ payments }) => {
+export const DayTotals: React.FC<{ payments: Payment[] }> = ({ payments: all }) => {
+  const payments = inRub(all);
   const income = payments.filter((p) => p.sum > 0).reduce((acc, p) => acc + p.sum, 0);
   const expense = payments.filter((p) => p.sum < 0).reduce((acc, p) => acc + Math.abs(p.sum), 0);
   return (

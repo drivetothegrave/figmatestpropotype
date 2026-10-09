@@ -1,9 +1,11 @@
-export type PaymentStatus = 'done' | 'progress' | 'sign' | 'credited' | 'second-sign';
+export type PaymentStatus = 'done' | 'progress' | 'sign' | 'credited' | 'second-sign' | 'docs';
 
 export interface Payment {
   id: string;
-  /** Сумма в рублях: отрицательная — списание, положительная — поступление */
+  /** Сумма: отрицательная — списание, положительная — поступление */
   sum: number;
+  /** Валюта, если не рубли — в рублёвые итоги не попадает */
+  currency?: 'USD';
   status: PaymentStatus;
   counterparty: string;
   description: string;
@@ -34,6 +36,7 @@ export const STATUS_LABEL: Record<PaymentStatus, string> = {
   sign: 'На подпись',
   credited: 'Зачислено',
   'second-sign': 'Ожидает вторую подпись',
+  docs: 'Нужны документы',
 };
 
 export const STATUS_COLOR: Record<PaymentStatus, string> = {
@@ -42,6 +45,7 @@ export const STATUS_COLOR: Record<PaymentStatus, string> = {
   sign: 'var(--primitive-brand)',
   credited: 'var(--primitive-success)',
   'second-sign': 'var(--primitive-secondary)',
+  docs: 'var(--primitive-brand)',
 };
 
 const rub = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
@@ -51,10 +55,16 @@ export function formatRub(value: number): string {
   return `${rub.format(Math.abs(value))} ₽`;
 }
 
-/** −250000 → «– 250 000 ₽», 50000 → «+ 50 000 ₽» */
-export function formatAmount(sum: number): string {
-  return `${sum < 0 ? '–' : '+'} ${formatRub(sum)}`;
+const usd = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** −250000 → «– 250 000 ₽», 50000 → «+ 50 000 ₽», валюта — «+ 12 400,00 $» */
+export function formatAmount(sum: number, currency?: 'USD'): string {
+  const value = currency === 'USD' ? `${usd.format(Math.abs(sum))} $` : formatRub(sum);
+  return `${sum < 0 ? '–' : '+'} ${value}`;
 }
+
+/** Рублёвые платежи — для итогов и сумм */
+export const inRub = <T extends { currency?: string }>(payments: T[]) => payments.filter((p) => !p.currency);
 
 /** plural(3, ['платёж', 'платежа', 'платежей']) → «платежа» */
 export function plural(n: number, forms: [string, string, string]): string {
@@ -95,6 +105,33 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         dateTime: '2 апреля 2026, 14:05',
         operationName: 'Налоговый платёж №6891',
         recipient: 'УФК по Сибирской области (Межрайонная ИФНС №4)',
+        ...requisites,
+      },
+      {
+        id: 'v1',
+        sum: 12400,
+        currency: 'USD',
+        status: 'docs',
+        counterparty: 'Global Trade Ltd',
+        description: 'Входящий валютный платёж. Загрузите документы для валютного контроля',
+        meta: 'USD ··0091, 11:45',
+        avatarLabel: 'G',
+        dateTime: '2 апреля 2026, 11:45',
+        operationName: 'Входящий валютный платёж',
+        recipient: 'Global Trade Ltd',
+        ...requisites,
+      },
+      {
+        id: 'i1',
+        sum: 62600,
+        status: 'credited',
+        counterparty: 'Анютикина С.И., ИП',
+        description: 'Оплата маркетинговых услуг по договору №18',
+        meta: '№3090, 11:00',
+        avatarLabel: 'А',
+        dateTime: '2 апреля 2026, 11:00',
+        operationName: 'Входящий платёж №3090',
+        recipient: 'Анютикина С.И., ИП',
         ...requisites,
       },
       {
@@ -154,6 +191,19 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         recipient: 'Дмитрий Олегович С.',
         ...requisites,
       },
+      {
+        id: 'i2',
+        sum: 249700,
+        status: 'credited',
+        counterparty: 'Лаванда, ООО',
+        description: 'Оплата за использование ПО «Онлайн-касса»',
+        meta: '№6372, 10:30',
+        avatarLabel: 'Л',
+        dateTime: '2 апреля 2026, 10:30',
+        operationName: 'Входящий платёж №6372',
+        recipient: 'Лаванда, ООО',
+        ...requisites,
+      },
     ],
   },
   {
@@ -202,6 +252,19 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         recipient: 'Промт, ООО',
         ...requisites,
       },
+      {
+        id: 'i3',
+        sum: 18500,
+        status: 'credited',
+        counterparty: 'Ромашка, ООО',
+        description: 'Возврат аванса по соглашению о расторжении',
+        meta: '№6838, 12:10',
+        avatarLabel: 'Р',
+        dateTime: '1 апреля 2026, 12:10',
+        operationName: 'Входящий платёж №6838',
+        recipient: 'Ромашка, ООО',
+        ...requisites,
+      },
     ],
   },
   {
@@ -218,6 +281,19 @@ export const PAYMENT_DAYS: PaymentDay[] = [
         dateTime: '22 марта 2026, 13:40',
         operationName: 'Платёж по реквизитам №6884',
         recipient: 'Засыпкина Дарья Викторовна, ИП',
+        ...requisites,
+      },
+      {
+        id: 'i4',
+        sum: 303200,
+        status: 'credited',
+        counterparty: 'Лотос, ИП',
+        description: 'Оплата подписки «Финансы» за сервис аналитики',
+        meta: '№4162, 14:45',
+        avatarLabel: 'Л',
+        dateTime: '22 марта 2026, 14:45',
+        operationName: 'Входящий платёж №4162',
+        recipient: 'Лотос, ИП',
         ...requisites,
       },
       {

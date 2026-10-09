@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowDownUnderline, ArrowReturnRight, BubbleListShort, Cross, Printer, Share } from '@pluginwoman/t-ds/icons';
-import { Payment, formatRub } from '../data';
+import { Payment, formatRub, inRub } from '../data';
 
 interface SelectionBarProps {
   selected: Payment[];
@@ -10,8 +10,9 @@ interface SelectionBarProps {
 
 /** Чёрная плашка массовых действий над выделенными операциями */
 export const SelectionBar: React.FC<SelectionBarProps> = ({ selected, onComment, onClear }) => {
-  const income = selected.filter((p) => p.sum > 0).reduce((acc, p) => acc + p.sum, 0);
-  const expense = selected.filter((p) => p.sum < 0).reduce((acc, p) => acc + Math.abs(p.sum), 0);
+  const rub = inRub(selected);
+  const income = rub.filter((p) => p.sum > 0).reduce((acc, p) => acc + p.sum, 0);
+  const expense = rub.filter((p) => p.sum < 0).reduce((acc, p) => acc + Math.abs(p.sum), 0);
 
   const actions = [
     { label: 'Комментарий', icon: <BubbleListShort />, onClick: onComment },
