@@ -20,7 +20,7 @@ interface PaymentTableRowProps {
 
 /**
  * Строка компактного вида «Операций» — в одну линию, как таблица:
- * сумма · получатель · статус · комментарий и назначение · время.
+ * сумма со статусом под ней · получатель · комментарий и назначение · номер и время.
  */
 export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   payment,
@@ -50,26 +50,27 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       </div>
     )}
 
-    <span
-      className="ts-600-m payment-table-row__sum"
-      style={{ color: payment.sum > 0 ? 'var(--primitive-success)' : undefined }}
-    >
-      {formatAmount(payment.sum, payment.currency)}
+    <span className="payment-table-row__amount">
+      <span
+        className="ts-600-m payment-table-row__sum"
+        style={{ color: payment.sum > 0 ? 'var(--primitive-success)' : undefined }}
+      >
+        {formatAmount(payment.sum, payment.currency)}
+      </span>
+      {hasStatus && (
+        <span
+          className="ts-400-s payment-table-row__status payment-table-row__ellipsis"
+          style={{ color: STATUS_COLOR[payment.status] }}
+        >
+          {STATUS_LABEL[payment.status]}
+        </span>
+      )}
     </span>
 
     <span className="payment-table-row__counterparty">
       <Avatar size={24} shape="circle" label={payment.avatarLabel} />
       <span className="ts-500-m payment-table-row__ellipsis">{payment.counterparty}</span>
     </span>
-
-    {hasStatus && (
-      <span
-        className="ts-500-s payment-table-row__status payment-table-row__ellipsis"
-        style={{ color: STATUS_COLOR[payment.status] }}
-      >
-        {STATUS_LABEL[payment.status]}
-      </span>
-    )}
 
     <span className="payment-table-row__purpose">
       {comment &&
@@ -95,7 +96,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       <span className="ts-400-s payment-table-row__ellipsis payment-row__secondary">{payment.description}</span>
     </span>
 
-    <span className="ts-400-s payment-table-row__time">{timeOf(payment)}</span>
+    <span className="ts-400-s payment-table-row__time">{payment.meta}</span>
 
     <QuickActionsBar actions={quickActions} />
   </div>

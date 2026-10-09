@@ -256,7 +256,7 @@ button {
 
 .payment-row__sum {
   display: flex;
-  flex: 0 0 var(--spacing-30x);
+  flex: 0 0 calc(var(--spacing-30x) + var(--spacing-5x));
   flex-direction: column;
   gap: var(--spacing-1-5x);
 }
@@ -904,8 +904,15 @@ button {
   align-items: center;
 }
 
+.payment-table-row__amount {
+  display: flex;
+  flex: 0 0 calc(var(--spacing-30x) + var(--spacing-5x));
+  flex-direction: column;
+  gap: var(--spacing-0-5x);
+  min-width: 0;
+}
+
 .payment-table-row__sum {
-  flex: 0 0 var(--spacing-30x);
   white-space: nowrap;
 }
 
@@ -915,10 +922,6 @@ button {
   align-items: center;
   gap: var(--spacing-2-5x);
   min-width: 0;
-}
-
-.payment-table-row__status {
-  flex: 0 0 calc(var(--spacing-30x) + var(--spacing-5x));
 }
 
 .payment-table-row__purpose {
