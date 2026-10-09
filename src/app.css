@@ -1090,3 +1090,34 @@ button {
   --icon-size: var(--icon-size-18);
 }
 
+
+/* Активный выпадающий чип: вместо стрелки — белый крестик сброса (как у кнопки фильтров) */
+.chip-clearable {
+  position: relative;
+  display: inline-flex;
+}
+
+.chip-clearable .chip__caret {
+  visibility: hidden;
+}
+
+.chip-clearable__clear {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-8x);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primitive-default);
+  cursor: pointer;
+}
+
+.chip-clearable__clear .chip__cross {
+  position: relative;
+  display: block;
+}

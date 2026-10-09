@@ -17,15 +17,12 @@ import {
   completions,
   extraFilters,
   filterMatches,
-  hasFilters,
   mergeFilters,
   parseQuery,
   periodOptions,
   removeToken,
-  summarize,
   toFilterState,
 } from '../smartQuery';
-import { SmartTotal } from './SmartSummary';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
 import { PaymentTableRow } from './PaymentTableRow';
@@ -144,6 +141,19 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   };
 
   const extra = extraFilters(effective);
+
+  /** Активный фильтр в выпадашке: стрелку заменяет белый крестик, как у кнопки фильтров */
+  const clearable = (chip: React.ReactNode, isActive: boolean, onClear: () => void, label: string) =>
+    isActive ? (
+      <span className="chip-clearable">
+        {chip}
+        <button type="button" className="chip-clearable__clear" aria-label={`Сбросить: ${label}`} onClick={onClear}>
+          <span className="chip__cross" aria-hidden="true" />
+        </button>
+      </span>
+    ) : (
+      chip
+    );
   const directionLabel = DIRECTIONS.find((d) => d.value === effective.direction)?.label ?? 'Все операции';
   const foundCount = visibleDays.reduce((acc, day) => acc + day.payments.length, 0);
   const visible = visibleDays.flatMap((day) => day.payments);
@@ -197,16 +207,22 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
           suggestions={commentTexts}
           completions={query.trim() ? completions(query, parsed, counterparties) : []}
         />
-        <Chip
-          variant="dropdown"
-          isSelected={Boolean(effective.direction)}
-          value={directionLabel}
-          popupContent={DIRECTIONS.map((d) => (
-            <Cell key={d.label} title={d.label} verticalPadding="2x" onClick={() => setDirection(d.value)} />
-          ))}
-        >
-          {directionLabel}
-        </Chip>
+        {clearable(
+          <Chip
+            variant="dropdown"
+            isSelected={Boolean(effective.direction)}
+            value={directionLabel}
+            popupContent={DIRECTIONS.map((d) => (
+              <Cell key={d.label} title={d.label} verticalPadding="2x" onClick={() => setDirection(d.value)} />
+            ))}
+          >
+            {directionLabel}
+          </Chip>,
+          Boolean(effective.direction),
+          () => setDirection(undefined),
+          directionLabel,
+        )}
+        {clearable(
         <Chip
           variant="dropdown"
           isSelected={Boolean(effective.period)}
@@ -221,7 +237,11 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
           ))}
         >
           {effective.period?.label ?? 'За всё время'}
-        </Chip>
+        </Chip>,
+          Boolean(effective.period),
+          () => setPeriod(undefined),
+          effective.period?.label ?? '',
+        )}
         <Chip variant="dropdown">Категория</Chip>
         {/* Режим выделения — чип в панели фильтров, без отдельной строки */}
         <Chip
@@ -234,22 +254,6 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         </Chip>
         <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
-
-      {(query.trim() !== '' || hasFilters(effective)) && (
-        <SmartTotal className="history-card__found" {...summarize(visibleDays.flatMap((day) => day.payments))}>
-          {' · '}
-          <button
-            type="button"
-            className="sign-list__link ts-500-s hoverOpacity"
-            onClick={() => {
-              onFiltersChange({});
-              onQueryChange('');
-            }}
-          >
-            Сбросить
-          </button>
-        </SmartTotal>
-      )}
 
       {visibleDays.map((day) => {
         const dayIds = day.payments.map((p) => p.id);
