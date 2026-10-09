@@ -1,6 +1,7 @@
 import React from 'react';
-import { Avatar, Tag } from '@pluginwoman/t-ds';
+import { Tag } from '@pluginwoman/t-ds';
 import { Payment, STATUS_COLOR, STATUS_LABEL, formatAmount } from '../data';
+import { BankAvatar } from './BankAvatar';
 import { QuickAction, QuickActionsBar } from './PaymentRow';
 
 /** «№6884, 13:40» → «13:40» */
@@ -68,7 +69,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
     </span>
 
     <span className="payment-table-row__counterparty">
-      <Avatar size={24} shape="circle" label={payment.avatarLabel} />
+      <BankAvatar size={24} counterparty={payment.counterparty} />
       <span className="ts-500-m payment-table-row__ellipsis">{payment.counterparty}</span>
     </span>
 

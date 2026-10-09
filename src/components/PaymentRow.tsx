@@ -1,5 +1,6 @@
 import React from 'react';
-import { Avatar, IconButton, Tag } from '@pluginwoman/t-ds';
+import { BankAvatar } from './BankAvatar';
+import { IconButton, Tag } from '@pluginwoman/t-ds';
 import { Payment, STATUS_COLOR, STATUS_LABEL, formatAmount } from '../data';
 
 export interface QuickAction {
@@ -112,7 +113,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
       {!isCompact && <span className="ts-400-xs payment-row__secondary">{payment.meta}</span>}
     </div>
 
-    <Avatar size={32} shape="circle" label={payment.avatarLabel} />
+    <BankAvatar size={32} counterparty={payment.counterparty} />
 
     <QuickActionsBar actions={quickActions} />
   </div>
