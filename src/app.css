@@ -730,16 +730,27 @@ button {
   color: var(--primitive-neutral-4);
 }
 
+/* Макет «Результаты поиска»: отступ 20, группы через 24, строки через 16 (у ячеек по 8 сверху и снизу) */
 .compact-search__popup {
+  gap: var(--spacing-2x);
   max-height: none;
+  padding: var(--spacing-3x) 0;
+  border-radius: var(--rounding-5x);
 }
 
-.compact-search__all {
-  box-shadow: var(--Top-Line);
+.compact-search__group {
+  display: flex;
+  flex-direction: column;
 }
 
-.compact-search__empty {
-  padding: var(--spacing-3x) var(--spacing-5x);
+.compact-search__ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-search__group-title {
+  padding: var(--spacing-2x) var(--spacing-5x);
   color: var(--primitive-secondary);
 }
 
@@ -1075,7 +1086,14 @@ button {
 /* ---------- Умный поиск: итог по найденному ---------- */
 
 .smart-total {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4x);
   color: var(--primitive-primary);
+}
+
+.smart-total__count {
+  color: var(--primitive-secondary);
 }
 
 .smart-total__income {
@@ -1084,8 +1102,8 @@ button {
 
 /* В выпадашке на главной — шапка над вариантами запроса */
 .compact-search__summary {
-  padding: var(--spacing-2x) var(--spacing-5x) var(--spacing-3x);
-  box-shadow: var(--Bottom-Line);
+  padding: var(--spacing-2x) var(--spacing-5x);
+  color: var(--primitive-secondary);
 }
 
 /* Кнопка фильтров с активными доп. фильтрами: иконка + счётчик + крестик */

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Cell, CellRightAccessory, Search } from '@pluginwoman/t-ds';
+import { Cell, Search } from '@pluginwoman/t-ds';
 import { Magnifier } from '@pluginwoman/t-ds/icons';
-import { Payment, formatAmount } from '../data';
+import { Payment } from '../data';
 import { matchSuggestions } from '../suggest';
 import { completions, isSmart, parseQuery, smartMatches, summarize } from '../smartQuery';
 import { SmartTotal } from './SmartSummary';
@@ -64,8 +64,8 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
     const update = () => {
       const rect = ref.current?.getBoundingClientRect();
       if (rect) {
-        // Выпадашка не уже 440px — блок «Понял как» помещается; прижимаем к правому краю поля
-        const width = Math.max(rect.width, 440);
+        // Выпадашка шире поля (в макете 680px), прижата к правому краю поля и не вылезает за экран
+        const width = Math.min(Math.max(rect.width, 600), rect.right - 16);
         setPosition({ top: rect.bottom, left: rect.right - width, width });
       }
     };
@@ -117,6 +117,60 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
   const itemClass = (index: number, extra = '') =>
     ['suggest-popup__item', extra, index === activeIndex ? 'is-active' : ''].filter(Boolean).join(' ');
 
+  const renderItem = (item: Item, index: number) => {
+    if (item.kind === 'complete' || item.kind === 'comment') {
+      return (
+        <Cell
+          key={`${item.kind}-${item.text}`}
+          className={itemClass(index)}
+          title={item.text.charAt(0).toUpperCase() + item.text.slice(1)}
+          titleClassName="ts-500-m"
+          verticalPadding="2x"
+          leftAccessory={
+            <span className="ds-icon ds-icon--m compact-search__hint-icon" aria-hidden="true">
+              <Magnifier />
+            </span>
+          }
+          onClick={() => choose(item)}
+        />
+      );
+    }
+    if (item.kind === 'payment') {
+      return (
+        <Cell
+          key={`p-${item.payment.id}`}
+          className={itemClass(index)}
+          title={item.payment.counterparty}
+          titleClassName="ts-500-m"
+          description={comments[item.payment.id] ?? item.payment.description}
+          descriptionClassName="ts-400-s compact-search__ellipsis"
+          verticalPadding="2x"
+          onClick={() => choose(item)}
+        />
+      );
+    }
+    return (
+      <Cell
+        key="all"
+        className={itemClass(index)}
+        title={`Все результаты  ·  ${item.count}`}
+        titleClassName="ts-400-s"
+        titleColor="var(--primitive-brand)"
+        verticalPadding="2x"
+        onClick={() => choose(item)}
+      />
+    );
+  };
+
+  /** Группа выпадашки по макету «Результаты поиска»: подсказки / операции / все результаты */
+  const renderGroup = (entries: { item: Item; index: number }[], title?: string) =>
+    entries.length > 0 && (
+      <div className="compact-search__group">
+        {title && <p className="ts-400-s compact-search__group-title">{title}</p>}
+        {entries.map(({ item, index }) => renderItem(item, index))}
+      </div>
+    );
+
   return (
     <div
       ref={ref}
@@ -136,77 +190,24 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
             style={{ top: position.top, left: position.left, width: position.width }}
             onMouseDown={(e) => e.preventDefault()}
           >
-            {smart && (
+            {found.length > 0 ? (
               <SmartTotal
                 className="compact-search__summary"
                 count={total.count}
                 income={total.income}
                 expense={total.expense}
               />
+            ) : (
+              <p className="ts-400-s compact-search__summary">Ничего не нашлось</p>
             )}
-            {!smart && items.length === 0 && (
-              <p className="ts-400-m compact-search__empty">Ничего не нашлось</p>
+            {renderGroup(
+              items.flatMap((item, index) => (item.kind === 'complete' || item.kind === 'comment' ? [{ item, index }] : [])),
             )}
-            {items.map((item, index) => {
-              if (item.kind === 'complete') {
-                return (
-                  <Cell
-                    key={`h-${item.text}`}
-                    className={itemClass(index)}
-                    title={item.text}
-                    titleClassName="ts-400-m"
-                    verticalPadding="2x"
-                    leftAccessory={
-                      <span className="ds-icon ds-icon--s compact-search__hint-icon" aria-hidden="true">
-                        <Magnifier />
-                      </span>
-                    }
-                    onClick={() => choose(item)}
-                  />
-                );
-              }
-              if (item.kind === 'comment') {
-                return (
-                  <Cell
-                    key={`c-${item.text}`}
-                    className={itemClass(index)}
-                    title={item.text}
-                    titleClassName="ts-400-m"
-                    verticalPadding="2x"
-                    leftAccessory={
-                      <span className="ds-icon ds-icon--s compact-search__hint-icon" aria-hidden="true">
-                        <Magnifier />
-                      </span>
-                    }
-                    onClick={() => choose(item)}
-                  />
-                );
-              }
-              if (item.kind === 'payment') {
-                return (
-                  <Cell
-                    key={`p-${item.payment.id}`}
-                    className={itemClass(index)}
-                    title={item.payment.counterparty}
-                    description={comments[item.payment.id] ?? item.payment.description}
-                    verticalPadding="2x"
-                    rightAccessory={<CellRightAccessory variant="text-m" text={formatAmount(item.payment.sum, item.payment.currency)} />}
-                    onClick={() => choose(item)}
-                  />
-                );
-              }
-              return (
-                <Cell
-                  key="all"
-                  className={itemClass(index, 'compact-search__all')}
-                  title={`Показать все результаты · ${item.count}`}
-                  titleClassName="ts-500-m"
-                  titleColor="var(--primitive-brand)"
-                  verticalPadding="2x"
-                  onClick={() => choose(item)}
-                />
-              );
-            })}
+            {renderGroup(
+              items.flatMap((item, index) => (item.kind === 'payment' ? [{ item, index }] : [])),
+              'Операции',
+            )}
+            {renderGroup(items.flatMap((item, index) => (item.kind === 'all' ? [{ item, index }] : [])))}
           </div>,
           document.body,
         )}

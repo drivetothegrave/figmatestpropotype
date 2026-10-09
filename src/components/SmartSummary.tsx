@@ -6,21 +6,15 @@ interface SmartTotalProps {
   income: number;
   expense: number;
   className?: string;
-  children?: React.ReactNode;
 }
 
-/** Итог по найденному: «36 операций · + 1,8 млн ₽ · – 4,2 млн ₽» */
-export const SmartTotal: React.FC<SmartTotalProps> = ({ count, income, expense, className = '', children }) => (
+/** Итог по найденному: «7 операций   + 312 300 ₽   – 777 000 ₽» (макет «Результаты поиска») */
+export const SmartTotal: React.FC<SmartTotalProps> = ({ count, income, expense, className = '' }) => (
   <p className={['ts-400-s smart-total', className].filter(Boolean).join(' ')}>
-    {count === 0 ? (
-      'Ничего не нашлось'
-    ) : (
-      <>
-        {count} {plural(count, ['операция', 'операции', 'операций'])}
-        {income > 0 && <span className="smart-total__income"> · + {formatRub(income)}</span>}
-        {expense > 0 && <span> · – {formatRub(expense)}</span>}
-      </>
-    )}
-    {children}
+    <span className="smart-total__count">
+      {count} {plural(count, ['операция', 'операции', 'операций'])}
+    </span>
+    {income > 0 && <span className="smart-total__income">+ {formatRub(income)}</span>}
+    {expense > 0 && <span>– {formatRub(expense)}</span>}
   </p>
 );
