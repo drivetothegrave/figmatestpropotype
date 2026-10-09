@@ -154,7 +154,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
         key="all"
         className={itemClass(index)}
         title={`Все результаты  ·  ${item.count}`}
-        titleClassName="ts-400-s"
+        titleClassName="ts-500-s"
         titleColor="var(--primitive-brand)"
         verticalPadding="2x"
         onClick={() => choose(item)}
@@ -166,7 +166,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
   const renderGroup = (entries: { item: Item; index: number }[], title?: string) =>
     entries.length > 0 && (
       <div className="compact-search__group">
-        {title && <p className="ts-400-s compact-search__group-title">{title}</p>}
+        {title && <p className="ts-500-s compact-search__group-title">{title}</p>}
         {entries.map(({ item, index }) => renderItem(item, index))}
       </div>
     );
@@ -198,7 +198,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
                 expense={total.expense}
               />
             ) : (
-              <p className="ts-400-s compact-search__summary">Ничего не нашлось</p>
+              <p className="ts-500-s compact-search__summary">Ничего не нашлось</p>
             )}
             {renderGroup(
               items.flatMap((item, index) => (item.kind === 'complete' || item.kind === 'comment' ? [{ item, index }] : [])),

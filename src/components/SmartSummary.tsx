@@ -10,7 +10,7 @@ interface SmartTotalProps {
 
 /** Итог по найденному: «7 операций   + 312 300 ₽   – 777 000 ₽» (макет «Результаты поиска») */
 export const SmartTotal: React.FC<SmartTotalProps> = ({ count, income, expense, className = '' }) => (
-  <p className={['ts-400-s smart-total', className].filter(Boolean).join(' ')}>
+  <p className={['ts-500-s smart-total', className].filter(Boolean).join(' ')}>
     <span className="smart-total__count">
       {count} {plural(count, ['операция', 'операции', 'операций'])}
     </span>
