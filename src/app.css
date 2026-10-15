@@ -1151,3 +1151,58 @@ button {
   position: relative;
   display: block;
 }
+
+/* ---------- Полный таймлайн на главной (настройка прототипа) ---------- */
+
+/* «Фильтры» — чип с подписью, как в макете: без стрелки, направление и период внутри */
+.filters-menu .chip__caret {
+  display: none;
+}
+
+.filters-menu .chip__accessory--left {
+  --icon-size: var(--icon-size-18);
+}
+
+/* У активного чипа справа белый крестик — оставляем под него место */
+.chip-clearable .filters-menu .chip__label {
+  margin-right: var(--spacing-5x);
+}
+
+.filters-menu__section {
+  padding: var(--spacing-2x) var(--spacing-4x) var(--spacing-1x);
+  color: var(--primitive-secondary);
+}
+
+.history-card__before-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  padding-bottom: var(--spacing-4x);
+}
+
+.history-card__more {
+  padding: var(--spacing-4x) var(--spacing-5x) 0;
+}
+
+.history-card__more .button {
+  --button-width: 100%;
+}
+
+/* «Это — конец истории» — разделитель и текст по центру */
+.timeline-end {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-7-5x);
+  padding: var(--spacing-4x) var(--spacing-10x) var(--spacing-5x);
+}
+
+.timeline-end::before {
+  content: '';
+  height: 1px;
+  background: var(--translucent-primitives-neutral-2);
+}
+
+.timeline-end__text {
+  color: var(--primitive-secondary);
+  text-align: center;
+}

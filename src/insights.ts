@@ -15,6 +15,8 @@ export interface InsightSettings {
   vedChip: boolean;
   /** Рекомендация «Откладывайте на налоги 7%» внутри таймлайна */
   recommendation: boolean;
+  /** Главная с полноценным таймлайном (как в «Операциях») вместо компактного */
+  fullTimeline: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -22,6 +24,7 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   signChip: true,
   vedChip: false,
   recommendation: false,
+  fullTimeline: false,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

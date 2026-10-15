@@ -1,12 +1,12 @@
 import React from 'react';
-import { Avatar, Button, Chip, ContextualNotification, Search, TabsCarousel } from '@pluginwoman/t-ds';
+import { Avatar, Button, Chip, Search, TabsCarousel } from '@pluginwoman/t-ds';
 import { DotsThreeHorizontal, Plus } from '@pluginwoman/t-ds/icons';
-import { Payment, formatRub } from '../data';
+import { Payment } from '../data';
 import { CompactSearch } from './CompactSearch';
 import { PaymentRow } from './PaymentRow';
 import { historyQuickActions } from './PaymentHistory';
-import { LayerOnLayerRectangleVertical, ArrowRightUp, WarningTriangle, WarningCircle } from '@pluginwoman/t-ds/icons/20/Stroked';
-import { InsightSettings, NOTICE_INFO } from '../insights';
+import { InsightSettings } from '../insights';
+import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './InsightBanners';
 
 type Direction = 'all' | 'in' | 'out';
 
@@ -15,13 +15,6 @@ const DIRECTIONS: { value: Direction; label: string }[] = [
   { value: 'in', label: 'Входящие' },
   { value: 'out', label: 'Исходящие' },
 ];
-
-const NOTICE_ICON = {
-  brand: <LayerOnLayerRectangleVertical />,
-  success: <ArrowRightUp />,
-  warning: <WarningTriangle />,
-  error: <WarningCircle />,
-};
 
 const ACCOUNTS = [
   { name: 'Расчётный, **6584', balance: '23 422 785,37 ₽' },
@@ -43,9 +36,11 @@ interface MainPageProps {
   onOpenOperations: (tab: 'all' | 'sign', query?: string) => void;
   /** Какая нотификация и рекомендация показываются — из настроек прототипа */
   insights: InsightSettings;
+  /** Полный таймлайн (настройка прототипа) — заменяет компактную историю */
+  timeline?: React.ReactNode;
 }
 
-/** Экран «Компактный таймлайн»: выжимка последних операций, инсайды и поиск */
+/** Главная: «Компактный таймлайн» (выжимка, инсайды, поиск) или полный таймлайн — по настройке */
 export const MainPage: React.FC<MainPageProps> = ({
   payments,
   comments,
@@ -56,21 +51,12 @@ export const MainPage: React.FC<MainPageProps> = ({
   onComment,
   onOpenOperations,
   insights,
+  timeline,
 }) => {
-  const [isRecommendationHidden, setIsRecommendationHidden] = React.useState(false);
-  // Если рекомендацию снова включили в настройках — показываем, даже если её скрывали
-  React.useEffect(() => {
-    if (insights.recommendation) setIsRecommendationHidden(false);
-  }, [insights.recommendation]);
-
   const vedPayments = payments.filter((p) => p.status === 'docs');
 
   // Быстрый фильтр по направлению — фильтрует список прямо на главной
   const [direction, setDirection] = React.useState<Direction>('all');
-
-  // Нотификация — одна за раз; крестик скрывает её, пока не выберут другую
-  const [dismissedNotice, setDismissedNotice] = React.useState<string>();
-  const notice = insights.notice !== 'off' && insights.notice !== dismissedNotice ? NOTICE_INFO[insights.notice] : undefined;
 
   const [globalQuery, setGlobalQuery] = React.useState('');
   const latest = payments
@@ -128,110 +114,59 @@ export const MainPage: React.FC<MainPageProps> = ({
         </div>
       </section>
 
-      <section className="main-page__section">
-        <h2 className="ts-600-2xl main-page__title">История операций</h2>
+      {timeline ? (
+        <section className="main-page__section main-page__timeline">{timeline}</section>
+      ) : (
+        <section className="main-page__section">
+          <h2 className="ts-600-2xl main-page__title">История операций</h2>
 
-        <div className="compact-timeline">
-          <div className="compact-timeline__filters">
-            <div className="compact-timeline__chips">
-              {DIRECTIONS.map((item) => (
-                <Chip
-                  key={item.value}
-                  variant="tab"
-                  isSelected={direction === item.value}
-                  onClick={() => setDirection(item.value)}
-                >
-                  {item.label}
-                </Chip>
-              ))}
-              {/* «На подпись» по-прежнему уводит во вкладку «Операций» */}
-              {insights.signChip && signCount > 0 && (
-                <Chip
-                  variant="tab"
-                  leftAccessory="icon"
-                  leftIcon={<span className="insight__dot" />}
-                  className="compact-timeline__sign-chip"
-                  onClick={() => onOpenOperations('sign')}
-                >
-                  {signCount} на подпись · {formatRub(signSum)}
-                </Chip>
-              )}
-              {/* ВЭД: валютные поступления ждут документов для валютного контроля */}
-              {insights.vedChip && vedPayments.length > 0 && (
-                <Chip
-                  variant="tab"
-                  leftAccessory="icon"
-                  leftIcon={<span className="insight__dot" />}
-                  className="compact-timeline__sign-chip"
-                  onClick={() => onOpenOperations('all', vedPayments[0].counterparty)}
-                >
-                  {vedPayments.length} {vedPayments.length === 1 ? 'ждёт' : 'ждут'} документы · ВЭД
-                </Chip>
-              )}
-            </div>
-            <CompactSearch
-              payments={payments}
-              comments={comments}
-              onOpenPayment={onOpenPayment}
-              onShowAll={(query) => onOpenOperations('all', query)}
-            />
-          </div>
-
-          {notice && (
-            // Клик по нотификации ведёт решать инсайд — переход пока не подключён
-            <div
-              role="button"
-              tabIndex={0}
-              className="insight-notice__action"
-              aria-label={`${notice.title} ${notice.text}`}
-            >
-            <ContextualNotification
-              className={`insight-notice insight-notice--${notice.tone}`}
-              hasTitle={false}
-              accessory="icon"
-              icon={NOTICE_ICON[notice.tone]}
-              text={
-                <>
-                  <span className="ts-500-s">{notice.title}</span> {notice.text}
-                </>
-              }
-              onClose={() => setDismissedNotice(insights.notice)}
-            />
-            </div>
-          )}
-
-          <div className="compact-timeline__list">
-            {latest.slice(0, 1).map(row)}
-
-            {insights.recommendation && !isRecommendationHidden && (
-              <div className="timeline-banner">
-                <span className="ts-500-s timeline-banner__label">Рекомендация</span>
-                <div className="timeline-banner__content">
-                  <p className="ts-400-s">
-                    Откладывайте на налоги 7% поступлений, чтобы не искать деньги в последний момент. Готовы
-                    отложить 37 500 ₽?
-                  </p>
-                  <div className="timeline-banner__buttons">
-                    <Button variant="secondary" size="xs" isHugWidth className="timeline-banner__brand-button">
-                      Отложить в фонд
-                    </Button>
-                    <Button variant="secondary" size="xs" isHugWidth onClick={() => setIsRecommendationHidden(true)}>
-                      Скрыть
-                    </Button>
-                  </div>
-                </div>
+          <div className="compact-timeline">
+            <div className="compact-timeline__filters">
+              <div className="compact-timeline__chips">
+                {DIRECTIONS.map((item) => (
+                  <Chip
+                    key={item.value}
+                    variant="tab"
+                    isSelected={direction === item.value}
+                    onClick={() => setDirection(item.value)}
+                  >
+                    {item.label}
+                  </Chip>
+                ))}
+                <TaskChips
+                  insights={insights}
+                  signCount={signCount}
+                  signSum={signSum}
+                  vedPayments={vedPayments}
+                  onOpenSign={() => onOpenOperations('sign')}
+                  onOpenVed={(payment) => onOpenOperations('all', payment.counterparty)}
+                />
               </div>
-            )}
+              <CompactSearch
+                payments={payments}
+                comments={comments}
+                onOpenPayment={onOpenPayment}
+                onShowAll={(query) => onOpenOperations('all', query)}
+              />
+            </div>
 
-            {latest.slice(1).map(row)}
-            {latest.length === 0 && <p className="ts-400-m history-card__empty">Операций пока нет</p>}
+            <InsightNoticeBanner insights={insights} />
+
+            <div className="compact-timeline__list">
+              {latest.slice(0, 1).map(row)}
+
+              <RecommendationBanner insights={insights} />
+
+              {latest.slice(1).map(row)}
+              {latest.length === 0 && <p className="ts-400-m history-card__empty">Операций пока нет</p>}
+            </div>
+
+            <Button variant="secondary" size="s" className="compact-timeline__all" onClick={() => onOpenOperations('all')}>
+              Все операции
+            </Button>
           </div>
-
-          <Button variant="secondary" size="s" className="compact-timeline__all" onClick={() => onOpenOperations('all')}>
-            Все операции
-          </Button>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 };

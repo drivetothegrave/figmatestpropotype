@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, Checkbox, Chip, IconButton } from '@pluginwoman/t-ds';
+import { Button, Cell, Checkbox, Chip, IconButton } from '@pluginwoman/t-ds';
 import {
   ArrowDownUnderline,
   ArrowReturnRight,
@@ -73,7 +73,19 @@ interface PaymentHistoryProps {
   /** Вид списка общий для вкладок «Операций» */
   isCompactView: boolean;
   onViewChange: (isCompact: boolean) => void;
+  /**
+   * «combined» — полный таймлайн на главной (макет «Совмещённый таймлайн»):
+   * направление и период переезжают в чип «Фильтры», дни подгружаются кнопкой «Показать ещё».
+   */
+  layout?: 'default' | 'combined';
+  /** Над списком: инсайд-нотификация, рекомендация */
+  beforeList?: React.ReactNode;
+  /** Чипы-задачи (на подпись, ВЭД) — рядом с «Выбрать» */
+  extraChips?: React.ReactNode;
 }
+
+/** Сколько дней показываем сразу и догружаем кнопкой в полном таймлайне на главной */
+const DAYS_PAGE = 4;
 
 /** Итоги дня: поступления и списания */
 export const DayTotals: React.FC<{ payments: Payment[] }> = ({ payments: all }) => {
@@ -101,7 +113,11 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   onBulkComment,
   isCompactView,
   onViewChange,
+  layout = 'default',
+  beforeList,
+  extraChips,
 }) => {
+  const isCombined = layout === 'combined';
   const [isSelecting, setIsSelecting] = React.useState(false);
   const [checked, setChecked] = React.useState<Set<string>>(new Set());
 
@@ -115,6 +131,12 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   const visibleDays = filterDays<PaymentDay, Payment>(days, (payment) =>
     filterMatches(payment, comments[payment.id], effective, parsed.text),
   );
+
+  // Полный таймлайн на главной показывает дни порциями; новый запрос — снова с первой порции
+  const [shownDays, setShownDays] = React.useState(DAYS_PAGE);
+  React.useEffect(() => setShownDays(DAYS_PAGE), [query, filters]);
+  const pageDays = isCombined ? visibleDays.slice(0, shownDays) : visibleDays;
+  const hasMore = pageDays.length < visibleDays.length;
 
   /** Убрать из поля распознанные фрагменты нужных видов — фильтр теперь задаёт чип */
   const stripTyped = (kinds: QueryToken['kind'][]) =>
@@ -141,6 +163,16 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   };
 
   const extra = extraFilters(effective);
+  // В полном таймлайне все фильтры живут в одном чипе «Фильтры»
+  const activeFilters = [
+    DIRECTIONS.find((d) => d.value && d.value === effective.direction)?.label,
+    effective.period?.label,
+    ...extra,
+  ].filter(Boolean) as string[];
+  const clearAll = () => {
+    onFiltersChange({});
+    onQueryChange(stripTyped(['direction', 'period', 'amount', 'status', 'currency', 'counterparty']));
+  };
 
   /** Активный фильтр в выпадашке: стрелку заменяет белый крестик, как у кнопки фильтров */
   const clearable = (chip: React.ReactNode, isActive: boolean, onClear: () => void, label: string) =>
@@ -154,6 +186,17 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
     ) : (
       chip
     );
+  /** Пункт меню «Фильтры»: выбранный — фиолетовым */
+  const menuItem = (label: string, isActive: boolean, onClick: () => void) => (
+    <Cell
+      key={label}
+      title={label}
+      titleClassName={isActive ? 'ts-500-m' : 'ts-400-m'}
+      titleColor={isActive ? 'var(--primitive-brand)' : undefined}
+      verticalPadding="2x"
+      onClick={onClick}
+    />
+  );
   const directionLabel = DIRECTIONS.find((d) => d.value === effective.direction)?.label ?? 'Все операции';
   const foundCount = visibleDays.reduce((acc, day) => acc + day.payments.length, 0);
   const visible = visibleDays.flatMap((day) => day.payments);
@@ -183,7 +226,36 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   return (
     <div className={['history-card', isSelecting && selected.length > 0 ? 'history-card--with-bar' : ''].join(' ')}>
       <div className="history-card__filters">
-        {extra.length > 0 ? (
+        {isCombined ? (
+          <span title={activeFilters.join(' · ') || undefined}>
+            {clearable(
+              <Chip
+                variant="dropdown"
+                className="filters-menu"
+                isSelected={activeFilters.length > 0}
+                leftAccessory="icon"
+                leftIcon={<Filters />}
+                popupContent={
+                  <>
+                    <p className="ts-500-s filters-menu__section">Операции</p>
+                    {DIRECTIONS.map((d) => menuItem(d.label, effective.direction === d.value, () => setDirection(d.value)))}
+                    <p className="ts-500-s filters-menu__section">Период</p>
+                    {[{ label: 'За всё время' }, ...periodOptions()].map((p) =>
+                      menuItem(p.label, (effective.period?.label ?? 'За всё время') === p.label, () =>
+                        setPeriod('from' in p ? (p as FilterState['period']) : undefined),
+                      ),
+                    )}
+                  </>
+                }
+              >
+                {activeFilters.length > 0 ? `Фильтры · ${activeFilters.length}` : 'Фильтры'}
+              </Chip>,
+              activeFilters.length > 0,
+              clearAll,
+              'все фильтры',
+            )}
+          </span>
+        ) : extra.length > 0 ? (
           // Фильтры без своего чипа — счётчик в кнопке фильтров, крестик сбрасывает
           <span title={extra.join(' · ')}>
             <Chip
@@ -207,42 +279,47 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
           suggestions={commentTexts}
           completions={query.trim() ? completions(query, parsed, counterparties) : []}
         />
-        {clearable(
-          <Chip
-            variant="dropdown"
-            isSelected={Boolean(effective.direction)}
-            value={directionLabel}
-            popupContent={DIRECTIONS.map((d) => (
-              <Cell key={d.label} title={d.label} verticalPadding="2x" onClick={() => setDirection(d.value)} />
-            ))}
-          >
-            {directionLabel}
-          </Chip>,
-          Boolean(effective.direction),
-          () => setDirection(undefined),
-          directionLabel,
+        {!isCombined && (
+          <>
+            {clearable(
+              <Chip
+                variant="dropdown"
+                isSelected={Boolean(effective.direction)}
+                value={directionLabel}
+                popupContent={DIRECTIONS.map((d) => (
+                  <Cell key={d.label} title={d.label} verticalPadding="2x" onClick={() => setDirection(d.value)} />
+                ))}
+              >
+                {directionLabel}
+              </Chip>,
+              Boolean(effective.direction),
+              () => setDirection(undefined),
+              directionLabel,
+            )}
+            {clearable(
+            <Chip
+              variant="dropdown"
+              isSelected={Boolean(effective.period)}
+              value={effective.period?.label ?? 'За всё время'}
+              popupContent={[{ label: 'За всё время' }, ...periodOptions()].map((p) => (
+                <Cell
+                  key={p.label}
+                  title={p.label}
+                  verticalPadding="2x"
+                  onClick={() => setPeriod('from' in p ? (p as FilterState['period']) : undefined)}
+                />
+              ))}
+            >
+              {effective.period?.label ?? 'За всё время'}
+            </Chip>,
+              Boolean(effective.period),
+              () => setPeriod(undefined),
+              effective.period?.label ?? '',
+            )}
+            <Chip variant="dropdown">Категория</Chip>
+          </>
         )}
-        {clearable(
-        <Chip
-          variant="dropdown"
-          isSelected={Boolean(effective.period)}
-          value={effective.period?.label ?? 'За всё время'}
-          popupContent={[{ label: 'За всё время' }, ...periodOptions()].map((p) => (
-            <Cell
-              key={p.label}
-              title={p.label}
-              verticalPadding="2x"
-              onClick={() => setPeriod('from' in p ? (p as FilterState['period']) : undefined)}
-            />
-          ))}
-        >
-          {effective.period?.label ?? 'За всё время'}
-        </Chip>,
-          Boolean(effective.period),
-          () => setPeriod(undefined),
-          effective.period?.label ?? '',
-        )}
-        <Chip variant="dropdown">Категория</Chip>
+        {extraChips}
         {/* Режим выделения — чип в панели фильтров, без отдельной строки */}
         <Chip
           variant="chip"
@@ -255,7 +332,9 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         <ViewToggle isCompact={isCompactView} onChange={onViewChange} />
       </div>
 
-      {visibleDays.map((day) => {
+      {beforeList && <div className="history-card__before-list">{beforeList}</div>}
+
+      {pageDays.map((day) => {
         const dayIds = day.payments.map((p) => p.id);
         const dayChecked = dayIds.filter((id) => checked.has(id)).length;
         return (
@@ -298,6 +377,23 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
       )}
 
       {visibleDays.length === 0 && <p className="ts-400-m history-card__empty">Ничего не нашлось</p>}
+
+      {isCombined && hasMore && (
+        <div className="history-card__more">
+          <Button variant="secondary" size="s" onClick={() => setShownDays((n) => n + DAYS_PAGE)}>
+            Показать ещё
+          </Button>
+        </div>
+      )}
+      {isCombined && !hasMore && visibleDays.length > 0 && (
+        <div className="timeline-end">
+          <p className="ts-400-s timeline-end__text">
+            Это — конец истории.
+            <br />
+            Других событий не было.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
+import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
 import { FilterState, parseQuery, toFilterState } from './smartQuery';
 import {
@@ -70,6 +71,7 @@ export const App: React.FC = () => {
       signChip: saved.signChip ?? DEFAULT_INSIGHTS.signChip,
       vedChip: saved.vedChip ?? DEFAULT_INSIGHTS.vedChip,
       recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
+      fullTimeline: saved.fullTimeline ?? DEFAULT_INSIGHTS.fullTimeline,
     };
   });
   const updateInsights = (next: InsightSettings) => {
@@ -114,6 +116,11 @@ export const App: React.FC = () => {
     const parsed = parseQuery(query, allPayments.map((p) => p.counterparty));
     setOperationsFilters(toFilterState(parsed));
     setOperationsQuery(parsed.text);
+    if (insights.fullTimeline && page === 'main') {
+      // Полный таймлайн на главной — остаёмся здесь и прокручиваем к нему
+      document.querySelector('.main-page__timeline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     setPage('operations');
     window.scrollTo({ top: 0 });
   };
@@ -198,6 +205,66 @@ export const App: React.FC = () => {
     setSuccessMessage(undefined);
   };
 
+  const vedPayments = allPayments.filter((p) => p.status === 'docs');
+
+  // Список «Все операции» и «На подпись» — общий для «Операций» и полного таймлайна на главной
+  const renderOperations = (isOnMain: boolean) => (
+    <OperationsPage
+      tab={operationsTab}
+      onTabChange={setOperationsTab}
+      signCount={signCount}
+      risk={riskOf(insights.notice)}
+      history={
+        <PaymentHistory
+          days={days}
+          comments={comments}
+          query={operationsQuery}
+          onQueryChange={setOperationsQuery}
+          filters={operationsFilters}
+          onFiltersChange={setOperationsFilters}
+          selectedId={isDrawerOpen ? paymentId : undefined}
+          onSelect={openPayment}
+          onComment={openComment}
+          onBulkComment={openBulkComment}
+          isCompactView={isCompactView}
+          onViewChange={setIsCompactView}
+          {...(isOnMain && {
+            layout: 'combined' as const,
+            beforeList: (
+              <>
+                <InsightNoticeBanner insights={insights} />
+                <RecommendationBanner insights={insights} />
+              </>
+            ),
+            extraChips: (
+              <TaskChips
+                insights={insights}
+                signCount={signCount}
+                signSum={signSum}
+                vedPayments={vedPayments}
+                onOpenSign={() => setOperationsTab('sign')}
+                onOpenVed={(p) => setOperationsQuery(p.counterparty)}
+              />
+            ),
+          })}
+        />
+      }
+      signList={
+        <SignList
+          days={signDays}
+          comments={comments}
+          selectedId={isDrawerOpen ? paymentId : undefined}
+          successMessage={successMessage}
+          onSelect={openPayment}
+          onComment={openComment}
+          onSign={setSignRequest}
+          isCompactView={isCompactView}
+          onViewChange={setIsCompactView}
+        />
+      }
+    />
+  );
+
   return (
     <div className="app">
       <AppNavigationBar page={page} onNavigate={navigate} />
@@ -222,47 +289,12 @@ export const App: React.FC = () => {
               onComment={openComment}
               onOpenOperations={openOperations}
               insights={insights}
+              timeline={insights.fullTimeline ? renderOperations(true) : undefined}
             />
           </main>
         </div>
       ) : (
-        <main className="app__operations">
-          <OperationsPage
-            tab={operationsTab}
-            onTabChange={setOperationsTab}
-            signCount={signCount}
-            risk={riskOf(insights.notice)}
-            history={
-              <PaymentHistory
-                days={days}
-                comments={comments}
-                query={operationsQuery}
-                onQueryChange={setOperationsQuery}
-                filters={operationsFilters}
-                onFiltersChange={setOperationsFilters}
-                selectedId={isDrawerOpen ? paymentId : undefined}
-                onSelect={openPayment}
-                onComment={openComment}
-                onBulkComment={openBulkComment}
-                isCompactView={isCompactView}
-                onViewChange={setIsCompactView}
-              />
-            }
-            signList={
-              <SignList
-                days={signDays}
-                comments={comments}
-                selectedId={isDrawerOpen ? paymentId : undefined}
-                successMessage={successMessage}
-                onSelect={openPayment}
-                onComment={openComment}
-                onSign={setSignRequest}
-                isCompactView={isCompactView}
-                onViewChange={setIsCompactView}
-              />
-            }
-          />
-        </main>
+        <main className="app__operations">{renderOperations(false)}</main>
       )}
 
       <PaymentDrawer
