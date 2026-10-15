@@ -205,6 +205,11 @@ export const App: React.FC = () => {
     setSuccessMessage(undefined);
   };
 
+  // Полный таймлайн включили, стоя на «Операциях», — пункта в шапке больше нет, возвращаемся на главную
+  React.useEffect(() => {
+    if (insights.fullTimeline && page === 'operations') setPage('main');
+  }, [insights.fullTimeline, page]);
+
   const vedPayments = allPayments.filter((p) => p.status === 'docs');
 
   // Список «Все операции» и «На подпись» — общий для «Операций» и полного таймлайна на главной
@@ -267,7 +272,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="app">
-      <AppNavigationBar page={page} onNavigate={navigate} />
+      <AppNavigationBar page={page} onNavigate={navigate} hasOperations={!insights.fullTimeline} />
 
       {successMessage && (
         <Alert key={successMessage} type="success" onHide={() => setSuccessMessage(undefined)}>

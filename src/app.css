@@ -44,9 +44,16 @@ button {
 
 /* ---------- Левая колонка ---------- */
 
-.left-bar {
+/* Шапка банка залипает при скролле */
+.app-nav {
   position: sticky;
   top: 0;
+  z-index: 100;
+}
+
+.left-bar {
+  position: sticky;
+  top: var(--app-nav-height, 0px);
   flex: 0 0 calc(var(--spacing-40x) * 2);
   display: flex;
   flex-direction: column;
@@ -1153,25 +1160,6 @@ button {
 }
 
 /* ---------- Полный таймлайн на главной (настройка прототипа) ---------- */
-
-/* «Фильтры» — чип с подписью, как в макете: без стрелки, направление и период внутри */
-.filters-menu .chip__caret {
-  display: none;
-}
-
-.filters-menu .chip__accessory--left {
-  --icon-size: var(--icon-size-18);
-}
-
-/* У активного чипа справа белый крестик — оставляем под него место */
-.chip-clearable .filters-menu .chip__label {
-  margin-right: var(--spacing-5x);
-}
-
-.filters-menu__section {
-  padding: var(--spacing-2x) var(--spacing-4x) var(--spacing-1x);
-  color: var(--primitive-secondary);
-}
 
 .history-card__before-list {
   display: flex;

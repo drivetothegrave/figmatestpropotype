@@ -25,6 +25,7 @@ import {
 } from '../smartQuery';
 import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
+import { CompactSearch } from './CompactSearch';
 import { PaymentTableRow } from './PaymentTableRow';
 import { SelectionBar } from './SelectionBar';
 import { ViewToggle } from './ViewToggle';
@@ -142,6 +143,21 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   const stripTyped = (kinds: QueryToken['kind'][]) =>
     parsed.tokens.filter((t) => kinds.includes(t.kind)).reduce((q, t) => removeToken(q, t), query);
 
+  // Полный таймлайн: в поле — черновик запроса, в список он попадает только после применения
+  const [draft, setDraft] = React.useState(query);
+  React.useEffect(() => setDraft(query), [query]);
+  const applyDraft = (text: string) => {
+    const next = parseQuery(text.trim(), counterparties);
+    onFiltersChange(mergeFilters(filters, toFilterState(next)));
+    onQueryChange(next.text);
+    setDraft(next.text);
+  };
+  const changeDraft = (text: string) => {
+    setDraft(text);
+    // Поле очистили — сбрасываем и применённый текст, иначе список останется отфильтрованным
+    if (!text.trim() && query) onQueryChange('');
+  };
+
   const commit = () => {
     onFiltersChange(effective);
     onQueryChange(parsed.text);
@@ -187,17 +203,6 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
     ) : (
       chip
     );
-  /** Пункт меню «Фильтры»: выбранный — фиолетовым */
-  const menuItem = (label: string, isActive: boolean, onClick: () => void) => (
-    <Cell
-      key={label}
-      title={label}
-      titleClassName={isActive ? 'ts-500-m' : 'ts-400-m'}
-      titleColor={isActive ? 'var(--primitive-brand)' : undefined}
-      verticalPadding="2x"
-      onClick={onClick}
-    />
-  );
   const directionLabel = DIRECTIONS.find((d) => d.value === effective.direction)?.label ?? 'Все операции';
   const foundCount = visibleDays.reduce((acc, day) => acc + day.payments.length, 0);
   const visible = visibleDays.flatMap((day) => day.payments);
@@ -228,32 +233,23 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
     <div className={['history-card', isSelecting && selected.length > 0 ? 'history-card--with-bar' : ''].join(' ')}>
       <div className="history-card__filters">
         {isCombined ? (
+          // «Фильтры» откроют отдельный дровер (будет в макете); активные — счётчик и крестик сброса
           <span title={activeFilters.join(' · ') || undefined}>
-            {clearable(
+            {activeFilters.length > 0 ? (
               <Chip
-                variant="dropdown"
-                className="filters-menu"
-                isSelected={activeFilters.length > 0}
+                variant="action"
+                isSelected
                 leftAccessory="icon"
                 leftIcon={<Filters />}
-                popupContent={
-                  <>
-                    <p className="ts-500-s filters-menu__section">Операции</p>
-                    {DIRECTIONS.map((d) => menuItem(d.label, filters.direction === d.value, () => setDirection(d.value)))}
-                    <p className="ts-500-s filters-menu__section">Период</p>
-                    {[{ label: 'За всё время' }, ...periodOptions()].map((p) =>
-                      menuItem(p.label, (filters.period?.label ?? 'За всё время') === p.label, () =>
-                        setPeriod('from' in p ? (p as FilterState['period']) : undefined),
-                      ),
-                    )}
-                  </>
-                }
+                onClose={clearAll}
+                className="filters-chip"
               >
-                {activeFilters.length > 0 ? `Фильтры · ${activeFilters.length}` : 'Фильтры'}
-              </Chip>,
-              activeFilters.length > 0,
-              clearAll,
-              'все фильтры',
+                Фильтры · {activeFilters.length}
+              </Chip>
+            ) : (
+              <Chip variant="tab" leftAccessory="icon" leftIcon={<Filters />} className="filters-chip">
+                Фильтры
+              </Chip>
             )}
           </span>
         ) : extra.length > 0 ? (
@@ -273,13 +269,26 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
         ) : (
           <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
         )}
-        <SearchWithSuggest
-          value={query}
-          onChange={onQueryChange}
-          onSubmit={commit}
-          suggestions={commentTexts}
-          completions={query.trim() ? completions(query, parsed, counterparties) : []}
-        />
+        {isCombined ? (
+          // Как в компактном таймлайне: итог, варианты запроса и превью операций в выпадашке;
+          // список меняется только когда запрос применили — Enter или «Все результаты»
+          <CompactSearch
+            payments={days.flatMap((day) => day.payments).filter((p) => filterMatches(p, comments[p.id], filters, ''))}
+            comments={comments}
+            query={draft}
+            onQueryChange={changeDraft}
+            onOpenPayment={onSelect}
+            onShowAll={applyDraft}
+          />
+        ) : (
+          <SearchWithSuggest
+            value={query}
+            onChange={onQueryChange}
+            onSubmit={commit}
+            suggestions={commentTexts}
+            completions={query.trim() ? completions(query, parsed, counterparties) : []}
+          />
+        )}
         {!isCombined && (
           <>
             {clearable(

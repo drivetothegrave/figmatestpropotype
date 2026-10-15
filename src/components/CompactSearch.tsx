@@ -14,6 +14,10 @@ interface CompactSearchProps {
   onOpenPayment: (payment: Payment) => void;
   /** Перейти в «Операции» с этим запросом — полный результат */
   onShowAll: (query: string) => void;
+  /** Запрос снаружи — в полном таймлайне поле должно знать, что применилось и что сбросили */
+  query?: string;
+  onQueryChange?: (query: string) => void;
+  className?: string;
 }
 
 const PREVIEW_LIMIT = 3;
@@ -29,8 +33,18 @@ type Item =
  * В выпадашке: подсказки из комментариев, 3 найденные операции и «Показать все результаты (N)».
  * Enter, «Показать все» или выбор комментария — переход в «Операции» с этим запросом.
  */
-export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments, onOpenPayment, onShowAll }) => {
-  const [query, setQuery] = React.useState('');
+export const CompactSearch: React.FC<CompactSearchProps> = ({
+  payments,
+  comments,
+  onOpenPayment,
+  onShowAll,
+  query: controlledQuery,
+  onQueryChange,
+  className = '',
+}) => {
+  const [ownQuery, setOwnQuery] = React.useState('');
+  const query = controlledQuery ?? ownQuery;
+  const setQuery = (next: string) => (onQueryChange ? onQueryChange(next) : setOwnQuery(next));
   const [isFocused, setIsFocused] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(-1);
   const [position, setPosition] = React.useState<{ top: number; left: number; width: number }>();
@@ -92,6 +106,8 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
     } else {
       onShowAll(q);
     }
+    // Результат применён — закрываем выпадашку
+    (document.activeElement as HTMLElement | null)?.blur();
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -106,7 +122,10 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
       e.preventDefault();
       // Enter без выбора — сразу полный результат в «Операциях»
       if (activeIndex >= 0) choose(items[activeIndex]);
-      else onShowAll(q);
+      else {
+        onShowAll(q);
+        (document.activeElement as HTMLElement | null)?.blur();
+      }
     } else if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();
@@ -179,7 +198,7 @@ export const CompactSearch: React.FC<CompactSearchProps> = ({ payments, comments
   return (
     <div
       ref={ref}
-      className="history-card__search compact-search"
+      className={['history-card__search compact-search', className].filter(Boolean).join(' ')}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       onKeyDown={onKeyDown}

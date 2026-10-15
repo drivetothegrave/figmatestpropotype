@@ -7,6 +7,8 @@ export type AppPage = 'main' | 'operations';
 interface AppNavigationBarProps {
   page: AppPage;
   onNavigate: (page: AppPage) => void;
+  /** Когда полный таймлайн живёт на главной, отдельный пункт «Операции» не нужен */
+  hasOperations?: boolean;
 }
 
 /**
@@ -14,7 +16,7 @@ interface AppNavigationBarProps {
  * В MainPageNavigationBar пункты зашиты, поэтому «Операции» и «Знания» добавляем
  * теми же SCINavigationButton через портал в его <nav> — исходники дизайн-системы не трогаем.
  */
-export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavigate }) => {
+export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavigate, hasOperations = true }) => {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [slots, setSlots] = React.useState<{ operations: HTMLElement; knowledge: HTMLElement }>();
 
@@ -35,8 +37,19 @@ export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavi
     };
   }, []);
 
+  // Шапка залипает при скролле — высоту отдаём в CSS, чтобы левая колонка залипала под ней
+  React.useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const observer = new ResizeObserver(() =>
+      document.documentElement.style.setProperty('--app-nav-height', `${root.offsetHeight}px`),
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div ref={rootRef}>
+    <div ref={rootRef} className="app-nav">
       <MainPageNavigationBar
         activeNavItem={page === 'main' ? 'main' : undefined}
         customer="Носковец О.Н., ИП"
@@ -44,6 +57,7 @@ export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavi
         onNavMainClick={() => onNavigate('main')}
       />
       {slots &&
+        hasOperations &&
         ReactDOM.createPortal(
           <SCINavigationButton
             label="Операции"
