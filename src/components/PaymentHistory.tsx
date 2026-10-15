@@ -163,11 +163,12 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   };
 
   const extra = extraFilters(effective);
-  // В полном таймлайне все фильтры живут в одном чипе «Фильтры»
+  // В полном таймлайне все фильтры живут в одном чипе «Фильтры».
+  // Чип показывает только применённое (по Enter или из меню), а не то, что ещё набирается в поле
   const activeFilters = [
-    DIRECTIONS.find((d) => d.value && d.value === effective.direction)?.label,
-    effective.period?.label,
-    ...extra,
+    DIRECTIONS.find((d) => d.value && d.value === filters.direction)?.label,
+    filters.period?.label,
+    ...extraFilters(filters),
   ].filter(Boolean) as string[];
   const clearAll = () => {
     onFiltersChange({});
@@ -238,10 +239,10 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
                 popupContent={
                   <>
                     <p className="ts-500-s filters-menu__section">Операции</p>
-                    {DIRECTIONS.map((d) => menuItem(d.label, effective.direction === d.value, () => setDirection(d.value)))}
+                    {DIRECTIONS.map((d) => menuItem(d.label, filters.direction === d.value, () => setDirection(d.value)))}
                     <p className="ts-500-s filters-menu__section">Период</p>
                     {[{ label: 'За всё время' }, ...periodOptions()].map((p) =>
-                      menuItem(p.label, (effective.period?.label ?? 'За всё время') === p.label, () =>
+                      menuItem(p.label, (filters.period?.label ?? 'За всё время') === p.label, () =>
                         setPeriod('from' in p ? (p as FilterState['period']) : undefined),
                       ),
                     )}

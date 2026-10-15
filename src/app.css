@@ -1206,3 +1206,9 @@ button {
   color: var(--primitive-secondary);
   text-align: center;
 }
+
+/* На главной блок «Операций» всегда во всю ширину колонки — не сжимается по контенту вкладки */
+.main-page__timeline .operations-page {
+  width: 100%;
+  margin: 0;
+}
