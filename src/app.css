@@ -1320,7 +1320,6 @@ button {
   border: 0;
   background: transparent;
   color: var(--primitive-brand);
-  font: inherit;
   text-align: left;
   cursor: pointer;
 }
