@@ -96,9 +96,9 @@ const LIST_TABS: {
     title: 'Фонды',
     link: 'Все фонды · 5',
     items: [
-      { title: 'На налоги', subtitle: 'Откладывает 6% с поступлений', amount: '312 400,00 ₽', logo: fundLogo },
-      { title: 'Зарплата', subtitle: 'Пополнение 5-го числа', amount: '280 000,00 ₽', logo: fundLogo },
-      { title: 'Резерв', subtitle: 'Цель — 500 000 ₽', amount: '130 385,37 ₽', logo: fundLogo },
+      { title: 'На налоги', subtitle: '6% с поступлений', amount: '312 400,00 ₽', logo: fundLogo },
+      { title: 'Зарплата', subtitle: 'Пополнение 5-го', amount: '280 000,00 ₽', logo: fundLogo },
+      { title: 'Резерв', subtitle: 'Цель 500 000 ₽', amount: '130 385,37 ₽', logo: fundLogo },
     ],
   },
   {
@@ -106,8 +106,8 @@ const LIST_TABS: {
     title: 'Депозиты',
     link: 'Все депозиты · 2',
     items: [
-      { title: 'На 6 месяцев', subtitle: '16% годовых · до 12 марта', amount: '500 000,00 ₽', logo: depositLogo },
-      { title: 'На год', subtitle: '15% годовых · до 3 октября', amount: '842 785,37 ₽', logo: depositLogo },
+      { title: 'На 6 месяцев', subtitle: '16% · до 12 марта', amount: '500 000,00 ₽', logo: depositLogo },
+      { title: 'На год', subtitle: '15% · до 3 октября', amount: '842 785,37 ₽', logo: depositLogo },
     ],
   },
 ];

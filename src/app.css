@@ -2268,3 +2268,15 @@ button {
 .finance-widget__list--detailed {
   gap: var(--spacing-4x);
 }
+
+/* У ячейки t-ds с подписью правая часть 42px — строка счёта по макету 38px (название + подпись) */
+.finance-widget__list--detailed .ds-cell__right-accessory {
+  height: auto;
+  align-self: center;
+}
+
+.finance-widget__list--detailed .ds-cell__description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
