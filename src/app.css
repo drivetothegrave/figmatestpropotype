@@ -1588,9 +1588,16 @@ button {
 }
 
 /* Колонка 900 уже прежних 1024 — карточка выручки сжимается за счёт графика */
+/* Карточка выручки по макету: 105px, отступы 20/30, 40 до графика */
 .app-v2 .analytics-card--revenue {
   min-width: 0;
+  height: calc(var(--spacing-24x) + var(--spacing-2x) + 1px);
+  padding: var(--spacing-5x) var(--spacing-7-5x);
   gap: var(--spacing-10x);
+}
+
+.app-v2 .analytics-stat .ts-600-m {
+  font-weight: 500;
 }
 
 .app-v2 .bar-graph {
@@ -2036,12 +2043,13 @@ button {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--spacing-1-5x);
+  gap: var(--spacing-2x);
   min-width: 0;
 }
 
+/* 43px, как в макете */
 .analytics-chart .finance-widget__chart {
-  height: calc(var(--spacing-12x) + var(--spacing-2-5x));
+  height: calc(var(--spacing-10x) + var(--spacing-0-5x) + 1px);
 }
 
 .analytics-chart__axis {

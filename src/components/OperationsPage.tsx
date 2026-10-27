@@ -9,15 +9,9 @@ export type OperationsTab = 'all' | 'sign' | 'drafts';
 
 const TAB_ORDER: OperationsTab[] = ['all', 'sign', 'drafts'];
 
-// «Выручка по месяцам» — доля от максимума шкалы (2,5 млн)
-const REVENUE_SCALE = 2_500_000;
-const REVENUE_BARS = [
-  { month: 'Май', short: 'Май', value: 0.2 },
-  { month: 'Июнь', short: 'Июн', value: 0.5 },
-  { month: 'Июль', short: 'Июль', value: 0.7 },
-  { month: 'Август', short: 'Авг', value: 0.6 },
-  { month: 'Сентябрь', short: 'Сен', value: 0.4 },
-  { month: 'Октябрь', short: 'Окт', value: 0.6 },
+// Выручка по дням октября (тыс. ₽) — линия в карточке «Выручка в октябре», как в макете
+const REVENUE_DAYS = [
+  4, 6, 3, 8, 7, 5, 9, 11, 10, 8, 12, 9, 13, 11, 10, 14, 12, 15, 13, 11, 14, 16, 13, 12, 15, 17, 14,
 ];
 
 interface OperationsPageProps {
@@ -65,17 +59,16 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange
                     </div>
                   </div>
 
-                  {/* Выручка по месяцам — линией, как график в «Финансах» на главной */}
-                  <div className="analytics-chart" aria-label="Выручка по месяцам">
+                  {/* Выручка по дням — линией, как график в «Финансах» на главной */}
+                  <div className="analytics-chart" aria-label="Выручка по дням октября">
                     <AreaChart
-                      values={REVENUE_BARS.map((bar) => bar.value)}
-                      labels={REVENUE_BARS.map((bar) => `${bar.month} 2026`)}
-                      formatValue={(i) => formatRub(Math.round(REVENUE_BARS[i].value * REVENUE_SCALE))}
+                      values={REVENUE_DAYS}
+                      labels={REVENUE_DAYS.map((_, i) => `${i + 1} октября`)}
+                      formatValue={(i) => formatRub(REVENUE_DAYS[i] * 1000)}
                     />
                     <div className="ts-400-xxs analytics-chart__axis">
-                      {REVENUE_BARS.map((bar) => (
-                        <span key={bar.month}>{bar.short}</span>
-                      ))}
+                      <span>1 Окт</span>
+                      <span>{REVENUE_DAYS.length} Окт</span>
                     </div>
                   </div>
                 </div>
