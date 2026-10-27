@@ -1934,3 +1934,8 @@ button {
   top: calc(var(--app-nav-height, 0px) + var(--spacing-4x));
   z-index: 20;
 }
+
+/* У виджетов плотная белая заливка — при перетаскивании карточки не просвечивают друг сквозь друга */
+.home-widget.widget--outlined {
+  background: var(--container-default);
+}
