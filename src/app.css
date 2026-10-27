@@ -1978,3 +1978,55 @@ button {
 .finance-widget__accounts {
   contain: size;
 }
+
+/* Наведение на график: точка на линии, вертикаль вниз и подсказка с датой и суммой (макет «График») */
+.finance-chart {
+  position: relative;
+}
+
+.finance-chart__rule {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  background: var(--primitive-brand);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.finance-chart__dot {
+  position: absolute;
+  width: calc(var(--spacing-2x) - 1px);
+  height: calc(var(--spacing-2x) - 1px);
+  border: 1.5px solid var(--primitive-brand);
+  border-radius: 50%;
+  background: var(--container-default);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.finance-chart__tooltip {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-0-5x);
+  padding: var(--spacing-3x);
+  border-radius: var(--rounding-2-5x);
+  background: var(--popup-primary);
+  box-shadow: var(--Popout);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(var(--spacing-3-5x), var(--spacing-3-5x));
+}
+
+.finance-chart__tooltip--left {
+  transform: translate(calc(-100% - var(--spacing-3-5x)), var(--spacing-3-5x));
+}
+
+.finance-chart__tooltip--above {
+  transform: translate(var(--spacing-3-5x), calc(-100% - var(--spacing-3-5x)));
+}
+
+.finance-chart__tooltip--left.finance-chart__tooltip--above {
+  transform: translate(calc(-100% - var(--spacing-3-5x)), calc(-100% - var(--spacing-3-5x)));
+}

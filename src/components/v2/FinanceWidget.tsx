@@ -1,4 +1,5 @@
 import React from 'react';
+import { MONTHS_NOM, addDays, dayMonth, formatRub } from '../../data';
 import { Avatar, Cell, CellRightAccessory, Chip, Widget } from '@pluginwoman/t-ds';
 import { Plus } from '@pluginwoman/t-ds/icons';
 import russiaLogo from '../../assets/logos/Russia.svg';
@@ -9,10 +10,19 @@ import cardTeal from '../../assets/cards/teal.svg';
 
 type Period = 'Неделя' | 'Месяц' | 'Квартал' | 'Год';
 
+/** Подписи точек: `count` дат с шагом `step` дней, последняя — `lastIso` («27 октября») */
+const daysBack = (lastIso: string, count: number, step: number) =>
+  Array.from({ length: count }, (_, i) => dayMonth(addDays(lastIso, -(count - 1 - i) * step)));
+
+/** Остаток в точке: млн ₽ → рубли с копейками; последняя точка — текущий остаток */
+const balanceAt = (values: number[], i: number) =>
+  i === values.length - 1 ? 3422785.37 : Math.round(values[i] * 1e6 + ((i * 7919 + 4321) % 9000)) + ((i * 37) % 100) / 100;
+
 /** Остаток на счетах (млн ₽) по периодам, прирост и подписи краёв оси — данные прототипа */
-const PERIOD_DATA: Record<Period, { values: number[]; delta: string; from: string; to: string }> = {
+const PERIOD_DATA: Record<Period, { values: number[]; dates: string[]; delta: string; from: string; to: string }> = {
   Неделя: {
     values: [3.4, 3.41, 3.39, 3.42, 3.41, 3.43, 3.42],
+    dates: daysBack('2026-10-27', 7, 1),
     delta: '+ 4 120,00 ₽ за неделю',
     from: '21 Окт',
     to: '27 Окт',
@@ -22,18 +32,21 @@ const PERIOD_DATA: Record<Period, { values: number[]; delta: string; from: strin
       3.33, 3.34, 3.32, 3.36, 3.35, 3.34, 3.37, 3.39, 3.38, 3.4, 3.41, 3.39, 3.42, 3.4, 3.39, 3.41, 3.43, 3.42,
       3.4, 3.41, 3.43, 3.44, 3.42, 3.41, 3.43, 3.44, 3.42,
     ],
+    dates: daysBack('2026-10-27', 27, 1),
     delta: '+ 22 785,37 ₽ за октябрь',
     from: '1 Окт',
     to: '27 Окт',
   },
   Квартал: {
     values: [3.1, 3.14, 3.12, 3.18, 3.22, 3.2, 3.26, 3.3, 3.28, 3.34, 3.38, 3.4, 3.42],
+    dates: daysBack('2026-10-27', 13, 7),
     delta: '+ 312 400,00 ₽ за квартал',
     from: '1 Авг',
     to: '27 Окт',
   },
   Год: {
     values: [2.18, 2.3, 2.26, 2.45, 2.6, 2.55, 2.74, 2.9, 2.86, 3.05, 3.2, 3.32, 3.42],
+    dates: MONTHS_NOM.slice(9).map((m) => `${m} 2025`).concat(MONTHS_NOM.slice(0, 10).map((m) => `${m} 2026`)),
     delta: '+ 1 240 000,00 ₽ за год',
     from: 'Окт 2025',
     to: 'Окт 2026',
@@ -55,10 +68,11 @@ const CARDS = [
   { title: 'Виртуальная, **8945', amount: '785,37 ₽', image: cardTeal },
 ];
 
-/** Площадной график остатка: линия + заливка, растягивается по ширине */
-const AreaChart: React.FC<{ values: number[] }> = ({ values }) => {
+/** Площадной график остатка: линия + заливка; при наведении — точка, вертикаль и подсказка с датой и суммой */
+const AreaChart: React.FC<{ values: number[]; dates: string[] }> = ({ values, dates }) => {
   const width = 400;
   const height = 93;
+  const [active, setActive] = React.useState<number>();
   const min = Math.min(...values);
   const max = Math.max(...values);
   const points = values.map((v, i) => [
@@ -66,17 +80,51 @@ const AreaChart: React.FC<{ values: number[] }> = ({ values }) => {
     height - ((v - min) / (max - min || 1)) * (height - 8) - 4,
   ]);
   const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+
+  // Ближайшая к курсору опорная точка
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    setActive(Math.round(ratio * (values.length - 1)));
+  };
+
+  const point = active !== undefined ? points[active] : undefined;
+  const left = point ? (point[0] / width) * 100 : 0;
+  const top = point ? (point[1] / height) * 100 : 0;
+
   return (
-    <svg className="finance-widget__chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="finance-area" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" className="finance-widget__area-stop finance-widget__area-stop--top" />
-          <stop offset="100%" className="finance-widget__area-stop" />
-        </linearGradient>
-      </defs>
-      <path d={`${line} L${width},${height} L0,${height} Z`} fill="url(#finance-area)" />
-      <path d={line} className="finance-widget__line" vectorEffect="non-scaling-stroke" />
-    </svg>
+    <div className="finance-chart" onMouseMove={onMove} onMouseLeave={() => setActive(undefined)}>
+      <svg className="finance-widget__chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="finance-area" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" className="finance-widget__area-stop finance-widget__area-stop--top" />
+            <stop offset="100%" className="finance-widget__area-stop" />
+          </linearGradient>
+        </defs>
+        <path d={`${line} L${width},${height} L0,${height} Z`} fill="url(#finance-area)" />
+        <path d={line} className="finance-widget__line" vectorEffect="non-scaling-stroke" />
+      </svg>
+
+      {point && active !== undefined && (
+        <>
+          <span className="finance-chart__rule" style={{ left: `${left}%`, top: `${top}%` }} />
+          <span className="finance-chart__dot" style={{ left: `${left}%`, top: `${top}%` }} />
+          {/* Подсказка справа снизу от точки; у правого края — слева, у низких точек — над точкой (виджет обрезает выступы) */}
+          <div
+            className={[
+              'finance-chart__tooltip',
+              left > 70 ? 'finance-chart__tooltip--left' : '',
+              top > 45 ? 'finance-chart__tooltip--above' : '',
+            ].join(' ')}
+            style={{ left: `${left}%`, top: `${top}%` }}
+            role="tooltip"
+          >
+            <span className="ts-400-xs finance-widget__secondary">{dates[active]}</span>
+            <span className="ts-500-xs">{formatRub(balanceAt(values, active))}</span>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 
@@ -115,7 +163,7 @@ export const FinanceWidget: React.FC = () => {
           </Chip>
         </div>
         {/* key — при смене периода график появляется заново с короткой анимацией */}
-        <AreaChart key={period} values={data.values} />
+        <AreaChart key={period} values={data.values} dates={data.dates} />
         <div className="ts-400-xs finance-widget__axis">
           <span>{data.from}</span>
           <span>{data.to}</span>
