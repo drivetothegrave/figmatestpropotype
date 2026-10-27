@@ -90,6 +90,8 @@ export const App: React.FC = () => {
   const [operationsFilters, setOperationsFilters] = React.useState<FilterState>({});
   // Вид списка (подробный/компактный) — общий для вкладок «Операций»
   const [isCompactView, setIsCompactView] = React.useState(false);
+  // Высота закреплённой шапки — под неё встают контент и левое меню
+  const [navHeight, setNavHeight] = React.useState(0);
 
   // Подписанные платежи уходят в историю со статусом «В процессе»; демо-платежи — к остальным
   const allPayments: Payment[] = [...extraPayments, ...BASE_PAYMENTS].map((p) =>
@@ -275,12 +277,16 @@ export const App: React.FC = () => {
   );
 
   return (
-    <div className={['app', insights.redesign ? 'app--v2' : ''].filter(Boolean).join(' ')}>
+    <div
+      className={['app', insights.redesign ? 'app--v2' : ''].filter(Boolean).join(' ')}
+      style={{ '--app-nav-height': `${navHeight}px` } as React.CSSProperties}
+    >
       <AppNavigationBar
         page={page}
         onNavigate={navigate}
         hasOperations={!insights.fullTimeline}
         isMinimal={insights.redesign}
+        onHeightChange={setNavHeight}
       />
 
       {successMessage && (

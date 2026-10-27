@@ -1671,3 +1671,27 @@ button {
   width: var(--spacing-10x);
   background: linear-gradient(to right, transparent, var(--container-default));
 }
+
+/* Редизайн: шапка и левое меню закреплены (fixed), прокручивается только контент — под шапкой */
+.app--v2 {
+  padding-top: var(--app-nav-height, 0px);
+}
+
+.app--v2 .app-nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.app--v2 .side-menu {
+  position: fixed;
+  top: var(--app-nav-height, 0px);
+  left: 0;
+  width: calc(var(--spacing-40x) + var(--spacing-24x) + var(--spacing-1x));
+  height: calc(100dvh - var(--app-nav-height, 0px));
+}
+
+.app--v2 .app-v2__main {
+  margin-left: calc(var(--spacing-40x) + var(--spacing-24x) + var(--spacing-1x));
+}

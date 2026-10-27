@@ -11,6 +11,8 @@ interface AppNavigationBarProps {
   hasOperations?: boolean;
   /** Редизайн: в шапке только логотип и профиль — разделы переехали в левое меню */
   isMinimal?: boolean;
+  /** Высота шапки — чтобы контент и левое меню вставали под неё */
+  onHeightChange?: (height: number) => void;
 }
 
 /**
@@ -18,7 +20,13 @@ interface AppNavigationBarProps {
  * В MainPageNavigationBar пункты зашиты, поэтому «Операции» и «Знания» добавляем
  * теми же SCINavigationButton через портал в его <nav> — исходники дизайн-системы не трогаем.
  */
-export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavigate, hasOperations = true, isMinimal = false }) => {
+export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({
+  page,
+  onNavigate,
+  hasOperations = true,
+  isMinimal = false,
+  onHeightChange,
+}) => {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [slots, setSlots] = React.useState<{ operations: HTMLElement; knowledge: HTMLElement }>();
 
@@ -39,13 +47,15 @@ export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavi
     };
   }, []);
 
-  // Шапка залипает при скролле — высоту отдаём в CSS, чтобы левая колонка залипала под ней
+  // Шапка закреплена при скролле — её высота нужна, чтобы контент и левое меню вставали под неё
+  const heightCallback = React.useRef(onHeightChange);
+  heightCallback.current = onHeightChange;
   React.useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const observer = new ResizeObserver(() =>
-      document.documentElement.style.setProperty('--app-nav-height', `${root.offsetHeight}px`),
-    );
+    const update = () => heightCallback.current?.(root.offsetHeight);
+    update();
+    const observer = new ResizeObserver(update);
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
