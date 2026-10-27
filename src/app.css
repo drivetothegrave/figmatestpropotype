@@ -2140,3 +2140,22 @@ button {
 .side-menu__more .context-menu.context-menu--right {
   max-width: none;
 }
+
+/* Чип периода в «Финансах»: вместо треугольника t-ds — шеврон, как у кнопки «Ещё» */
+.finance-period .chip__caret {
+  display: none;
+}
+
+.finance-period .chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+}
+
+.finance-period__chevron {
+  --icon-size: var(--icon-size-s);
+}
+
+.finance-period__chevron svg {
+  fill: currentColor;
+}

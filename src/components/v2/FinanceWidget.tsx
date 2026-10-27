@@ -1,6 +1,7 @@
 import React from 'react';
 import { MONTHS_NOM, addDays, dayMonth, formatRub } from '../../data';
 import { AreaChart } from '../AreaChart';
+import { ChevronDown } from '@pluginwoman/t-ds/icons/32/Stroked';
 import { Avatar, Cell, CellRightAccessory, Chip, Widget } from '@pluginwoman/t-ds';
 import { Plus } from '@pluginwoman/t-ds/icons';
 import russiaLogo from '../../assets/logos/Russia.svg';
@@ -95,12 +96,17 @@ export const FinanceWidget: React.FC = () => {
           </div>
           <Chip
             variant="dropdown"
+            className="finance-period"
             value={period}
             popupContent={PERIODS.map((p) => (
               <Cell key={p} title={p} verticalPadding="2x" onClick={() => setPeriod(p)} />
             ))}
           >
             {period}
+            {/* Шеврон как у кнопки «Ещё»: из набора 32px в размере 20px */}
+            <span className="ds-icon finance-period__chevron" aria-hidden="true">
+              <ChevronDown />
+            </span>
           </Chip>
         </div>
         {/* key — при смене периода график появляется заново с короткой анимацией */}
