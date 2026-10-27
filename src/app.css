@@ -1616,10 +1616,19 @@ button {
 }
 
 /* Выбранный чип-таб в редизайне: обводка 1.4px neutral-3, как в макете.
-   Рисуем inset-тенью поверх прозрачной рамки 2px — размер чипа не меняется */
+   Рамка t-ds 2px остаётся прозрачной (размер чипа как у соседних), обводку рисует псевдоэлемент по внешнему краю */
 .app--v2 .chip--tab.is-selected {
   --chip-border-color: transparent;
-  box-shadow: inset 0 0 0 1.4px var(--translucent-primitives-neutral-3);
+  position: relative;
+}
+
+.app--v2 .chip--tab.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1.4px solid var(--translucent-primitives-neutral-3);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 /* Чипы в виджетах — 32px, как в макете (по умолчанию в t-ds 34px) */
