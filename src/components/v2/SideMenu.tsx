@@ -130,7 +130,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({ page, onNavigate, operations
             <ShortcutItem
               key={label}
               label={label}
-              icon={<PaperPin />}
+              icon={<span className="side-menu__pin"><PaperPin /></span>}
               isFavorite
               onToggleFavorite={() => toggleFavorite(label)}
             />

@@ -2125,3 +2125,18 @@ button {
   font-weight: 400;
   white-space: nowrap;
 }
+
+/* Скрепка у избранного — серая neutral-4, как в макете */
+.side-menu__pin {
+  display: contents;
+  color: var(--primitive-neutral-4);
+}
+
+.side-menu__item .side-menu__icon:has(.side-menu__pin) {
+  color: var(--primitive-neutral-4);
+}
+
+/* Меню «⋯» по ширине текста — «Убрать из избранного» целиком */
+.side-menu__more .context-menu.context-menu--right {
+  max-width: none;
+}
