@@ -39,6 +39,8 @@ interface PaymentRowProps {
   onTagClick?: (comment: string) => void;
   /** Компактная строка без номера и времени (главная, компактный вид) */
   isCompact?: boolean;
+  /** Мелкая строка виджета «История» в редизайне: текст 14px, аватар 24px */
+  isSmall?: boolean;
 }
 
 export const PaymentRow: React.FC<PaymentRowProps> = ({
@@ -51,11 +53,17 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
   onSelect,
   onTagClick,
   isCompact = false,
+  isSmall = false,
 }) => (
   <div
     role="button"
     tabIndex={0}
-    className={['payment-row', isSelected ? 'is-selected' : '', isCompact ? 'payment-row--compact' : '']
+    className={[
+      'payment-row',
+      isSelected ? 'is-selected' : '',
+      isCompact ? 'payment-row--compact' : '',
+      isSmall ? 'payment-row--small' : '',
+    ]
       .filter(Boolean)
       .join(' ')}
     onClick={onSelect}
@@ -74,7 +82,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
 
     <div className="payment-row__sum">
       <span
-        className="ts-600-m payment-row__amount"
+        className={`${isSmall ? 'ts-600-s' : 'ts-600-m'} payment-row__amount`}
         style={{ color: payment.sum > 0 ? 'var(--primitive-success)' : undefined }}
       >
         {formatAmount(payment.sum, payment.currency)}
@@ -87,7 +95,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
     </div>
 
     <div className="payment-row__data">
-      <span className="ts-500-m">{payment.counterparty}</span>
+      <span className={isSmall ? 'ts-500-s' : 'ts-500-m'}>{payment.counterparty}</span>
       <span className="ts-400-s payment-row__secondary">{payment.description}</span>
       {comment &&
         (onTagClick ? (
@@ -112,7 +120,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
       {!isCompact && <span className="ts-400-xs payment-row__secondary">{payment.meta}</span>}
     </div>
 
-    <Avatar size={32} shape="circle" label={payment.avatarLabel} />
+    <Avatar size={isSmall ? 24 : 32} shape="circle" label={payment.avatarLabel} />
 
     <QuickActionsBar actions={quickActions} />
   </div>

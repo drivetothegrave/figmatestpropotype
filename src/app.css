@@ -1200,3 +1200,418 @@ button {
   width: 100%;
   margin: 0;
 }
+
+/* ================================================================
+   Редизайн (настройка «Редизайн: новая главная»): левое меню,
+   колонка 900px, главная с ассистентом и виджетами, «Операции» без карточки
+   ================================================================ */
+
+.app--v2 {
+  min-height: 100vh;
+  background: var(--page-primary);
+}
+
+/* В шапке только логотип и профиль — разделы в левом меню */
+.app-nav--minimal .main-page-navigation-bar__nav {
+  visibility: hidden;
+}
+
+.app-v2 {
+  align-items: stretch;
+}
+
+.app-v2__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--page-top-padding) var(--page-horizontal-padding) calc(var(--page-bottom-padding) * 3);
+}
+
+/* 900px = 5 × 160 + 96 + 4 */
+.app-v2__column {
+  max-width: calc(var(--spacing-40x) * 5 + var(--spacing-24x) + var(--spacing-1x));
+  margin: 0 auto;
+}
+
+/* ---------- Левое меню ---------- */
+
+.side-menu {
+  position: sticky;
+  top: var(--app-nav-height, 0px);
+  flex: 0 0 calc(var(--spacing-40x) + var(--spacing-24x) + var(--spacing-1x));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8x);
+  align-self: flex-start;
+  height: calc(100vh - var(--app-nav-height, 0px));
+  padding: var(--spacing-8x) var(--spacing-5x);
+  overflow-y: auto;
+  background: var(--container-default);
+  box-shadow: var(--Right-Line);
+}
+
+.side-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.side-menu__group--main {
+  gap: var(--spacing-5x);
+}
+
+.side-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primitive-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.side-menu__item--brand {
+  color: var(--primitive-brand);
+}
+
+.side-menu__item--muted {
+  color: var(--primitive-neutral-4);
+  cursor: default;
+}
+
+.side-menu__icon {
+  --icon-size: var(--icon-size-s);
+  flex: 0 0 auto;
+}
+
+.side-menu__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-menu__divider {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: 0;
+  box-shadow: var(--Top-Line);
+}
+
+/* ---------- Главная ---------- */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-group-list-spacing);
+}
+
+.home > h1 {
+  margin: 0 0 calc(var(--spacing-4x) - var(--content-group-list-spacing));
+}
+
+.home-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primitive-brand);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Блок ассистента: поле 48px и строка задач */
+.assistant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-5x);
+  border: 1px solid var(--category-amethyst);
+  border-radius: var(--rounding-4x);
+  background: linear-gradient(
+    -60deg,
+    color-mix(in srgb, var(--category-amethyst) 12%, transparent),
+    transparent
+  );
+}
+
+.assistant__field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+  height: var(--spacing-12x);
+  padding: 0 var(--spacing-3x);
+  border-radius: var(--rounding-3x);
+  background: var(--container-transparent-1);
+}
+
+.assistant__icon {
+  --icon-size: var(--icon-size-s);
+  color: var(--category-amethyst);
+}
+
+.assistant__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--primitive-primary);
+}
+
+.assistant__input::placeholder {
+  color: var(--primitive-secondary);
+}
+
+.assistant__tasks {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4x);
+}
+
+.assistant__tasks .home-link {
+  white-space: nowrap;
+}
+
+/* Быстрые действия */
+.home__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2-5x);
+}
+
+.home__actions-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2-5x);
+}
+
+/* Виджеты: обводка 0.5px и скругление 16 — как в макете */
+.home-widget.widget--outlined {
+  border-width: 0.5px;
+  border-radius: var(--rounding-4x);
+}
+
+/* ---------- Виджет «Финансы» ---------- */
+
+.finance-widget.widget__content {
+  flex-direction: row;
+  gap: var(--spacing-5x);
+}
+
+.finance-widget__total,
+.finance-widget__accounts {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.finance-widget__accounts {
+  gap: var(--spacing-5x);
+}
+
+.finance-widget__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2-5x);
+}
+
+.finance-widget__sum {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-0-5x);
+}
+
+.finance-widget__secondary,
+.finance-widget__axis {
+  color: var(--primitive-secondary);
+}
+
+.finance-widget__delta {
+  color: var(--primitive-success);
+}
+
+.finance-widget__chart {
+  display: block;
+  width: 100%;
+  height: calc(var(--spacing-24x) - var(--spacing-1x));
+}
+
+.finance-widget__line {
+  fill: none;
+  stroke: var(--primitive-brand);
+  stroke-width: 1.5;
+}
+
+.finance-widget__area-stop {
+  stop-color: var(--primitive-brand);
+  stop-opacity: 0;
+}
+
+.finance-widget__area-stop--top {
+  stop-opacity: 0.2;
+}
+
+.finance-widget__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-2-5x);
+}
+
+.finance-widget__divider {
+  flex: 0 0 auto;
+  width: 1px;
+  box-shadow: var(--Right-Line);
+}
+
+.finance-widget__tabs {
+  display: flex;
+  gap: var(--spacing-2-5x);
+}
+
+.finance-widget__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.finance-widget__list .ds-cell {
+  padding: 0;
+}
+
+.finance-widget__avatar {
+  --avatar-color: var(--primitive-default);
+}
+
+.finance-widget__avatar--fund {
+  --avatar-surface: var(--category-mint);
+}
+
+.finance-widget__avatar--deposit {
+  --avatar-surface: var(--category-emerald);
+}
+
+/* ---------- Виджет «История» ---------- */
+
+.history-widget.widget__content {
+  gap: var(--spacing-5x);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.history-widget__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6x);
+  padding: 0 var(--spacing-5x);
+}
+
+.history-widget__chips {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-2-5x);
+}
+
+.history-widget__filters .compact-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.history-widget__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-widget__all {
+  --button-width: auto;
+  margin: 0 var(--spacing-5x);
+}
+
+/* Строка виджета: 14px, статус вплотную к сумме, между строками 20px */
+.payment-row--small {
+  padding-top: 0;
+  padding-bottom: var(--spacing-5x);
+}
+
+.payment-row--small:last-child {
+  padding-bottom: 0;
+}
+
+.payment-row--small .payment-row__sum {
+  flex-basis: var(--spacing-30x);
+  gap: var(--spacing-0-5x);
+}
+
+/* ---------- «Операции» в редизайне: без карточки, карточки аналитики с обводкой ---------- */
+
+.app-v2 .operations-page {
+  max-width: none;
+}
+
+.app-v2 .analytics-card {
+  border: 0.5px solid var(--translucent-primitives-neutral-2);
+  border-radius: var(--rounding-4x);
+  box-shadow: none;
+}
+
+/* Список прямо на странице: строки с отступом 20 выходят за колонку, текст — по её краю */
+.app-v2 .history-card {
+  margin: 0 calc(var(--spacing-5x) * -1);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ---------- Плавающие кнопки: ассистент и чат ---------- */
+
+.floating-actions {
+  position: fixed;
+  right: var(--spacing-5x);
+  bottom: var(--spacing-5x);
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5x);
+}
+
+.floating-actions__button {
+  --button-bg: var(--primitive-primary);
+  --button-bg-hovered: var(--primitive-primary);
+  --button-color: var(--primitive-default);
+  --icon-button-radius: var(--rounding-5x);
+}
+
+/* Панель настроек прототипа в редизайне — слева внизу, чтобы не спорить с кнопками ассистента */
+.app--v2 .demo-panel {
+  right: auto;
+  left: var(--spacing-5x);
+  align-items: flex-start;
+}
+
+/* Колонка 900 уже прежних 1024 — карточка выручки сжимается за счёт графика */
+.app-v2 .analytics-card--revenue {
+  min-width: 0;
+  gap: var(--spacing-10x);
+}
+
+.app-v2 .bar-graph {
+  min-width: 0;
+}
+
+.app-v2 .bar-graph__legend {
+  white-space: nowrap;
+}
+
+.app-v2 .analytics-card--risk {
+  flex-basis: calc(var(--spacing-40x) + var(--spacing-14x));
+}

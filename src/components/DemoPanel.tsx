@@ -16,7 +16,8 @@ interface DemoPanelProps {
 
 const NOTICES: InsightNotice[] = ['off', 'duplicate', 'revenue', 'risk-medium', 'risk-high'];
 
-const TOGGLES: { key: 'fullTimeline' | 'signChip' | 'vedChip' | 'recommendation'; title: string }[] = [
+const TOGGLES: { key: 'redesign' | 'fullTimeline' | 'signChip' | 'vedChip' | 'recommendation'; title: string }[] = [
+  { key: 'redesign', title: 'Редизайн: новая главная' },
   { key: 'fullTimeline', title: 'Полный таймлайн на главной' },
   { key: 'signChip', title: 'Чип «На подпись»' },
   { key: 'vedChip', title: 'Чип «ВЭД: ждут документы»' },

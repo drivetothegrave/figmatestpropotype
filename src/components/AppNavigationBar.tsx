@@ -9,6 +9,8 @@ interface AppNavigationBarProps {
   onNavigate: (page: AppPage) => void;
   /** Когда полный таймлайн живёт на главной, отдельный пункт «Операции» не нужен */
   hasOperations?: boolean;
+  /** Редизайн: в шапке только логотип и профиль — разделы переехали в левое меню */
+  isMinimal?: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ interface AppNavigationBarProps {
  * В MainPageNavigationBar пункты зашиты, поэтому «Операции» и «Знания» добавляем
  * теми же SCINavigationButton через портал в его <nav> — исходники дизайн-системы не трогаем.
  */
-export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavigate, hasOperations = true }) => {
+export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavigate, hasOperations = true, isMinimal = false }) => {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [slots, setSlots] = React.useState<{ operations: HTMLElement; knowledge: HTMLElement }>();
 
@@ -49,7 +51,7 @@ export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({ page, onNavi
   }, []);
 
   return (
-    <div ref={rootRef} className="app-nav">
+    <div ref={rootRef} className={['app-nav', isMinimal ? 'app-nav--minimal' : ''].filter(Boolean).join(' ')}>
       <MainPageNavigationBar
         activeNavItem={page === 'main' ? 'main' : undefined}
         customer="Носковец О.Н., ИП"

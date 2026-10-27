@@ -10,6 +10,9 @@ import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
+import { SideMenu } from './components/v2/SideMenu';
+import { HomePage } from './components/v2/HomePage';
+import { FloatingActions } from './components/v2/FloatingActions';
 import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
 import { FilterState, parseQuery, toFilterState } from './smartQuery';
@@ -72,6 +75,7 @@ export const App: React.FC = () => {
       vedChip: saved.vedChip ?? DEFAULT_INSIGHTS.vedChip,
       recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
       fullTimeline: saved.fullTimeline ?? DEFAULT_INSIGHTS.fullTimeline,
+      redesign: saved.redesign ?? DEFAULT_INSIGHTS.redesign,
     };
   });
   const updateInsights = (next: InsightSettings) => {
@@ -116,7 +120,7 @@ export const App: React.FC = () => {
     const parsed = parseQuery(query, allPayments.map((p) => p.counterparty));
     setOperationsFilters(toFilterState(parsed));
     setOperationsQuery(parsed.text);
-    if (insights.fullTimeline && page === 'main') {
+    if (insights.fullTimeline && !insights.redesign && page === 'main') {
       // Полный таймлайн на главной — остаёмся здесь и прокручиваем к нему
       document.querySelector('.main-page__timeline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
@@ -207,8 +211,8 @@ export const App: React.FC = () => {
 
   // Полный таймлайн включили, стоя на «Операциях», — пункта в шапке больше нет, возвращаемся на главную
   React.useEffect(() => {
-    if (insights.fullTimeline && page === 'operations') setPage('main');
-  }, [insights.fullTimeline, page]);
+    if (insights.fullTimeline && !insights.redesign && page === 'operations') setPage('main');
+  }, [insights.fullTimeline, insights.redesign, page]);
 
   const vedPayments = allPayments.filter((p) => p.status === 'docs');
 
@@ -271,8 +275,13 @@ export const App: React.FC = () => {
   );
 
   return (
-    <div className="app">
-      <AppNavigationBar page={page} onNavigate={navigate} hasOperations={!insights.fullTimeline} />
+    <div className={['app', insights.redesign ? 'app--v2' : ''].filter(Boolean).join(' ')}>
+      <AppNavigationBar
+        page={page}
+        onNavigate={navigate}
+        hasOperations={!insights.fullTimeline}
+        isMinimal={insights.redesign}
+      />
 
       {successMessage && (
         <Alert key={successMessage} type="success" onHide={() => setSuccessMessage(undefined)}>
@@ -280,7 +289,31 @@ export const App: React.FC = () => {
         </Alert>
       )}
 
-      {page === 'main' ? (
+      {insights.redesign ? (
+        // Редизайн: левое меню и колонка контента 900px
+        <div className="app__body app-v2">
+          <SideMenu page={page} onNavigate={navigate} operationsBadge={signCount} />
+          <main className="app-v2__main">
+            <div className="app-v2__column">
+              {page === 'main' ? (
+                <HomePage
+                  payments={days.flatMap((day) => day.payments)}
+                  comments={comments}
+                  signCount={signCount}
+                  signSum={signSum}
+                  selectedId={isDrawerOpen ? paymentId : undefined}
+                  onOpenPayment={openPayment}
+                  onComment={openComment}
+                  onOpenOperations={openOperations}
+                />
+              ) : (
+                renderOperations(false)
+              )}
+            </div>
+          </main>
+          <FloatingActions />
+        </div>
+      ) : page === 'main' ? (
         <div className="app__body">
           <LeftBar />
           <main className="app__main">

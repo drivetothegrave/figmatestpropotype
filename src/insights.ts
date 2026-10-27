@@ -17,6 +17,8 @@ export interface InsightSettings {
   recommendation: boolean;
   /** Главная с полноценным таймлайном (как в «Операциях») вместо компактного */
   fullTimeline: boolean;
+  /** Редизайн: левое меню, главная с ассистентом и виджетами (макеты «Главная» и «Операции» 276:*) */
+  redesign: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -25,6 +27,7 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   vedChip: false,
   recommendation: false,
   fullTimeline: false,
+  redesign: true,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {
