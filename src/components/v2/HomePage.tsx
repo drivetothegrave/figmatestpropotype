@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@pluginwoman/t-ds';
-import { ChevronDown, DocumentListAcsArrowDownOutgoing, FileListShortReverse, Filters, Wallet } from '@pluginwoman/t-ds/icons/24/Stroked';
+import { ChevronDown, DocumentListAcsArrowDownOutgoing, FileListShortReverse, Filters, Wallet } from '@pluginwoman/t-ds/icons/32/Stroked';
 import { LetterAAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
 import { Payment, formatRub, paymentsWord } from '../../data';
 import { FinanceWidget } from './FinanceWidget';

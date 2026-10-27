@@ -1614,3 +1614,15 @@ button {
 .app-v2 .analytics-card--risk {
   flex-basis: calc(var(--spacing-40x) + var(--spacing-14x));
 }
+
+/* Иконки кнопок действий — из набора 32px, ужатые до 20px; цвет — как у текста кнопки (белый на «Заплатить») */
+.home__actions .button__accessory {
+  width: var(--icon-size-s);
+  height: var(--icon-size-s);
+}
+
+.home__actions .button__accessory svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
