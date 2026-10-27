@@ -19,8 +19,6 @@ export interface InsightSettings {
   fullTimeline: boolean;
   /** Редизайн: левое меню, главная с ассистентом и виджетами (макеты «Главная» и «Операции» 276:*) */
   redesign: boolean;
-  /** Наведение на операцию в «Истории» главной: левая часть полупрозрачная, иконки на белом — вместо серой подложки */
-  hoverFade: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -30,7 +28,6 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   recommendation: false,
   fullTimeline: false,
   redesign: true,
-  hoverFade: true,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

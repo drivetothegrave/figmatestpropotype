@@ -17,11 +17,10 @@ interface DemoPanelProps {
 const NOTICES: InsightNotice[] = ['off', 'duplicate', 'revenue', 'risk-medium', 'risk-high'];
 
 const TOGGLES: {
-  key: 'redesign' | 'hoverFade' | 'fullTimeline' | 'signChip' | 'vedChip' | 'recommendation';
+  key: 'redesign' | 'fullTimeline' | 'signChip' | 'vedChip' | 'recommendation';
   title: string;
 }[] = [
   { key: 'redesign', title: 'Редизайн: новая главная' },
-  { key: 'hoverFade', title: 'Наведение в «Истории»: прозрачность' },
   { key: 'fullTimeline', title: 'Полный таймлайн на главной' },
   { key: 'signChip', title: 'Чип «На подпись»' },
   { key: 'vedChip', title: 'Чип «ВЭД: ждут документы»' },
