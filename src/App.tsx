@@ -10,7 +10,7 @@ import { PaymentDrawer } from './components/PaymentDrawer';
 import { CommentModal } from './components/CommentModal';
 import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
-import { SideMenu } from './components/v2/SideMenu';
+import { DEFAULT_FAVORITES, DEFAULT_RECENT, SideMenu } from './components/v2/SideMenu';
 import { HomePage } from './components/v2/HomePage';
 import { FloatingActions } from './components/v2/FloatingActions';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
@@ -35,6 +35,7 @@ const SIGNED_KEY = 'signed-payments';
 const EXTRA_KEY = 'extra-payments';
 const INSIGHTS_KEY = 'insight-settings';
 const HOME_WIDGETS_KEY = 'home-widgets';
+const FAVORITES_KEY = 'menu-favorites';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -99,6 +100,12 @@ export const App: React.FC = () => {
   const updateHomeWidgets = (next: HomeWidgetId[]) => {
     setHomeWidgets(next);
     save(HOME_WIDGETS_KEY, next);
+  };
+  // Избранное в левом меню — добавляется и убирается через «⋯» у пунктов
+  const [favorites, setFavorites] = React.useState<string[]>(() => load(FAVORITES_KEY, DEFAULT_FAVORITES));
+  const updateFavorites = (next: string[]) => {
+    setFavorites(next);
+    save(FAVORITES_KEY, next);
   };
   // Высота закреплённой шапки — под неё встают контент и левое меню
   const [navHeight, setNavHeight] = React.useState(0);
@@ -205,7 +212,7 @@ export const App: React.FC = () => {
   };
 
   const resetPrototype = () => {
-    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY].forEach((key) => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY].forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch {
@@ -218,6 +225,7 @@ export const App: React.FC = () => {
     setExtraPayments([]);
     setInsights(DEFAULT_INSIGHTS);
     setHomeWidgets(DEFAULT_HOME_WIDGETS);
+    setFavorites(DEFAULT_FAVORITES);
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
   };
@@ -309,7 +317,14 @@ export const App: React.FC = () => {
       {insights.redesign ? (
         // Редизайн: левое меню и колонка контента 900px
         <div className="app__body app-v2">
-          <SideMenu page={page} onNavigate={navigate} operationsBadge={signCount} />
+          <SideMenu
+            page={page}
+            onNavigate={navigate}
+            operationsBadge={signCount}
+            favorites={favorites}
+            onFavoritesChange={updateFavorites}
+            recent={DEFAULT_RECENT}
+          />
           <main className="app-v2__main">
             <div className="app-v2__column">
               {page === 'main' ? (

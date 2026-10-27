@@ -2070,3 +2070,58 @@ button {
 .analytics-card--risk .ds-cell__title {
   white-space: nowrap;
 }
+
+/* ---------- Левое меню: «⋯» у избранного и недавних, меню «В избранное» ---------- */
+
+/* Меню действий выходит за край колонки — колонка его не обрезает и лежит поверх контента */
+.app--v2 .side-menu {
+  z-index: 50;
+  overflow: visible;
+}
+
+.side-menu__shortcut {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+}
+
+.side-menu__shortcut > .side-menu__item {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* «⋯» видно при наведении на пункт и пока открыто меню */
+.side-menu__more-button {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primitive-neutral-4);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.side-menu__shortcut:hover .side-menu__more-button,
+.side-menu__shortcut:focus-within .side-menu__more-button,
+.side-menu__shortcut.is-open .side-menu__more-button {
+  opacity: 1;
+}
+
+.side-menu__more-icon {
+  --icon-size: var(--icon-size-xs);
+}
+
+/* Меню под «⋯», по левому краю иконки — как в макете «Меню» */
+.side-menu__more .context-menu.context-menu--right {
+  top: calc(100% + var(--spacing-1x));
+  left: 0;
+  min-width: calc(var(--spacing-40x) + var(--spacing-8x) + var(--spacing-1x) - 1px);
+  padding: var(--spacing-1-5x) 0;
+}
+
+.side-menu__more .context-menu__label {
+  font-weight: 400;
+  white-space: nowrap;
+}
