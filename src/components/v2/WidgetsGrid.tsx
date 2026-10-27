@@ -142,8 +142,6 @@ export const WidgetsEditor: React.FC<WidgetsEditorProps> = ({ draft, onDraftChan
               <WidgetCard
                 key={widget.id}
                 widget={widget}
-                // Пока на главной ничего не добавлено — скрытые в карточках; иначе — без обводки под «Скрытые»
-                className={draft.length > 0 ? 'is-hidden-widget' : ''}
                 accessory={
                   <IconButton
                     icon={<Plus />}

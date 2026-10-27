@@ -1913,7 +1913,3 @@ button {
   --button-color: var(--primitive-default);
   box-shadow: var(--Card);
 }
-
-.home-widget-cell.is-hidden-widget .widget--outlined {
-  border-color: transparent;
-}
