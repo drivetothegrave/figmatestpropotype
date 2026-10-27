@@ -1614,3 +1614,16 @@ button {
   height: 100%;
   fill: currentColor;
 }
+
+/* Выбранный чип-таб в редизайне: обводка 1.4px neutral-3, как в макете.
+   Рисуем inset-тенью поверх прозрачной рамки 2px — размер чипа не меняется */
+.app--v2 .chip--tab.is-selected {
+  --chip-border-color: transparent;
+  box-shadow: inset 0 0 0 1.4px var(--translucent-primitives-neutral-3);
+}
+
+/* Чипы в виджетах — 32px, как в макете (по умолчанию в t-ds 34px) */
+.home-widget .chip {
+  padding-top: var(--spacing-1x);
+  padding-bottom: var(--spacing-1x);
+}
