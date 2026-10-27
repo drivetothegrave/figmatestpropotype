@@ -124,21 +124,21 @@ export const HomePage: React.FC<HomePageProps> = ({
         </Button>
       </div>
 
-      {/* Финансы, добавленные виджеты и История — одной сеткой с шагом 16px */}
+      {/* Финансы и добавленные виджеты — одной сеткой с шагом 16px; История — отдельно, через 32px */}
       <div className="home__widgets">
         <FinanceWidget />
 
         <WidgetsGrid ids={widgets} />
-
-        <HistoryWidget
-          payments={payments}
-          comments={comments}
-          selectedId={selectedId}
-          onOpenPayment={onOpenPayment}
-          onComment={onComment}
-          onOpenOperations={onOpenOperations}
-        />
       </div>
+
+      <HistoryWidget
+        payments={payments}
+        comments={comments}
+        selectedId={selectedId}
+        onOpenPayment={onOpenPayment}
+        onComment={onComment}
+        onOpenOperations={onOpenOperations}
+      />
     </div>
   );
 };
