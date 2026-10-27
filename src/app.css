@@ -2295,3 +2295,97 @@ button {
   align-self: flex-start;
   height: auto;
 }
+
+/* ---------- Внутренняя страница «Платёж по реквизитам» (макет 293:254827) ---------- */
+
+/* Внутренние страницы — без колонки 900: навигация раздела 280 + форма 720 */
+.app-v2__main--wide {
+  padding: 0;
+}
+
+.app-v2__main--wide .app-v2__column {
+  max-width: none;
+}
+
+.payment-page {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(100dvh - var(--app-nav-height, 0px));
+}
+
+.payment-page__nav {
+  position: sticky;
+  top: var(--app-nav-height, 0px);
+  flex: 0 0 calc(var(--spacing-40x) + var(--spacing-30x));
+}
+
+.payment-page__nav .navigation-bar__title,
+.payment-page__nav [class*='navigation-bar__title'] {
+  max-width: calc(var(--spacing-40x) + var(--spacing-16x));
+}
+
+.payment-page__content {
+  display: flex;
+  flex: 0 1 calc(var(--spacing-40x) * 4 + var(--spacing-30x) - var(--spacing-10x));
+  flex-direction: column;
+  min-width: 0;
+  min-height: calc(100dvh - var(--app-nav-height, 0px));
+}
+
+.payment-page__form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--content-group-list-spacing);
+  padding: var(--content-group-list-spacing) var(--page-horizontal-padding);
+}
+
+.payment-page__secondary {
+  color: var(--primitive-secondary);
+}
+
+/* «Распознать платёж» — пунктирная область */
+.payment-page__recognize {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-0-5x);
+  min-height: calc(var(--spacing-24x) + var(--spacing-2x));
+  padding: var(--spacing-5x);
+  border: 1px dashed var(--translucent-primitives-neutral-4);
+  border-radius: var(--rounding-3x);
+  background: transparent;
+  cursor: pointer;
+}
+
+.payment-page__recognize-title {
+  color: var(--primitive-brand);
+}
+
+.payment-page__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.payment-page__vat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2-5x);
+}
+
+.payment-page__vat .chip {
+  padding-top: var(--spacing-1x);
+  padding-bottom: var(--spacing-1x);
+}
+
+.payment-page__send {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.payment-page__footer.footer {
+  bottom: 0;
+}

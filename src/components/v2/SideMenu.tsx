@@ -14,6 +14,8 @@ interface SideMenuProps {
   onFavoritesChange: (next: string[]) => void;
   /** Недавние действия — страницы, на которые клиент переходил */
   recent: string[];
+  /** Клик по пункту избранного или недавних — переход на его страницу, если она есть в прототипе */
+  onOpenShortcut: (label: string) => void;
 }
 
 /** По умолчанию в избранном и в недавних — как в макете; переходы добавим позже */
@@ -65,11 +67,12 @@ const ShortcutItem: React.FC<{
   icon?: React.ReactNode;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-}> = ({ label, icon, isFavorite, onToggleFavorite }) => {
+  onOpen: () => void;
+}> = ({ label, icon, isFavorite, onToggleFavorite, onOpen }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div className={['side-menu__shortcut', isOpen ? 'is-open' : ''].filter(Boolean).join(' ')}>
-      <MenuItem label={label} icon={icon} />
+      <MenuItem label={label} icon={icon} onClick={onOpen} />
       <ContextMenu
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -100,7 +103,15 @@ const ShortcutItem: React.FC<{
 };
 
 /** Левое меню редизайна: разделы, избранное и недавние действия */
-export const SideMenu: React.FC<SideMenuProps> = ({ page, onNavigate, operationsBadge, favorites, onFavoritesChange, recent }) => {
+export const SideMenu: React.FC<SideMenuProps> = ({
+  page,
+  onNavigate,
+  operationsBadge,
+  favorites,
+  onFavoritesChange,
+  recent,
+  onOpenShortcut,
+}) => {
   const toggleFavorite = (label: string) =>
     onFavoritesChange(favorites.includes(label) ? favorites.filter((f) => f !== label) : [...favorites, label]);
 
@@ -115,7 +126,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({ page, onNavigate, operations
           badge={operationsBadge}
           onClick={() => onNavigate('operations')}
         />
-        <MenuItem label="Платежи" icon={<CoinsRuble />} />
+        <MenuItem label="Платежи" icon={<CoinsRuble />} isActive={page === 'payment'} onClick={() => onNavigate('payment')} />
         <MenuItem label="Сервисы" icon={<LayoutBento />} />
         <MenuItem label="Знания" icon={<CapGraduation />} />
         <MenuItem label="Бухгалтерия" icon={<PlusMinusRectangle />} />
@@ -133,6 +144,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({ page, onNavigate, operations
               icon={<span className="side-menu__pin"><PaperPin /></span>}
               isFavorite
               onToggleFavorite={() => toggleFavorite(label)}
+              onOpen={() => onOpenShortcut(label)}
             />
           ))}
         </div>
@@ -146,6 +158,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({ page, onNavigate, operations
             label={label}
             isFavorite={favorites.includes(label)}
             onToggleFavorite={() => toggleFavorite(label)}
+            onOpen={() => onOpenShortcut(label)}
           />
         ))}
         <MenuItem label="Вся история действий" tone="brand" />

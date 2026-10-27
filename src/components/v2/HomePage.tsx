@@ -23,6 +23,8 @@ interface HomePageProps {
   /** Виджеты между «Финансами» и «Историей» — в порядке на главной */
   widgets: HomeWidgetId[];
   onWidgetsChange: (next: HomeWidgetId[]) => void;
+  /** «Заплатить» — страница «Платёж по реквизитам» */
+  onPay: () => void;
 }
 
 /** Главная в редизайне: приветствие, ассистент с задачами, быстрые действия и виджеты */
@@ -38,6 +40,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenOperations,
   widgets,
   onWidgetsChange,
+  onPay,
 }) => {
   const [query, setQuery] = React.useState('');
   // Режим «Настройка главной»: правим черновик, на главную он попадает только по «Сохранить»
@@ -110,7 +113,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       <div className="home__actions">
         <div className="home__actions-main">
-          <Button variant="primary" size="s" isHugWidth leftAccessory={<Wallet />}>
+          <Button variant="primary" size="s" isHugWidth leftAccessory={<Wallet />} onClick={onPay}>
             Заплатить
           </Button>
           <Button variant="secondary" size="s" isHugWidth leftAccessory={<DocumentListAcsArrowDownOutgoing />}>

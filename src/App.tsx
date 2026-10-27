@@ -12,6 +12,7 @@ import { SignConfirmModal } from './components/SignConfirmModal';
 import { DemoPanel } from './components/DemoPanel';
 import { DEFAULT_FAVORITES, DEFAULT_RECENT, SideMenu } from './components/v2/SideMenu';
 import { HomePage } from './components/v2/HomePage';
+import { PaymentPage } from './components/v2/PaymentPage';
 import { FloatingActions } from './components/v2/FloatingActions';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
 import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
@@ -35,6 +36,10 @@ const EXTRA_KEY = 'extra-payments';
 const INSIGHTS_KEY = 'insight-settings';
 const HOME_WIDGETS_KEY = 'home-widgets';
 const FAVORITES_KEY = 'menu-favorites';
+const RECENT_KEY = 'menu-recent';
+const RECENT_LIMIT = 5;
+/** Пункты избранного и недавних, которые ведут на страницы прототипа */
+const PAGE_LABELS: Partial<Record<AppPage, string>> = { payment: 'Платёж по реквизитам' };
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -106,6 +111,12 @@ export const App: React.FC = () => {
     setFavorites(next);
     save(FAVORITES_KEY, next);
   };
+  // Недавние действия — страницы, на которые переходил клиент (новые сверху)
+  const [recent, setRecent] = React.useState<string[]>(() => load(RECENT_KEY, DEFAULT_RECENT));
+  const updateRecent = (next: string[]) => {
+    setRecent(next);
+    save(RECENT_KEY, next);
+  };
   // Высота закреплённой шапки — под неё встают контент и левое меню
   const [navHeight, setNavHeight] = React.useState(0);
 
@@ -121,8 +132,14 @@ export const App: React.FC = () => {
   const signSum = signDays.flatMap((day) => day.payments).reduce((acc, p) => acc + Math.abs(p.sum), 0);
   const payment = allPayments.find((p) => p.id === paymentId);
 
+  // Откуда пришли — для стрелки «назад» на внутренних страницах
+  const [previousPage, setPreviousPage] = React.useState<AppPage>('main');
   const navigate = (next: AppPage) => {
+    if (next !== page) setPreviousPage(page);
     setPage(next);
+    // Посещённая страница — первой в «Недавних действиях» левого меню
+    const label = PAGE_LABELS[next];
+    if (label) updateRecent([label, ...recent.filter((r) => r !== label)].slice(0, RECENT_LIMIT));
     if (next === 'operations') {
       setOperationsTab('all');
       setOperationsQuery('');
@@ -196,7 +213,7 @@ export const App: React.FC = () => {
   };
 
   const resetPrototype = () => {
-    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY].forEach((key) => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY, RECENT_KEY].forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch {
@@ -210,6 +227,7 @@ export const App: React.FC = () => {
     setInsights(DEFAULT_INSIGHTS);
     setHomeWidgets(DEFAULT_HOME_WIDGETS);
     setFavorites(DEFAULT_FAVORITES);
+    setRecent(DEFAULT_RECENT);
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
   };
@@ -307,9 +325,13 @@ export const App: React.FC = () => {
             operationsBadge={signCount}
             favorites={favorites}
             onFavoritesChange={updateFavorites}
-            recent={DEFAULT_RECENT}
+            recent={recent}
+            onOpenShortcut={(label) => {
+              const target = (Object.keys(PAGE_LABELS) as AppPage[]).find((p) => PAGE_LABELS[p] === label);
+              if (target) navigate(target);
+            }}
           />
-          <main className="app-v2__main">
+          <main className={['app-v2__main', page === 'payment' ? 'app-v2__main--wide' : ''].filter(Boolean).join(' ')}>
             <div className="app-v2__column">
               {page === 'main' ? (
                 <HomePage
@@ -324,7 +346,10 @@ export const App: React.FC = () => {
                   onOpenOperations={openOperations}
                   widgets={homeWidgets}
                   onWidgetsChange={updateHomeWidgets}
+                  onPay={() => navigate('payment')}
                 />
+              ) : page === 'payment' ? (
+                <PaymentPage onBack={() => navigate(previousPage === 'payment' ? 'main' : previousPage)} />
               ) : (
                 renderOperations(false)
               )}
