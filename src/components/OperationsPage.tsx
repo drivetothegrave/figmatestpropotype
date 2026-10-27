@@ -2,19 +2,22 @@ import React from 'react';
 import { Cell, LinearProgress, TabsCarousel } from '@pluginwoman/t-ds';
 import { ArrowDownUnderline } from '@pluginwoman/t-ds/icons';
 import { RISK_INFO, RiskMode } from '../insights';
+import { formatRub } from '../data';
+import { AreaChart } from './AreaChart';
 
 export type OperationsTab = 'all' | 'sign' | 'drafts';
 
 const TAB_ORDER: OperationsTab[] = ['all', 'sign', 'drafts'];
 
-// Столбики «Выручка по месяцам» — доля от максимума шкалы (2,5 млн)
+// «Выручка по месяцам» — доля от максимума шкалы (2,5 млн)
+const REVENUE_SCALE = 2_500_000;
 const REVENUE_BARS = [
-  { month: 'Май', value: 0.2 },
-  { month: 'Июн', value: 0.5 },
-  { month: 'Июль', value: 0.7 },
-  { month: 'Авг', value: 0.6 },
-  { month: 'Сен', value: 0.4 },
-  { month: 'Окт', value: 0.6 },
+  { month: 'Май', short: 'Май', value: 0.2 },
+  { month: 'Июнь', short: 'Июн', value: 0.5 },
+  { month: 'Июль', short: 'Июль', value: 0.7 },
+  { month: 'Август', short: 'Авг', value: 0.6 },
+  { month: 'Сентябрь', short: 'Сен', value: 0.4 },
+  { month: 'Октябрь', short: 'Окт', value: 0.6 },
 ];
 
 interface OperationsPageProps {
@@ -62,19 +65,16 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({ tab, onTabChange
                     </div>
                   </div>
 
-                  <div className="bar-graph" aria-label="Выручка по месяцам">
-                    <div className="bar-graph__legend ts-400-xxs">
-                      <span>2,5 млн</span>
-                      <span>0</span>
-                    </div>
-                    <div className="bar-graph__bars">
+                  {/* Выручка по месяцам — линией, как график в «Финансах» на главной */}
+                  <div className="analytics-chart" aria-label="Выручка по месяцам">
+                    <AreaChart
+                      values={REVENUE_BARS.map((bar) => bar.value)}
+                      labels={REVENUE_BARS.map((bar) => `${bar.month} 2026`)}
+                      formatValue={(i) => formatRub(Math.round(REVENUE_BARS[i].value * REVENUE_SCALE))}
+                    />
+                    <div className="ts-400-xxs analytics-chart__axis">
                       {REVENUE_BARS.map((bar) => (
-                        <div key={bar.month} className="bar-graph__column">
-                          <div className="bar-graph__track">
-                            <div className="bar-graph__bar" style={{ height: `${bar.value * 100}%` }} />
-                          </div>
-                          <span className="ts-400-xxs bar-graph__label">{bar.month}</span>
-                        </div>
+                        <span key={bar.month}>{bar.short}</span>
                       ))}
                     </div>
                   </div>
