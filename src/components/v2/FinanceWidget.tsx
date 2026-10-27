@@ -1,7 +1,7 @@
 import React from 'react';
 import { MONTHS_NOM, addDays, dayMonth, formatRub } from '../../data';
 import { AreaChart } from '../AreaChart';
-import { ChevronDown } from '@pluginwoman/t-ds/icons/32/Stroked';
+import { ChartBar, ChevronDown, LinesThreeHorizontal } from '@pluginwoman/t-ds/icons/32/Stroked';
 import { Avatar, Badge, Button, Cell, CellRightAccessory, Chip, ContextualNotification, Widget } from '@pluginwoman/t-ds';
 import { StarShineAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
 import { Plus } from '@pluginwoman/t-ds/icons';
@@ -71,27 +71,107 @@ const CARDS = [
   { title: 'Виртуальная, **8945', amount: '785,37 ₽', image: cardTeal },
 ];
 
+/**
+ * Режим «Счета списком» (макет «Счета списками»): каждый счёт, фонд и депозит — отдельной строкой
+ * с подписью; данные прототипа
+ */
+const LIST_TABS: {
+  id: 'accounts' | 'funds' | 'deposits';
+  title: string;
+  link: string;
+  items: { title: string; subtitle: string; amount: string; logo: string }[];
+}[] = [
+  {
+    id: 'accounts',
+    title: 'Счета',
+    link: 'Все счета · 3',
+    items: [
+      { title: 'Расчётный', subtitle: '**3486 · 2 карты', amount: '22 785,37 ₽', logo: russiaLogo },
+      { title: 'Операционный', subtitle: '**8934 · 1 карта', amount: '2 374,77 ₽', logo: russiaLogo },
+      { title: 'Резервный', subtitle: '**5521 · без карт', amount: '397 625,23 ₽', logo: russiaLogo },
+    ],
+  },
+  {
+    id: 'funds',
+    title: 'Фонды',
+    link: 'Все фонды · 5',
+    items: [
+      { title: 'На налоги', subtitle: 'Откладывает 6% с поступлений', amount: '312 400,00 ₽', logo: fundLogo },
+      { title: 'Зарплата', subtitle: 'Пополнение 5-го числа', amount: '280 000,00 ₽', logo: fundLogo },
+      { title: 'Резерв', subtitle: 'Цель — 500 000 ₽', amount: '130 385,37 ₽', logo: fundLogo },
+    ],
+  },
+  {
+    id: 'deposits',
+    title: 'Депозиты',
+    link: 'Все депозиты · 2',
+    items: [
+      { title: 'На 6 месяцев', subtitle: '16% годовых · до 12 марта', amount: '500 000,00 ₽', logo: depositLogo },
+      { title: 'На год', subtitle: '15% годовых · до 3 октября', amount: '842 785,37 ₽', logo: depositLogo },
+    ],
+  },
+];
+
+/** Детализация остатков в режиме «Счета списком» — вместо графика */
+const BALANCE_DETAILS = [
+  { title: 'Счета', amount: '422 785,37 ₽' },
+  { title: 'Фонды', amount: '722 785,37 ₽' },
+  { title: 'Депозиты', amount: '1 342 785,37 ₽' },
+];
+
+type Tab = 'accounts' | 'funds' | 'deposits' | 'cards' | 'finance';
+
 /** Виджет «Финансы»: всего на счетах с графиком и список счетов/карт */
 interface FinanceWidgetProps {
   /** Промо-вкладка «Финансирование» с предложением кредита (настройка прототипа) */
   hasFinancePromo: boolean;
   /** Рекомендация открыть фонд под налоги внизу виджета (настройка прототипа) */
   hasFundRecommendation: boolean;
+  /** Счета списком: каждый счёт отдельно, слева — график или детализация остатков (настройка прототипа) */
+  isAccountsList: boolean;
 }
 
-export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, hasFundRecommendation }) => {
+export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, hasFundRecommendation, isAccountsList }) => {
   const [period, setPeriod] = React.useState<Period>('Месяц');
   const data = PERIOD_DATA[period];
-  const [tab, setTab] = React.useState<'accounts' | 'cards' | 'finance'>('accounts');
-  // Промо выключили, пока была открыта его вкладка, — возвращаемся к счетам
+  // В режиме «Счета списком» слева — график или детализация остатков
+  const [leftView, setLeftView] = React.useState<'chart' | 'details'>('chart');
+  const [tab, setTab] = React.useState<Tab>('accounts');
+  // Вкладка пропала (выключили промо или режим списка) — возвращаемся к счетам
   React.useEffect(() => {
-    if (!hasFinancePromo && tab === 'finance') setTab('accounts');
-  }, [hasFinancePromo, tab]);
+    if ((!hasFinancePromo && tab === 'finance') || (!isAccountsList && (tab === 'funds' || tab === 'deposits'))) {
+      setTab('accounts');
+    }
+  }, [hasFinancePromo, isAccountsList, tab]);
   // Крестик скрывает рекомендацию; если её снова включить в настройках — показываем
   const [isRecommendationHidden, setIsRecommendationHidden] = React.useState(false);
   React.useEffect(() => {
     if (hasFundRecommendation) setIsRecommendationHidden(false);
   }, [hasFundRecommendation]);
+
+  const tabs: { id: Tab; title: string }[] = isAccountsList
+    ? [...LIST_TABS.map(({ id, title }) => ({ id, title })), { id: 'cards', title: 'Карты' }]
+    : [
+        { id: 'accounts', title: 'Счета' },
+        { id: 'cards', title: 'Карты' },
+      ];
+  const listTab = isAccountsList ? LIST_TABS.find((t) => t.id === tab) : undefined;
+
+  const chart = (
+    <>
+      {/* key — при смене периода график появляется заново с короткой анимацией */}
+      <AreaChart
+        key={period}
+        values={data.values}
+        labels={data.dates}
+        formatValue={(i) => formatRub(balanceAt(data.values, i))}
+      />
+      <div className="ts-400-xs finance-widget__axis">
+        <span>{data.from}</span>
+        <span>{data.to}</span>
+      </div>
+    </>
+  );
 
   return (
     <Widget
@@ -102,7 +182,7 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
       rightAccessoryIcon={<Plus />}
       minContentHeight={0}
       className="home-widget"
-      contentClassName="finance-widget"
+      contentClassName={['finance-widget', isAccountsList ? 'finance-widget--list' : ''].filter(Boolean).join(' ')}
     >
       <div className="finance-widget__main">
         <div className="finance-widget__total">
@@ -110,46 +190,75 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
             <div className="finance-widget__sum">
               <span className="ts-400-s finance-widget__secondary">Всего на счетах</span>
               <span className="ts-600-3xl">3 422 785,37 ₽</span>
-              <span className="ts-500-s finance-widget__delta">{data.delta}</span>
+              <span className="ts-500-s finance-widget__delta">{isAccountsList ? `↑ ${data.delta.replace('+ ', '')}` : data.delta}</span>
             </div>
-            <Chip
-              variant="dropdown"
-              className="finance-period"
-              value={period}
-              popupContent={PERIODS.map((p) => (
-                <Cell key={p} title={p} verticalPadding="2x" onClick={() => setPeriod(p)} />
+            {isAccountsList ? (
+              // Переключатель вида слева: график или детализация остатков
+              <div className="finance-view-toggle" role="group" aria-label="Вид остатков">
+                <Chip
+                  variant="tab"
+                  leftAccessory="icon"
+                  leftIcon={<ChartBar />}
+                  isSelected={leftView === 'chart'}
+                  onClick={() => setLeftView('chart')}
+                  className="finance-view-toggle__chip"
+                >
+                  <span className="visually-hidden">График</span>
+                </Chip>
+                <Chip
+                  variant="tab"
+                  leftAccessory="icon"
+                  leftIcon={<LinesThreeHorizontal />}
+                  isSelected={leftView === 'details'}
+                  onClick={() => setLeftView('details')}
+                  className="finance-view-toggle__chip"
+                >
+                  <span className="visually-hidden">Детализация</span>
+                </Chip>
+              </div>
+            ) : (
+              <Chip
+                variant="dropdown"
+                className="finance-period"
+                value={period}
+                popupContent={PERIODS.map((p) => (
+                  <Cell key={p} title={p} verticalPadding="2x" onClick={() => setPeriod(p)} />
+                ))}
+              >
+                {period}
+                {/* Шеврон как у кнопки «Ещё»: из набора 32px в размере 20px */}
+                <span className="ds-icon finance-period__chevron" aria-hidden="true">
+                  <ChevronDown />
+                </span>
+              </Chip>
+            )}
+          </div>
+          {isAccountsList && leftView === 'details' ? (
+            <div className="finance-widget__details">
+              {BALANCE_DETAILS.map((row) => (
+                <Cell
+                  key={row.title}
+                  title={row.title}
+                  titleClassName="ts-400-s"
+                  verticalPadding="none"
+                  rightAccessory={<CellRightAccessory variant="text-s" text={row.amount} />}
+                />
               ))}
-            >
-              {period}
-              {/* Шеврон как у кнопки «Ещё»: из набора 32px в размере 20px */}
-              <span className="ds-icon finance-period__chevron" aria-hidden="true">
-                <ChevronDown />
-              </span>
-            </Chip>
-          </div>
-          {/* key — при смене периода график появляется заново с короткой анимацией */}
-          <AreaChart
-            key={period}
-            values={data.values}
-            labels={data.dates}
-            formatValue={(i) => formatRub(balanceAt(data.values, i))}
-          />
-          <div className="ts-400-xs finance-widget__axis">
-            <span>{data.from}</span>
-            <span>{data.to}</span>
-          </div>
+            </div>
+          ) : (
+            chart
+          )}
         </div>
 
         <div className="finance-widget__divider" />
 
         <div className="finance-widget__accounts">
           <div className="finance-widget__tabs">
-            <Chip variant="tab" isSelected={tab === 'accounts'} onClick={() => setTab('accounts')}>
-              Счета
-            </Chip>
-            <Chip variant="tab" isSelected={tab === 'cards'} onClick={() => setTab('cards')}>
-              Карты
-            </Chip>
+            {tabs.map((t) => (
+              <Chip key={t.id} variant="tab" isSelected={tab === t.id} onClick={() => setTab(t.id)}>
+                {t.title}
+              </Chip>
+            ))}
             {hasFinancePromo && (
               <Chip variant="tab" isSelected={tab === 'finance'} onClick={() => setTab('finance')} className="finance-promo-chip">
                 Финансирование
@@ -169,6 +278,26 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                 Получить деньги
               </Button>
             </div>
+          ) : listTab ? (
+            <>
+              <div className="finance-widget__list finance-widget__list--detailed">
+                {listTab.items.map((item) => (
+                  <Cell
+                    key={item.title}
+                    title={item.title}
+                    titleClassName="ts-500-s"
+                    description={item.subtitle}
+                    descriptionClassName="ts-400-s"
+                    verticalPadding="none"
+                    leftAccessory={<Avatar size={32} shape="circle" imageUrl={item.logo} label={item.title} />}
+                    rightAccessory={<CellRightAccessory variant="text-m" text={item.amount} />}
+                  />
+                ))}
+              </div>
+              <button type="button" className="ts-500-s home-link hoverOpacity">
+                {listTab.link}
+              </button>
+            </>
           ) : tab === 'accounts' ? (
             <>
               <div className="finance-widget__list">

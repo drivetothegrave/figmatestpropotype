@@ -23,6 +23,8 @@ export interface InsightSettings {
   financePromo: boolean;
   /** «Финансы»: рекомендация открыть фонд под налоги */
   fundRecommendation: boolean;
+  /** «Финансы»: счета списком — каждый отдельно, слева график или детализация остатков */
+  accountsList: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -34,6 +36,7 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   redesign: true,
   financePromo: false,
   fundRecommendation: false,
+  accountsList: false,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

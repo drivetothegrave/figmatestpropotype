@@ -2198,3 +2198,73 @@ button {
 .finance-recommendation .home-link {
   display: inline;
 }
+
+/* ---------- «Финансы» в режиме «Счета списком» (макет «Счета списками») ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Переключатель вида слева: квадратные чипы 32px с иконкой */
+.finance-view-toggle {
+  display: flex;
+  flex: 0 0 auto;
+  align-self: center;
+  gap: var(--spacing-2-5x);
+}
+
+.finance-view-toggle__chip.chip {
+  justify-content: center;
+  width: var(--spacing-8x);
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.finance-view-toggle__chip .chip__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.finance-view-toggle__chip .chip__accessory--left svg {
+  fill: currentColor;
+}
+
+/* Высота колонки слева одинаковая в обоих видах — 236px, как в макете */
+.finance-widget--list .finance-widget__total {
+  gap: var(--spacing-5x);
+  min-height: calc(var(--spacing-40x) + var(--spacing-16x) + var(--spacing-3x));
+}
+
+.finance-widget--list .finance-widget__head {
+  align-items: center;
+}
+
+.finance-widget--list .finance-widget__chart {
+  height: calc(var(--spacing-24x) + var(--spacing-4-5x) + 1px);
+}
+
+.finance-widget--list .finance-widget__axis {
+  margin-top: calc(var(--spacing-2-5x) - var(--spacing-5x));
+}
+
+.finance-widget__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3x);
+}
+
+.finance-widget__details .ds-cell {
+  padding: 0;
+}
+
+.finance-widget__list--detailed {
+  gap: var(--spacing-4x);
+}

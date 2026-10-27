@@ -130,7 +130,11 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Финансы и добавленные виджеты — одной сеткой с шагом 16px; История — отдельно, через 32px */}
       <div className="home__widgets">
-        <FinanceWidget hasFinancePromo={settings.financePromo} hasFundRecommendation={settings.fundRecommendation} />
+        <FinanceWidget
+          hasFinancePromo={settings.financePromo}
+          hasFundRecommendation={settings.fundRecommendation}
+          isAccountsList={settings.accountsList}
+        />
 
         <WidgetsGrid ids={widgets} />
       </div>
