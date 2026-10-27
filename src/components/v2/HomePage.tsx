@@ -4,11 +4,14 @@ import { ChevronDown, DocumentListAcsArrowDownOutgoing, FileListShortReverse, Fi
 import { LetterAAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
 import { Payment, formatRub, paymentsWord } from '../../data';
 import { FinanceWidget } from './FinanceWidget';
+import { InsightSettings } from '../../insights';
 import { HistoryWidget } from './HistoryWidget';
 import { WidgetsEditor, WidgetsGrid } from './WidgetsGrid';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './homeWidgets';
 
 interface HomePageProps {
+  /** Настройки прототипа: промо и рекомендации в виджетах */
+  settings: InsightSettings;
   payments: Payment[];
   comments: Record<string, string>;
   signCount: number;
@@ -24,6 +27,7 @@ interface HomePageProps {
 
 /** Главная в редизайне: приветствие, ассистент с задачами, быстрые действия и виджеты */
 export const HomePage: React.FC<HomePageProps> = ({
+  settings,
   payments,
   comments,
   signCount,
@@ -126,7 +130,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Финансы и добавленные виджеты — одной сеткой с шагом 16px; История — отдельно, через 32px */}
       <div className="home__widgets">
-        <FinanceWidget />
+        <FinanceWidget hasFinancePromo={settings.financePromo} hasFundRecommendation={settings.fundRecommendation} />
 
         <WidgetsGrid ids={widgets} />
       </div>

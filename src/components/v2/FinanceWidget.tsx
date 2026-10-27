@@ -2,7 +2,8 @@ import React from 'react';
 import { MONTHS_NOM, addDays, dayMonth, formatRub } from '../../data';
 import { AreaChart } from '../AreaChart';
 import { ChevronDown } from '@pluginwoman/t-ds/icons/32/Stroked';
-import { Avatar, Cell, CellRightAccessory, Chip, Widget } from '@pluginwoman/t-ds';
+import { Avatar, Badge, Button, Cell, CellRightAccessory, Chip, ContextualNotification, Widget } from '@pluginwoman/t-ds';
+import { StarShineAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
 import { Plus } from '@pluginwoman/t-ds/icons';
 import russiaLogo from '../../assets/logos/Russia.svg';
 import fundLogo from '../../assets/logos/Fund.svg';
@@ -71,10 +72,26 @@ const CARDS = [
 ];
 
 /** Виджет «Финансы»: всего на счетах с графиком и список счетов/карт */
-export const FinanceWidget: React.FC = () => {
+interface FinanceWidgetProps {
+  /** Промо-вкладка «Финансирование» с предложением кредита (настройка прототипа) */
+  hasFinancePromo: boolean;
+  /** Рекомендация открыть фонд под налоги внизу виджета (настройка прототипа) */
+  hasFundRecommendation: boolean;
+}
+
+export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, hasFundRecommendation }) => {
   const [period, setPeriod] = React.useState<Period>('Месяц');
   const data = PERIOD_DATA[period];
-  const [tab, setTab] = React.useState<'accounts' | 'cards'>('accounts');
+  const [tab, setTab] = React.useState<'accounts' | 'cards' | 'finance'>('accounts');
+  // Промо выключили, пока была открыта его вкладка, — возвращаемся к счетам
+  React.useEffect(() => {
+    if (!hasFinancePromo && tab === 'finance') setTab('accounts');
+  }, [hasFinancePromo, tab]);
+  // Крестик скрывает рекомендацию; если её снова включить в настройках — показываем
+  const [isRecommendationHidden, setIsRecommendationHidden] = React.useState(false);
+  React.useEffect(() => {
+    if (hasFundRecommendation) setIsRecommendationHidden(false);
+  }, [hasFundRecommendation]);
 
   return (
     <Widget
@@ -87,85 +104,123 @@ export const FinanceWidget: React.FC = () => {
       className="home-widget"
       contentClassName="finance-widget"
     >
-      <div className="finance-widget__total">
-        <div className="finance-widget__head">
-          <div className="finance-widget__sum">
-            <span className="ts-400-s finance-widget__secondary">Всего на счетах</span>
-            <span className="ts-600-3xl">3 422 785,37 ₽</span>
-            <span className="ts-500-s finance-widget__delta">{data.delta}</span>
+      <div className="finance-widget__main">
+        <div className="finance-widget__total">
+          <div className="finance-widget__head">
+            <div className="finance-widget__sum">
+              <span className="ts-400-s finance-widget__secondary">Всего на счетах</span>
+              <span className="ts-600-3xl">3 422 785,37 ₽</span>
+              <span className="ts-500-s finance-widget__delta">{data.delta}</span>
+            </div>
+            <Chip
+              variant="dropdown"
+              className="finance-period"
+              value={period}
+              popupContent={PERIODS.map((p) => (
+                <Cell key={p} title={p} verticalPadding="2x" onClick={() => setPeriod(p)} />
+              ))}
+            >
+              {period}
+              {/* Шеврон как у кнопки «Ещё»: из набора 32px в размере 20px */}
+              <span className="ds-icon finance-period__chevron" aria-hidden="true">
+                <ChevronDown />
+              </span>
+            </Chip>
           </div>
-          <Chip
-            variant="dropdown"
-            className="finance-period"
-            value={period}
-            popupContent={PERIODS.map((p) => (
-              <Cell key={p} title={p} verticalPadding="2x" onClick={() => setPeriod(p)} />
-            ))}
-          >
-            {period}
-            {/* Шеврон как у кнопки «Ещё»: из набора 32px в размере 20px */}
-            <span className="ds-icon finance-period__chevron" aria-hidden="true">
-              <ChevronDown />
-            </span>
-          </Chip>
+          {/* key — при смене периода график появляется заново с короткой анимацией */}
+          <AreaChart
+            key={period}
+            values={data.values}
+            labels={data.dates}
+            formatValue={(i) => formatRub(balanceAt(data.values, i))}
+          />
+          <div className="ts-400-xs finance-widget__axis">
+            <span>{data.from}</span>
+            <span>{data.to}</span>
+          </div>
         </div>
-        {/* key — при смене периода график появляется заново с короткой анимацией */}
-        <AreaChart
-          key={period}
-          values={data.values}
-          labels={data.dates}
-          formatValue={(i) => formatRub(balanceAt(data.values, i))}
-        />
-        <div className="ts-400-xs finance-widget__axis">
-          <span>{data.from}</span>
-          <span>{data.to}</span>
-        </div>
-      </div>
 
-      <div className="finance-widget__divider" />
+        <div className="finance-widget__divider" />
 
-      <div className="finance-widget__accounts">
-        <div className="finance-widget__tabs">
-          <Chip variant="tab" isSelected={tab === 'accounts'} onClick={() => setTab('accounts')}>
-            Счета
-          </Chip>
-          <Chip variant="tab" isSelected={tab === 'cards'} onClick={() => setTab('cards')}>
-            Карты
-          </Chip>
-        </div>
-        {tab === 'accounts' ? (
-          <>
+        <div className="finance-widget__accounts">
+          <div className="finance-widget__tabs">
+            <Chip variant="tab" isSelected={tab === 'accounts'} onClick={() => setTab('accounts')}>
+              Счета
+            </Chip>
+            <Chip variant="tab" isSelected={tab === 'cards'} onClick={() => setTab('cards')}>
+              Карты
+            </Chip>
+            {hasFinancePromo && (
+              <Chip variant="tab" isSelected={tab === 'finance'} onClick={() => setTab('finance')} className="finance-promo-chip">
+                Финансирование
+                {/* Бейдж t-ds у чипа серый — для промо нужен фиолетовый, как в макете */}
+                <Badge value={1} size="s" color="var(--bg-brand)" textColor="var(--primitive-default)" />
+              </Chip>
+            )}
+          </div>
+          {tab === 'finance' ? (
+            // Предложение кредита — экрана в макете нет, вариант прототипа
+            <div className="finance-offer">
+              <div className="finance-offer__text">
+                <span className="ts-500-m">Кредит до 5 000 000 ₽ одобрен заранее</span>
+                <span className="ts-400-s finance-widget__secondary">Без залога, от 19% годовых. Деньги на счёт за 1 минуту</span>
+              </div>
+              <Button variant="primary" size="s" isHugWidth>
+                Получить деньги
+              </Button>
+            </div>
+          ) : tab === 'accounts' ? (
+            <>
+              <div className="finance-widget__list">
+                {ACCOUNTS.map((account) => (
+                  <Cell
+                    key={account.title}
+                    title={account.title}
+                    titleClassName="ts-500-s"
+                    verticalPadding="none"
+                    leftAccessory={<Avatar size={24} shape="circle" imageUrl={account.logo} label={account.title} />}
+                    rightAccessory={<CellRightAccessory variant="text-s" text={account.amount} />}
+                  />
+                ))}
+              </div>
+              <button type="button" className="ts-500-s home-link hoverOpacity">
+                Все счета · 3
+              </button>
+            </>
+          ) : (
             <div className="finance-widget__list">
-              {ACCOUNTS.map((account) => (
+              {CARDS.map((card) => (
                 <Cell
-                  key={account.title}
-                  title={account.title}
+                  key={card.title}
+                  title={card.title}
                   titleClassName="ts-500-s"
                   verticalPadding="none"
-                  leftAccessory={<Avatar size={24} shape="circle" imageUrl={account.logo} label={account.title} />}
-                  rightAccessory={<CellRightAccessory variant="text-s" text={account.amount} />}
+                  leftAccessory={<img src={card.image} alt="" className="finance-widget__card" />}
+                  rightAccessory={<CellRightAccessory variant="text-s" text={card.amount} />}
                 />
               ))}
             </div>
-            <button type="button" className="ts-500-s home-link hoverOpacity">
-              Все счета · 3
-            </button>
-          </>
-        ) : (
-          <div className="finance-widget__list">
-            {CARDS.map((card) => (
-              <Cell
-                key={card.title}
-                title={card.title}
-                titleClassName="ts-500-s"
-                verticalPadding="none"
-                leftAccessory={<img src={card.image} alt="" className="finance-widget__card" />}
-                rightAccessory={<CellRightAccessory variant="text-s" text={card.amount} />}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {hasFundRecommendation && !isRecommendationHidden && (
+        <ContextualNotification
+          className="insight-notice insight-notice--brand finance-recommendation"
+          hasTitle={false}
+          accessory="icon"
+          icon={<StarShineAcsStarShine />}
+          text={
+            <>
+              Чтобы налоги не застали врасплох — откройте фонд, он сам отложит 6% с поступлений.{' '}
+              <button type="button" className="ts-500-s home-link">
+                Открыть фонд
+              </button>
+            </>
+          }
+          onClose={() => setIsRecommendationHidden(true)}
+        />
+      )}
     </Widget>
   );
 };

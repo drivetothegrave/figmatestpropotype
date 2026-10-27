@@ -24,7 +24,6 @@ import {
   groupByDay,
   Payment,
   PaymentDay,
-  createDemoSignPayment,
   formatRub,
   paymentsWord,
 } from './data';
@@ -70,15 +69,14 @@ export const App: React.FC = () => {
   const [signRequest, setSignRequest] = React.useState<Payment[]>([]);
   const [successMessage, setSuccessMessage] = React.useState<string>();
   // Инсайды и рекомендация на главной — включаются в настройках прототипа
+  // Настройки прототипа: прежние режимы (компактная главная, инсайды) больше не настраиваются —
+  // целевой прототип с редизайном; из сохранённого берём только настройки нового прототипа
   const [insights, setInsights] = React.useState<InsightSettings>(() => {
     const saved = load<Partial<InsightSettings>>(INSIGHTS_KEY, {});
     return {
-      notice: saved.notice ?? DEFAULT_INSIGHTS.notice,
-      signChip: saved.signChip ?? DEFAULT_INSIGHTS.signChip,
-      vedChip: saved.vedChip ?? DEFAULT_INSIGHTS.vedChip,
-      recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
-      fullTimeline: saved.fullTimeline ?? DEFAULT_INSIGHTS.fullTimeline,
-      redesign: saved.redesign ?? DEFAULT_INSIGHTS.redesign,
+      ...DEFAULT_INSIGHTS,
+      financePromo: saved.financePromo ?? DEFAULT_INSIGHTS.financePromo,
+      fundRecommendation: saved.fundRecommendation ?? DEFAULT_INSIGHTS.fundRecommendation,
     };
   });
   const updateInsights = (next: InsightSettings) => {
@@ -194,21 +192,6 @@ export const App: React.FC = () => {
         : `Подписано ${paymentsWord(signRequest.length)} на ${formatRub(total)}`,
     );
     setSignRequest([]);
-  };
-
-  const addDemoSignPayment = () => {
-    const { payment: next, comment } = createDemoSignPayment();
-    const nextExtra = [...extraPayments, next];
-    setExtraPayments(nextExtra);
-    save(EXTRA_KEY, nextExtra);
-    const nextComments = { ...comments, [next.id]: comment };
-    setComments(nextComments);
-    save(COMMENTS_KEY, nextComments);
-  };
-
-  const restoreSigned = () => {
-    setSignedIds([]);
-    save(SIGNED_KEY, []);
   };
 
   const resetPrototype = () => {
@@ -329,6 +312,7 @@ export const App: React.FC = () => {
             <div className="app-v2__column">
               {page === 'main' ? (
                 <HomePage
+                  settings={insights}
                   payments={days.flatMap((day) => day.payments)}
                   comments={comments}
                   signCount={signCount}
@@ -389,15 +373,7 @@ export const App: React.FC = () => {
         onSave={saveComment}
       />
 
-      <DemoPanel
-        signCount={signCount}
-        signedCount={signedIds.length}
-        onAddSignPayment={addDemoSignPayment}
-        onRestoreSigned={restoreSigned}
-        onReset={resetPrototype}
-        insights={insights}
-        onInsightsChange={updateInsights}
-      />
+      <DemoPanel onReset={resetPrototype} settings={insights} onSettingsChange={updateInsights} />
 
       <SignConfirmModal
         isOpen={signRequest.length > 0}

@@ -19,6 +19,10 @@ export interface InsightSettings {
   fullTimeline: boolean;
   /** Редизайн: левое меню, главная с ассистентом и виджетами (макеты «Главная» и «Операции» 276:*) */
   redesign: boolean;
+  /** «Финансы»: промо-вкладка «Финансирование» с предложением кредита */
+  financePromo: boolean;
+  /** «Финансы»: рекомендация открыть фонд под налоги */
+  fundRecommendation: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -28,6 +32,8 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   recommendation: false,
   fullTimeline: false,
   redesign: true,
+  financePromo: false,
+  fundRecommendation: false,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

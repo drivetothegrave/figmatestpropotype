@@ -2159,3 +2159,42 @@ button {
 .finance-period__chevron svg {
   fill: currentColor;
 }
+
+/* «Финансы»: колонки графика и счетов — строкой, рекомендация — под ними */
+.finance-widget.widget__content {
+  flex-direction: column;
+}
+
+.finance-widget__main {
+  display: flex;
+  gap: var(--spacing-5x);
+}
+
+/* Промо-вкладка: подпись и бейдж в одну строку */
+.finance-promo-chip .chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+}
+
+/* Предложение кредита */
+.finance-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-4x);
+}
+
+.finance-offer__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1x);
+}
+
+.finance-recommendation {
+  margin: 0;
+}
+
+.finance-recommendation .home-link {
+  display: inline;
+}
