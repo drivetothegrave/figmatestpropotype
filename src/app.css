@@ -1488,18 +1488,6 @@ button {
   padding: 0;
 }
 
-.finance-widget__avatar {
-  --avatar-color: var(--primitive-default);
-}
-
-.finance-widget__avatar--fund {
-  --avatar-surface: var(--category-mint);
-}
-
-.finance-widget__avatar--deposit {
-  --avatar-surface: var(--category-emerald);
-}
-
 /* ---------- Виджет «История» ---------- */
 
 .history-widget.widget__content {

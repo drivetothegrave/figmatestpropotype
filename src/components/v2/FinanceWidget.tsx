@@ -1,7 +1,9 @@
 import React from 'react';
 import { Avatar, Cell, CellRightAccessory, Chip, Widget } from '@pluginwoman/t-ds';
 import { Plus } from '@pluginwoman/t-ds/icons';
-import { HousePercent, Wallet } from '@pluginwoman/t-ds/icons/32/Filled';
+import russiaLogo from '../../assets/logos/Russia.svg';
+import fundLogo from '../../assets/logos/Fund.svg';
+import depositLogo from '../../assets/logos/Deposit.svg';
 
 /** Остаток по дням октября — для графика «Всего на счетах» (данные прототипа) */
 const BALANCE = [
@@ -9,18 +11,11 @@ const BALANCE = [
   3.41, 3.43, 3.44, 3.42, 3.41, 3.43, 3.44, 3.42,
 ];
 
+// Логотипы счетов из макета (48×48, в кружке 24px)
 const ACCOUNTS = [
-  { title: 'Расчётный, **3486', amount: '22 785,37 ₽', avatar: <Avatar size={24} shape="circle" label="₽" /> },
-  {
-    title: 'Фонды · 5',
-    amount: '422 785,37 ₽',
-    avatar: <Avatar size={24} shape="circle" icon={<Wallet />} className="finance-widget__avatar finance-widget__avatar--fund" />,
-  },
-  {
-    title: 'Депозиты · 2',
-    amount: '500 000 ₽',
-    avatar: <Avatar size={24} shape="circle" icon={<HousePercent />} className="finance-widget__avatar finance-widget__avatar--deposit" />,
-  },
+  { title: 'Расчётный, **3486', amount: '22 785,37 ₽', logo: russiaLogo },
+  { title: 'Фонды · 5', amount: '422 785,37 ₽', logo: fundLogo },
+  { title: 'Депозиты · 2', amount: '500 000 ₽', logo: depositLogo },
 ];
 
 const PERIODS = ['Неделя', 'Месяц', 'Квартал', 'Год'];
@@ -108,7 +103,7 @@ export const FinanceWidget: React.FC = () => {
               title={account.title}
               titleClassName="ts-500-s"
               verticalPadding="none"
-              leftAccessory={account.avatar}
+              leftAccessory={<Avatar size={24} shape="circle" imageUrl={account.logo} label={account.title} />}
               rightAccessory={<CellRightAccessory variant="text-s" text={account.amount} />}
             />
           ))}
