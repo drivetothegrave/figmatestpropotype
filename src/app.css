@@ -1524,14 +1524,16 @@ button {
   margin: 0 var(--spacing-5x);
 }
 
-/* Строка виджета: 14px, статус вплотную к сумме, между строками 20px */
+/* Строка виджета: 14px, статус вплотную к сумме. Между строками 20px — по 10px сверху и снизу,
+   чтобы серая подложка при наведении ложилась ровно вокруг текста */
 .payment-row--small {
-  padding-top: 0;
-  padding-bottom: var(--spacing-5x);
+  padding-top: var(--spacing-2-5x);
+  padding-bottom: var(--spacing-2-5x);
 }
 
-.payment-row--small:last-child {
-  padding-bottom: 0;
+/* Внешние 10px списка компенсируем — до фильтров и кнопки остаются 20px, как в макете */
+.history-widget__list {
+  margin: calc(var(--spacing-2-5x) * -1) 0;
 }
 
 .payment-row--small .payment-row__sum {
