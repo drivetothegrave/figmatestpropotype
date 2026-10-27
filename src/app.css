@@ -2243,8 +2243,13 @@ button {
   min-height: calc(var(--spacing-40x) + var(--spacing-16x) + var(--spacing-3x));
 }
 
+/* Переключатели графика — у верхнего края блока с суммой, как в макете */
 .finance-widget--list .finance-widget__head {
-  align-items: center;
+  align-items: flex-start;
+}
+
+.finance-widget--list .finance-view-toggle {
+  align-self: flex-start;
 }
 
 .finance-widget--list .finance-widget__chart {
@@ -2279,4 +2284,14 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Аватар 24px — у верха строки, напротив названия */
+.finance-widget__list--detailed .ds-cell {
+  align-items: flex-start;
+}
+
+.finance-widget__list--detailed .ds-cell__left-accessory {
+  align-self: flex-start;
+  height: auto;
 }

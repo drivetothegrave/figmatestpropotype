@@ -289,7 +289,7 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                     description={item.subtitle}
                     descriptionClassName="ts-400-s"
                     verticalPadding="none"
-                    leftAccessory={<Avatar size={32} shape="circle" imageUrl={item.logo} label={item.title} />}
+                    leftAccessory={<Avatar size={24} shape="circle" imageUrl={item.logo} label={item.title} />}
                     rightAccessory={<CellRightAccessory variant="text-m" text={item.amount} />}
                   />
                 ))}
