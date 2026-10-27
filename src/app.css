@@ -1913,3 +1913,11 @@ button {
   --button-color: var(--primitive-default);
   box-shadow: var(--Card);
 }
+
+/* Плюс в кнопке добавления — из набора 20px, ужатый до 16px, как в макете */
+.widget-add-button .ds-icon,
+.widget-add-button svg {
+  --icon-size: var(--icon-size-xs);
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
