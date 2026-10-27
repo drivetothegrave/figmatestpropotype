@@ -1939,3 +1939,37 @@ button {
 .home-widget.widget--outlined {
   background: var(--container-default);
 }
+
+/* Смена периода: график появляется заново — линия прорисовывается, заливка проявляется */
+.finance-widget__chart {
+  animation: finance-chart-in 0.35s ease-out;
+}
+
+.finance-widget__chart .finance-widget__line {
+  stroke-dasharray: 2000;
+  animation: finance-line-draw 0.6s ease-out;
+}
+
+@keyframes finance-chart-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes finance-line-draw {
+  from {
+    stroke-dashoffset: 2000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Мини-изображение карты 39×24 с лёгкой тенью */
+.finance-widget__card {
+  display: block;
+  width: calc(var(--spacing-10x) - var(--spacing-0-5x) / 2);
+  height: var(--spacing-6x);
+  border-radius: var(--rounding-1x);
+  box-shadow: var(--Card);
+}
