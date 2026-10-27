@@ -1921,3 +1921,16 @@ button {
   width: var(--icon-size-xs);
   height: var(--icon-size-xs);
 }
+
+.home__widgets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+/* Чёрная панель настройки залипает под шапкой при прокрутке */
+.widgets-editor__bar {
+  position: sticky;
+  top: calc(var(--app-nav-height, 0px) + var(--spacing-4x));
+  z-index: 20;
+}
