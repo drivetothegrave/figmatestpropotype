@@ -1638,3 +1638,36 @@ button {
   padding-top: var(--spacing-1x);
   padding-bottom: var(--spacing-1x);
 }
+
+/* Наведение через прозрачность (настройка прототипа): без серой подложки —
+   левая часть строки уходит в 50%, справа иконки быстрых действий на белом */
+.app--hover-fade .payment-row--small:hover,
+.app--hover-fade .payment-row--small:focus-within,
+.app--hover-fade .payment-row--small.is-selected {
+  background: transparent;
+}
+
+.app--hover-fade .payment-row--small > :not(.payment-row__actions) {
+  transition: opacity 0.2s ease;
+}
+
+.app--hover-fade .payment-row--small:hover > :not(.payment-row__actions),
+.app--hover-fade .payment-row--small:focus-within > :not(.payment-row__actions),
+.app--hover-fade .payment-row--small.is-selected > :not(.payment-row__actions) {
+  opacity: 0.5;
+}
+
+.app--hover-fade .payment-row--small .payment-row__actions {
+  background: var(--container-default);
+}
+
+/* Мягкий переход от текста к белой плашке с иконками — без резкого обрезания */
+.app--hover-fade .payment-row--small .payment-row__actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: var(--spacing-10x);
+  background: linear-gradient(to right, transparent, var(--container-default));
+}

@@ -76,6 +76,7 @@ export const App: React.FC = () => {
       recommendation: saved.recommendation ?? DEFAULT_INSIGHTS.recommendation,
       fullTimeline: saved.fullTimeline ?? DEFAULT_INSIGHTS.fullTimeline,
       redesign: saved.redesign ?? DEFAULT_INSIGHTS.redesign,
+      hoverFade: saved.hoverFade ?? DEFAULT_INSIGHTS.hoverFade,
     };
   });
   const updateInsights = (next: InsightSettings) => {
@@ -275,7 +276,11 @@ export const App: React.FC = () => {
   );
 
   return (
-    <div className={['app', insights.redesign ? 'app--v2' : ''].filter(Boolean).join(' ')}>
+    <div
+      className={['app', insights.redesign ? 'app--v2' : '', insights.hoverFade ? 'app--hover-fade' : '']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <AppNavigationBar
         page={page}
         onNavigate={navigate}
