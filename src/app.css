@@ -1973,3 +1973,8 @@ button {
   border-radius: var(--rounding-1x);
   box-shadow: var(--Card);
 }
+
+/* Высоту «Финансов» задаёт колонка с графиком — при переключении «Счета / Карты» виджет не прыгает */
+.finance-widget__accounts {
+  contain: size;
+}
