@@ -5,6 +5,8 @@ import { LetterAAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
 import { Payment, formatRub, paymentsWord } from '../../data';
 import { FinanceWidget } from './FinanceWidget';
 import { HistoryWidget } from './HistoryWidget';
+import { WidgetsEditor, WidgetsGrid } from './WidgetsGrid';
+import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './homeWidgets';
 
 interface HomePageProps {
   payments: Payment[];
@@ -15,6 +17,9 @@ interface HomePageProps {
   onOpenPayment: (payment: Payment) => void;
   onComment: (payment: Payment) => void;
   onOpenOperations: (tab: 'all' | 'sign', query?: string) => void;
+  /** Виджеты между «Финансами» и «Историей» — в порядке на главной */
+  widgets: HomeWidgetId[];
+  onWidgetsChange: (next: HomeWidgetId[]) => void;
 }
 
 /** Главная в редизайне: приветствие, ассистент с задачами, быстрые действия и виджеты */
@@ -27,8 +32,31 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenPayment,
   onComment,
   onOpenOperations,
+  widgets,
+  onWidgetsChange,
 }) => {
   const [query, setQuery] = React.useState('');
+  // Режим «Настройка главной»: правим черновик, на главную он попадает только по «Сохранить»
+  const [draft, setDraft] = React.useState<HomeWidgetId[]>();
+  const startEditing = () => {
+    setDraft(widgets);
+    window.scrollTo({ top: 0 });
+  };
+
+  if (draft) {
+    return (
+      <WidgetsEditor
+        draft={draft}
+        onDraftChange={setDraft}
+        onReset={() => setDraft(DEFAULT_HOME_WIDGETS)}
+        onCancel={() => setDraft(undefined)}
+        onSave={() => {
+          onWidgetsChange(draft);
+          setDraft(undefined);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="home">
@@ -91,12 +119,14 @@ export const HomePage: React.FC<HomePageProps> = ({
             Ещё
           </Button>
         </div>
-        <Button variant="secondary" size="s" isHugWidth leftAccessory={<Filters />}>
+        <Button variant="secondary" size="s" isHugWidth leftAccessory={<Filters />} onClick={startEditing}>
           Настроить
         </Button>
       </div>
 
       <FinanceWidget />
+
+      <WidgetsGrid ids={widgets} />
 
       <HistoryWidget
         payments={payments}

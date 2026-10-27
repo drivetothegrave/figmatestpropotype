@@ -1695,3 +1695,225 @@ button {
 .app--v2 .app-v2__main {
   margin-left: calc(var(--spacing-40x) + var(--spacing-24x) + var(--spacing-1x));
 }
+
+/* ---------- Виджеты главной и «Настройка главной» ---------- */
+
+/* Сетка: крупные виджеты по 2 в ряд, мелкие — по 3 */
+.widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--spacing-4x);
+}
+
+.home-widget-cell {
+  display: flex;
+  min-width: 0;
+}
+
+.home-widget-cell--l {
+  grid-column: span 3;
+}
+
+.home-widget-cell--s {
+  grid-column: span 2;
+}
+
+.home-widget-cell .widget {
+  height: 100%;
+}
+
+.home-widget__content.widget__content {
+  gap: var(--spacing-5x);
+}
+
+.home-widget-more {
+  color: var(--primitive-neutral-4);
+}
+
+.home-widget-secondary {
+  color: var(--primitive-secondary);
+}
+
+.home-widget-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-0-5x);
+}
+
+.home-widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+}
+
+.home-widget-list .ds-cell {
+  padding: 0;
+}
+
+.home-widget-dot {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+}
+
+.home-widget-dot::before {
+  content: '';
+  flex: 0 0 auto;
+  width: var(--spacing-2x);
+  height: var(--spacing-2x);
+  border-radius: 50%;
+  background: var(--primitive-success);
+}
+
+.home-widget-limits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5x);
+}
+
+.home-widget-limits > p {
+  margin-bottom: calc(var(--spacing-2-5x) - var(--spacing-5x));
+}
+
+.home-widget-limit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+}
+
+.home-widget-limit__text {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-2-5x);
+}
+
+.home-widget-risk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+}
+
+.forecast-chart {
+  display: block;
+  width: 100%;
+  height: calc(var(--spacing-16x) + var(--spacing-2-5x));
+}
+
+.forecast-chart__line {
+  fill: none;
+  stroke: var(--primitive-brand);
+  stroke-width: 1.5;
+}
+
+.forecast-chart__line--forecast {
+  stroke-dasharray: 4 4;
+}
+
+.forecast-chart__today {
+  stroke: var(--translucent-primitives-neutral-2);
+  stroke-width: 1;
+}
+
+/* Режим настройки */
+.widgets-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-group-list-spacing);
+}
+
+.widgets-editor__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-5x);
+  border-radius: var(--rounding-4x);
+  background: var(--primitive-primary);
+  color: var(--primitive-default);
+}
+
+.widgets-editor__hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--primitive-neutral-4);
+}
+
+.widgets-editor__reset {
+  --button-color: var(--primitive-default);
+  --button-bg-hovered: var(--container-transparent-1-inverse);
+}
+
+.widgets-editor__cancel {
+  --button-bg: var(--container-transparent-1-inverse);
+  --button-bg-hovered: var(--container-transparent-1-inverse);
+  --button-color: var(--primitive-default);
+}
+
+.widgets-editor__hidden {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+/* Закреплённые «Финансы» и «История» */
+.widgets-locked {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-5x);
+  border-radius: var(--rounding-4x);
+  background: var(--container-transparent-1);
+  color: var(--primitive-neutral-4);
+}
+
+.widgets-locked__icon {
+  --icon-size: var(--icon-size-s);
+}
+
+/* Панель добавленного виджета: перетащить + скрыть */
+.widget-edit-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+  height: var(--spacing-8x);
+  padding: 0 var(--spacing-2x);
+  border-radius: var(--rounding-2x);
+  background: var(--container-transparent-1);
+  color: var(--primitive-secondary);
+}
+
+.widget-edit-panel__icon {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  --icon-size: var(--icon-size-xs);
+}
+
+.widget-edit-panel__icon .ds-icon {
+  --icon-size: var(--icon-size-xs);
+}
+
+.widget-edit-panel__grab {
+  cursor: grab;
+}
+
+.home-widget-cell.is-draggable {
+  cursor: grab;
+}
+
+.home-widget-cell.is-dragging {
+  opacity: 0.4;
+}
+
+/* Скрытый виджет: фиолетовая «+» с лёгкой тенью */
+.widget-add-button {
+  --button-color: var(--primitive-default);
+  box-shadow: var(--Card);
+}
+
+.home-widget-cell.is-hidden-widget .widget--outlined {
+  border-color: transparent;
+}
