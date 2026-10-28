@@ -9,10 +9,14 @@ interface DemoPanelProps {
   onReset: () => void;
 }
 
-type ToggleKey = 'accountsList' | 'financePromo' | 'fundRecommendation';
+type ToggleKey = 'criticalTask' | 'accountsList' | 'financePromo' | 'fundRecommendation';
 
 /** Настройки целевого прототипа, по разделам главной */
 const SECTIONS: { title: string; toggles: { key: ToggleKey; title: string }[] }[] = [
+  {
+    title: 'Главная',
+    toggles: [{ key: 'criticalTask', title: 'Критичная задача' }],
+  },
   {
     title: 'Счета',
     toggles: [

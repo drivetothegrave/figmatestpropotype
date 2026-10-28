@@ -25,6 +25,8 @@ export interface InsightSettings {
   fundRecommendation: boolean;
   /** «Финансы»: счета списком — каждый отдельно, слева график или детализация остатков */
   accountsList: boolean;
+  /** Главная: критичная задача — красная карточка над ассистентом */
+  criticalTask: boolean;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -37,6 +39,7 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   financePromo: false,
   fundRecommendation: false,
   accountsList: false,
+  criticalTask: false,
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

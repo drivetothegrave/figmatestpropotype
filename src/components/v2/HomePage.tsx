@@ -69,6 +69,14 @@ export const HomePage: React.FC<HomePageProps> = ({
     <div className="home">
       <h1 className="ts-600-4xl">Доброе утро, Тимур!</h1>
 
+      {/* Критичная задача (настройка прототипа) — над ассистентом, остальные дела уходят в «менее важные» */}
+      {settings.criticalTask && (
+        <button type="button" className="task-card task-card--important hoverOpacity">
+          <span className="ts-600-s">Ответьте на запрос, чтобы избежать ограничений</span>
+          <span className="ts-400-xs">До 29 ноября не позднее 23:59</span>
+        </button>
+      )}
+
       <section className="assistant">
         {/* Пока ассистент ищет по операциям: Enter — «Операции» с этим запросом */}
         <form
@@ -91,7 +99,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </form>
         <div className="assistant__tasks">
           <p className="ts-500-s">
-            Сегодня 2 важные задачи:{' '}
+            {settings.criticalTask ? 'Другие менее важные дела:' : 'Сегодня 2 важные задачи:'}{' '}
             {signCount > 0 ? (
               <>
                 <button type="button" className="home-link" onClick={() => onOpenOperations('sign')}>

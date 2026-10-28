@@ -83,6 +83,7 @@ export const App: React.FC = () => {
       financePromo: saved.financePromo ?? DEFAULT_INSIGHTS.financePromo,
       fundRecommendation: saved.fundRecommendation ?? DEFAULT_INSIGHTS.fundRecommendation,
       accountsList: saved.accountsList ?? DEFAULT_INSIGHTS.accountsList,
+      criticalTask: saved.criticalTask ?? DEFAULT_INSIGHTS.criticalTask,
     };
   });
   const updateInsights = (next: InsightSettings) => {

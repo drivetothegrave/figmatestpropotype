@@ -2400,3 +2400,23 @@ button {
 .payment-page__footer.footer {
   bottom: 0;
 }
+
+/* Карточка критичной задачи на главной (Task Card, важная) */
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5x);
+  width: 100%;
+  /* От приветствия и до ассистента — по 16px, как в макете */
+  margin-bottom: calc(var(--spacing-4x) - var(--content-group-list-spacing));
+  padding: var(--spacing-4x) var(--spacing-5x);
+  border: 0;
+  border-radius: var(--rounding-3x);
+  color: var(--primitive-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-card--important {
+  background: var(--bg-error-2);
+}
