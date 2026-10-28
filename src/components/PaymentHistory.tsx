@@ -29,6 +29,7 @@ import { CompactSearch } from './CompactSearch';
 import { PaymentTableRow } from './PaymentTableRow';
 import { SelectionBar } from './SelectionBar';
 import { ViewToggle } from './ViewToggle';
+import { ChipChevron } from './ChipChevron';
 
 const DIRECTIONS: { value?: 'in' | 'out'; label: string }[] = [
   { label: 'Все операции' },
@@ -294,6 +295,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
             {clearable(
               <Chip
                 variant="dropdown"
+                className="chip-chevron"
                 isSelected={Boolean(effective.direction)}
                 value={directionLabel}
                 popupContent={DIRECTIONS.map((d) => (
@@ -301,6 +303,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
                 ))}
               >
                 {directionLabel}
+                <ChipChevron />
               </Chip>,
               Boolean(effective.direction),
               () => setDirection(undefined),
@@ -309,6 +312,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
             {clearable(
             <Chip
               variant="dropdown"
+              className="chip-chevron"
               isSelected={Boolean(effective.period)}
               value={effective.period?.label ?? 'За всё время'}
               popupContent={[{ label: 'За всё время' }, ...periodOptions()].map((p) => (
@@ -321,12 +325,12 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
               ))}
             >
               {effective.period?.label ?? 'За всё время'}
+              <ChipChevron />
             </Chip>,
               Boolean(effective.period),
               () => setPeriod(undefined),
               effective.period?.label ?? '',
             )}
-            <Chip variant="dropdown">Категория</Chip>
           </>
         )}
         {extraChips}

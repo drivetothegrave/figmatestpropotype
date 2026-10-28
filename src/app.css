@@ -878,11 +878,6 @@ button {
   gap: var(--spacing-2-5x);
 }
 
-.history-card__view .icon-button.is-active {
-  --button-bg: transparent;
-  --button-bg-hovered: transparent;
-  box-shadow: inset 0 0 0 2px var(--primitive-neutral-3);
-}
 
 .history-card__found {
   padding: 0 var(--spacing-5x) var(--spacing-2x);
@@ -2549,4 +2544,72 @@ button {
 
 .tasks-page__empty {
   color: var(--primitive-secondary);
+}
+
+/* ---------- Чипы по макету «Операции»: шеврон у выпадашек, квадратные чипы-иконки ---------- */
+
+/* Выпадашка с шевроном 20px вместо треугольника t-ds */
+.chip-chevron .chip__caret {
+  display: none;
+}
+
+.chip-chevron .chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+}
+
+.chip-chevron__icon {
+  --icon-size: var(--icon-size-s);
+}
+
+.chip-chevron__icon svg {
+  fill: currentColor;
+}
+
+/* У активного фильтра вместо шеврона — белый крестик сброса */
+.chip-clearable .chip-chevron__icon {
+  visibility: hidden;
+}
+
+/* Квадратный чип 32px с иконкой 20px (переключатель вида списка) */
+.icon-chip.chip {
+  justify-content: center;
+  width: var(--spacing-8x);
+  padding: var(--spacing-1x) 0;
+}
+
+.icon-chip .chip__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.icon-chip .chip__accessory--left {
+  --icon-size: var(--icon-size-s);
+}
+
+.icon-chip .chip__accessory--left svg {
+  fill: currentColor;
+}
+
+/* Отступы «Операций» по макету: вкладки → аналитика 32, аналитика → фильтры 32, фильтры → список 16 */
+.app-v2 .history-tabs .tabs-carousel__bar {
+  padding-bottom: var(--content-group-list-spacing);
+}
+
+.app-v2 .operations-analytics {
+  margin-bottom: var(--content-group-list-spacing);
+}
+
+.app-v2 .history-card {
+  padding-top: 0;
+}
+
+/* Чипы в строке фильтров «Операций»: по 8px от края, как в макете (6px отступа + 2px рамки t-ds) */
+.app-v2 .history-card__filters .chip:not(.icon-chip) {
+  padding-right: var(--spacing-1-5x);
+  padding-left: var(--spacing-1-5x);
 }

@@ -1,30 +1,34 @@
 import React from 'react';
-import { IconButton } from '@pluginwoman/t-ds';
-import { LayoutRowsTwo, LinesThreeHorizontal } from '@pluginwoman/t-ds/icons';
+import { Chip } from '@pluginwoman/t-ds';
+import { LayoutRowsTwo, LinesThreeHorizontal } from '@pluginwoman/t-ds/icons/32/Stroked';
 
 interface ViewToggleProps {
   isCompact: boolean;
   onChange: (isCompact: boolean) => void;
 }
 
-/** Переключатель вида списка: подробный / компактный (общий для вкладок «Операций») */
+/** Переключатель вида списка: подробный / компактный — квадратные чипы-табы, выбранный с обводкой (как в макете) */
 export const ViewToggle: React.FC<ViewToggleProps> = ({ isCompact, onChange }) => (
   <div className="history-card__view" role="group" aria-label="Вид списка">
-    <IconButton
-      icon={<LayoutRowsTwo />}
-      ariaLabel="Подробный вид"
-      variant="secondary"
-      size="xs"
-      className={!isCompact ? 'is-active' : undefined}
+    <Chip
+      variant="tab"
+      leftAccessory="icon"
+      leftIcon={<LayoutRowsTwo />}
+      isSelected={!isCompact}
       onClick={() => onChange(false)}
-    />
-    <IconButton
-      icon={<LinesThreeHorizontal />}
-      ariaLabel="Компактный вид"
-      variant="secondary"
-      size="xs"
-      className={isCompact ? 'is-active' : undefined}
+      className="icon-chip"
+    >
+      <span className="visually-hidden">Подробный вид</span>
+    </Chip>
+    <Chip
+      variant="tab"
+      leftAccessory="icon"
+      leftIcon={<LinesThreeHorizontal />}
+      isSelected={isCompact}
       onClick={() => onChange(true)}
-    />
+      className="icon-chip"
+    >
+      <span className="visually-hidden">Компактный вид</span>
+    </Chip>
   </div>
 );

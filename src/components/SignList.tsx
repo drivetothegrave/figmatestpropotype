@@ -8,6 +8,7 @@ import { PaymentRow, QuickAction } from './PaymentRow';
 import { SearchWithSuggest } from './SearchWithSuggest';
 import { PaymentTableRow } from './PaymentTableRow';
 import { ViewToggle } from './ViewToggle';
+import { ChipChevron } from './ChipChevron';
 import { DayTotals } from './PaymentHistory';
 
 // На подпись нужны только период и счёт
@@ -117,8 +118,9 @@ export const SignList: React.FC<SignListProps> = ({
           placeholder="Контрагент, сумма, комментарий"
         />
         {FILTERS.map((label) => (
-          <Chip key={label} variant="dropdown">
+          <Chip key={label} variant="dropdown" className="chip-chevron">
             {label}
+            <ChipChevron />
           </Chip>
         ))}
         <Chip
