@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button, Cell, CellRightAccessory, LinearProgress } from '@pluginwoman/t-ds';
+import barGrid from '../../assets/widgets/bar-grid.svg';
 
 /** Виджеты главной, которые можно добавить, скрыть и переставить (экран «Настройка виджетов») */
-export type HomeWidgetId = 'revenue' | 'forecast' | 'limits' | 'taxes' | 'risks';
+export type HomeWidgetId = 'revenue' | 'forecast' | 'analytics' | 'documents' | 'limits' | 'taxes' | 'risks';
 
 export interface HomeWidgetDef {
   id: HomeWidgetId;
@@ -48,6 +49,38 @@ const ForecastChart: React.FC = () => (
   </svg>
 );
 
+/** Входящие и исходящие по месяцам — пары столбиков, высота в процентах от 5 млн */
+const ANALYTICS_MONTHS = [
+  { label: 'Окт 25', incoming: 20, outgoing: 50 },
+  { label: 'Ноя 25', incoming: 50, outgoing: 80 },
+  { label: 'Дек 25', incoming: 70, outgoing: 40 },
+  { label: 'Янв', incoming: 60, outgoing: 100 },
+  { label: 'Фев', incoming: 40, outgoing: 10 },
+  { label: 'Мар', incoming: 60, outgoing: 30 },
+];
+
+const BarChart: React.FC = () => (
+  <div className="bar-chart" aria-hidden="true">
+    <div className="bar-chart__legend-y ts-400-xs">
+      <span>5 млн</span>
+      <span>2,5 млн</span>
+      <span>0</span>
+    </div>
+    <div className="bar-chart__plot">
+      <img src={barGrid} alt="" className="bar-chart__grid" />
+      {ANALYTICS_MONTHS.map((month) => (
+        <div key={month.label} className="bar-chart__month">
+          <div className="bar-chart__bars">
+            <span className="bar-chart__bar bar-chart__bar--incoming" style={{ height: `${month.incoming}%` }} />
+            <span className="bar-chart__bar bar-chart__bar--outgoing" style={{ height: `${month.outgoing}%` }} />
+          </div>
+          <span className="ts-400-xs bar-chart__label">{month.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const LIMITS = [
   { label: 'Перевести физлицам', amount: '400 000 ₽', value: 70, color: 'var(--primitive-success)' },
   { label: 'Снять наличных', amount: '50 000 ₽', value: 20, color: 'var(--primitive-warning)' },
@@ -80,6 +113,44 @@ export const HOME_WIDGETS: HomeWidgetDef[] = [
         <Total caption="Остаток через 30 дней, если всё пойдет как обычно" amount="3 422 785,37 ₽" />
         <ForecastChart />
         <p className="ts-400-s">Самая низкая точка — 10 октября, после зарплаты 22 785 ₽</p>
+      </>
+    ),
+  },
+  {
+    id: 'analytics',
+    title: 'Аналитика',
+    size: 'l',
+    content: (
+      <>
+        <div className="home-widget-total">
+          <span className="ts-400-s home-widget-secondary">Входящие 1 — 21 марта</span>
+          <span className="ts-500-xl">1 682 053,73 ₽</span>
+          <span className="ts-500-xs">
+            <span className="home-widget-up">↑30 %</span>{' '}
+            <span className="home-widget-secondary">к 1 — 21 февраля /</span>{' '}
+            <span className="home-widget-down">↓50 %</span>{' '}
+            <span className="home-widget-secondary">к 1 — 21 марта 2024</span>
+          </span>
+        </div>
+        <BarChart />
+      </>
+    ),
+  },
+  {
+    id: 'documents',
+    title: 'Документы',
+    size: 'l',
+    content: (
+      <>
+        <Total caption="Ждут вашей подписи" amount="3 документа" />
+        <div className="home-widget-list">
+          <AmountRow label="Акт №87 · Вектор, ООО" amount="422 785,37 ₽" />
+          <AmountRow label="УПД №1204 · Лаванда" amount="722 785,37 ₽" />
+          <AmountRow label="Счёт №312 · Промт, ООО" amount="1 342 785,37 ₽" />
+        </div>
+        <Button variant="secondary" size="s" isHugWidth>
+          Подписать
+        </Button>
       </>
     ),
   },

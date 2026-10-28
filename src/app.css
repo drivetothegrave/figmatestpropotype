@@ -1752,6 +1752,11 @@ button {
   padding: 0;
 }
 
+/* Строки «название — сумма» по макету 18px: у ячейки правый аксессуар 22px */
+.home-widget-list .ds-cell__right-accessory {
+  height: auto;
+}
+
 .home-widget-dot {
   display: flex;
   align-items: center;
@@ -2774,4 +2779,82 @@ button {
 /* Логотип в шапке ведёт на главную */
 .app-nav .main-page-navigation-bar__logo {
   cursor: pointer;
+}
+
+/* ---------- Виджет «Аналитика»: столбики по месяцам ---------- */
+
+.home-widget-up {
+  color: var(--primitive-success);
+}
+
+.home-widget-down {
+  color: var(--primitive-error);
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 117px;
+}
+
+.bar-chart__legend-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--spacing-2-5x) 13px 0;
+  color: var(--primitive-secondary);
+  white-space: nowrap;
+}
+
+.bar-chart__plot {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.bar-chart__grid {
+  position: absolute;
+  inset: 0 0 20px;
+  width: 100%;
+  height: calc(100% - 20px);
+}
+
+.bar-chart__month {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding-top: 7px;
+}
+
+.bar-chart__bars {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.bar-chart__bar {
+  width: 15px;
+  border-radius: var(--rounding-1-5x);
+  opacity: 0.5;
+}
+
+.bar-chart__bar--incoming {
+  background: var(--category-flamingo);
+}
+
+.bar-chart__bar--outgoing {
+  background: var(--category-lavender);
+}
+
+.bar-chart__label {
+  color: var(--primitive-secondary);
+  white-space: nowrap;
 }
