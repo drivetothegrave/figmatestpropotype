@@ -4,6 +4,8 @@ import { Payment } from '../../data';
 import { CompactSearch } from '../CompactSearch';
 import { PaymentRow } from '../PaymentRow';
 import { historyQuickActions } from '../PaymentHistory';
+import { InsightNoticeBanner } from '../InsightBanners';
+import { InsightSettings } from '../../insights';
 
 type Direction = 'all' | 'in' | 'out';
 
@@ -24,6 +26,8 @@ interface HistoryWidgetProps {
   onComment: (payment: Payment) => void;
   /** «Операции» с запросом — полный результат поиска, клик по тегу, «Все операции» */
   onOpenOperations: (tab: 'all' | 'sign', query?: string) => void;
+  /** Инсайт над списком (настройка прототипа) */
+  insights: InsightSettings;
 }
 
 /** Виджет «История»: быстрые фильтры, поиск с саджестами и 5 последних операций */
@@ -34,6 +38,7 @@ export const HistoryWidget: React.FC<HistoryWidgetProps> = ({
   onOpenPayment,
   onComment,
   onOpenOperations,
+  insights,
 }) => {
   const [direction, setDirection] = React.useState<Direction>('all');
   const latest = payments
@@ -65,6 +70,9 @@ export const HistoryWidget: React.FC<HistoryWidgetProps> = ({
           onShowAll={(query) => onOpenOperations('all', query)}
         />
       </div>
+
+      {/* Инсайт — между фильтрами и списком, как в макетах «Инсайд 1–2» */}
+      <InsightNoticeBanner insights={insights} />
 
       <div className="history-widget__list">
         {latest.map((payment) => (

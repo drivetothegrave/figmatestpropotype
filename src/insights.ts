@@ -30,7 +30,7 @@ export interface InsightSettings {
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
-  notice: 'duplicate',
+  notice: 'off',
   signChip: true,
   vedChip: false,
   recommendation: false,
@@ -58,7 +58,7 @@ export const NOTICE_INFO: Record<Exclude<InsightNotice, 'off'>, {
   duplicate: {
     tone: 'brand',
     title: 'Похоже на дубль.',
-    text: 'Два платежа БЦ Лесная, ООО с комментарием «Аренда офиса» ждут подписания.',
+    text: 'Два одинаковых платежа Промт, ООО ждут подписания.',
   },
   revenue: {
     tone: 'success',

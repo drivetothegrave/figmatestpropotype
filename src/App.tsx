@@ -87,6 +87,8 @@ export const App: React.FC = () => {
       fundRecommendation: saved.fundRecommendation ?? DEFAULT_INSIGHTS.fundRecommendation,
       accountsList: saved.accountsList ?? DEFAULT_INSIGHTS.accountsList,
       criticalTask: saved.criticalTask ?? DEFAULT_INSIGHTS.criticalTask,
+      // Инсайт в «Истории» на главной — из макетов есть только дубль и рост риска
+      notice: saved.notice === 'duplicate' || saved.notice === 'risk-medium' ? saved.notice : 'off',
     };
   });
   const updateInsights = (next: InsightSettings) => {

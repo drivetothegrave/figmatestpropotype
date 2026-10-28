@@ -162,6 +162,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         onOpenPayment={onOpenPayment}
         onComment={onComment}
         onOpenOperations={onOpenOperations}
+        insights={settings}
       />
     </div>
   );
