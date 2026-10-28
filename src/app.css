@@ -2420,3 +2420,98 @@ button {
 .task-card--important {
   background: var(--bg-error-2);
 }
+
+/* Серые приписки в строках «Финансов»: номер счёта, количество фондов и депозитов */
+.finance-widget__suffix {
+  color: var(--primitive-neutral-4);
+}
+
+/* ---------- Дровер «Счета и карты» (макет 306:263005) ---------- */
+
+/* Как дровер платежа: поверх контента, без затемнения, с тенью Popout */
+.accounts-drawer .drawer__panel {
+  background: var(--popup-primary);
+  box-shadow: var(--Popout);
+}
+
+.accounts-drawer__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-group-list-spacing);
+  padding: var(--spacing-4x) var(--spacing-5x) var(--content-group-list-spacing);
+}
+
+.accounts-drawer__tabs {
+  display: flex;
+  gap: var(--spacing-2-5x);
+}
+
+.accounts-drawer__tabs .chip {
+  padding-top: var(--spacing-1x);
+  padding-bottom: var(--spacing-1x);
+}
+
+.accounts-drawer__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6x);
+}
+
+.accounts-drawer__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4x);
+}
+
+.accounts-drawer__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-0-5x);
+  min-width: 0;
+}
+
+.accounts-drawer__secondary {
+  color: var(--primitive-secondary);
+}
+
+.accounts-drawer__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5x);
+  color: var(--primitive-primary);
+}
+
+.accounts-drawer__paused {
+  color: var(--primitive-neutral-4);
+}
+
+.accounts-drawer__more {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Карта в дровере — по центру квадрата 48px, как аватары фондов */
+.accounts-drawer__card {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-12x);
+  height: var(--spacing-12x);
+}
+
+.accounts-drawer__card img {
+  width: var(--spacing-10x);
+  border-radius: var(--rounding-1x);
+  box-shadow: var(--Card);
+}
+
+.accounts-drawer__actions svg,
+.accounts-drawer__paused svg {
+  fill: currentColor;
+}

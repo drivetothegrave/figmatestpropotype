@@ -1,6 +1,7 @@
 import React from 'react';
 import { MONTHS_NOM, addDays, dayMonth, formatRub } from '../../data';
 import { AreaChart } from '../AreaChart';
+import { AccountsDrawer, AccountsTab } from './AccountsDrawer';
 import { ChartBar, ChevronDown, LinesThreeHorizontal } from '@pluginwoman/t-ds/icons/32/Stroked';
 import { Avatar, Badge, Button, Cell, CellRightAccessory, Chip, ContextualNotification, Widget } from '@pluginwoman/t-ds';
 import { StarShineAcsStarShine } from '@pluginwoman/t-ds/icons/24/Filled';
@@ -59,10 +60,11 @@ const PERIOD_DATA: Record<Period, { values: number[]; dates: string[]; delta: st
 const PERIODS = Object.keys(PERIOD_DATA) as Period[];
 
 // Логотипы счетов из макета (48×48, в кружке 24px)
-const ACCOUNTS = [
-  { title: 'Расчётный, **3486', amount: '22 785,37 ₽', logo: russiaLogo },
-  { title: 'Фонды · 5', amount: '422 785,37 ₽', logo: fundLogo },
-  { title: 'Депозиты · 2', amount: '500 000 ₽', logo: depositLogo },
+// «Расчётный» откроет страницу счёта (добавим позже), фонды и депозиты — дровер со списком
+const ACCOUNTS: { title: string; suffix: string; amount: string; logo: string; drawerTab?: AccountsTab }[] = [
+  { title: 'Расчётный', suffix: '**3486', amount: '22 785,37 ₽', logo: russiaLogo },
+  { title: 'Фонды', suffix: '· 5', amount: '422 785,37 ₽', logo: fundLogo, drawerTab: 'funds' },
+  { title: 'Депозиты', suffix: '· 2', amount: '500 000 ₽', logo: depositLogo, drawerTab: 'deposits' },
 ];
 
 // Карты: мини-изображение карты 39×24 и остаток
@@ -137,6 +139,8 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
   // В режиме «Счета списком» слева — график или детализация остатков
   const [leftView, setLeftView] = React.useState<'chart' | 'details'>('chart');
   const [tab, setTab] = React.useState<Tab>('accounts');
+  // Дровер «Счета и карты» — все фонды, депозиты и карты списком
+  const [drawerTab, setDrawerTab] = React.useState<AccountsTab>();
   // Вкладка пропала (выключили промо или режим списка) — возвращаемся к счетам
   React.useEffect(() => {
     if ((!hasFinancePromo && tab === 'finance') || (!isAccountsList && (tab === 'funds' || tab === 'deposits'))) {
@@ -291,10 +295,11 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                     verticalPadding="none"
                     leftAccessory={<Avatar size={24} shape="circle" imageUrl={item.logo} label={item.title} />}
                     rightAccessory={<CellRightAccessory variant="text-m" text={item.amount} />}
+                    onClick={listTab.id === 'accounts' ? undefined : () => setDrawerTab(listTab.id)}
                   />
                 ))}
               </div>
-              <button type="button" className="ts-500-s home-link hoverOpacity">
+              <button type="button" className="ts-500-s home-link hoverOpacity" onClick={() => setDrawerTab(listTab.id)}>
                 {listTab.link}
               </button>
             </>
@@ -304,16 +309,21 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                 {ACCOUNTS.map((account) => (
                   <Cell
                     key={account.title}
-                    title={account.title}
+                    title={
+                      <>
+                        {account.title} <span className="finance-widget__suffix">{account.suffix}</span>
+                      </>
+                    }
                     titleClassName="ts-500-s"
                     verticalPadding="none"
                     leftAccessory={<Avatar size={24} shape="circle" imageUrl={account.logo} label={account.title} />}
                     rightAccessory={<CellRightAccessory variant="text-s" text={account.amount} />}
+                    onClick={account.drawerTab ? () => setDrawerTab(account.drawerTab) : undefined}
                   />
                 ))}
               </div>
-              <button type="button" className="ts-500-s home-link hoverOpacity">
-                Все счета · 3
+              <button type="button" className="ts-500-s home-link hoverOpacity" onClick={() => setDrawerTab('accounts')}>
+                Все счета
               </button>
             </>
           ) : (
@@ -326,6 +336,7 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                   verticalPadding="none"
                   leftAccessory={<img src={card.image} alt="" className="finance-widget__card" />}
                   rightAccessory={<CellRightAccessory variant="text-s" text={card.amount} />}
+                  onClick={() => setDrawerTab('cards')}
                 />
               ))}
             </div>
@@ -350,6 +361,8 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
           onClose={() => setIsRecommendationHidden(true)}
         />
       )}
+
+      <AccountsDrawer tab={drawerTab} onTabChange={setDrawerTab} onClose={() => setDrawerTab(undefined)} />
     </Widget>
   );
 };
