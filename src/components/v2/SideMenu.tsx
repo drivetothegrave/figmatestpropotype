@@ -126,7 +126,8 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           badge={operationsBadge}
           onClick={() => onNavigate('operations')}
         />
-        <MenuItem label="Платежи" icon={<CoinsRuble />} isActive={page === 'payment'} onClick={() => onNavigate('payment')} />
+        {/* Корневого раздела платежей пока нет — пункт только подсвечивается на странице платежа */}
+        <MenuItem label="Платежи" icon={<CoinsRuble />} isActive={page === 'payment'} />
         <MenuItem label="Сервисы" icon={<LayoutBento />} />
         <MenuItem label="Знания" icon={<CapGraduation />} />
         <MenuItem label="Бухгалтерия" icon={<PlusMinusRectangle />} />
