@@ -61,7 +61,14 @@ export const AppNavigationBar: React.FC<AppNavigationBarProps> = ({
   }, []);
 
   return (
-    <div ref={rootRef} className={['app-nav', isMinimal ? 'app-nav--minimal' : ''].filter(Boolean).join(' ')}>
+    <div
+      ref={rootRef}
+      className={['app-nav', isMinimal ? 'app-nav--minimal' : ''].filter(Boolean).join(' ')}
+      // Логотип «Точки» — на главную (в MainPageNavigationBar своего обработчика у него нет)
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('.main-page-navigation-bar__logo')) onNavigate('main');
+      }}
+    >
       <MainPageNavigationBar
         activeNavItem={page === 'main' ? 'main' : undefined}
         customer="Носковец О.Н., ИП"

@@ -2770,3 +2770,8 @@ button {
   background: var(--primitive-neutral-3);
   cursor: default;
 }
+
+/* Логотип в шапке ведёт на главную */
+.app-nav .main-page-navigation-bar__logo {
+  cursor: pointer;
+}
