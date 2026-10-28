@@ -28,6 +28,8 @@ interface HomePageProps {
   /** Сколько задач у клиента — «Все задачи · N» */
   tasksCount: number;
   onOpenTasks: () => void;
+  /** Enter в поле ассистента — вопрос уходит в чат */
+  onAsk: (question: string) => void;
 }
 
 /** Главная в редизайне: приветствие, ассистент с задачами, быстрые действия и виджеты */
@@ -46,6 +48,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onPay,
   tasksCount,
   onOpenTasks,
+  onAsk,
 }) => {
   const [query, setQuery] = React.useState('');
   // Режим «Настройка главной»: правим черновик, на главную он попадает только по «Сохранить»
@@ -83,12 +86,14 @@ export const HomePage: React.FC<HomePageProps> = ({
       )}
 
       <section className="assistant">
-        {/* Пока ассистент ищет по операциям: Enter — «Операции» с этим запросом */}
+        {/* Enter — чат с ассистентом: вопрос баблом и ответ */}
         <form
           className="assistant__field"
           onSubmit={(e) => {
             e.preventDefault();
-            if (query.trim()) onOpenOperations('all', query.trim());
+            if (!query.trim()) return;
+            onAsk(query.trim());
+            setQuery('');
           }}
         >
           <span className="ds-icon ds-icon--m assistant__icon" aria-hidden="true">

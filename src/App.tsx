@@ -16,6 +16,8 @@ import { PaymentPage } from './components/v2/PaymentPage';
 import { TasksPage } from './components/v2/TasksPage';
 import { DEFAULT_TASKS_STATE, TasksState, visibleTasks } from './tasks';
 import { FloatingActions } from './components/v2/FloatingActions';
+import { AssistantChat, useAssistant } from './components/v2/AssistantChat';
+import { AssistantAction } from './assistant';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
 import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
@@ -174,6 +176,32 @@ export const App: React.FC = () => {
     }
     setPage('operations');
     window.scrollTo({ top: 0 });
+  };
+
+  // Ассистент: вопрос из поля на главной или плавающей кнопки — чат в модалке
+  const [isAssistantOpen, setIsAssistantOpen] = React.useState(false);
+  const assistant = useAssistant({
+    payments: allPayments,
+    signCount,
+    signSum,
+    tasksCount: visibleTasks(tasksState, insights.criticalTask).length,
+  });
+  const askAssistant = (question: string) => {
+    assistant.ask(question);
+    setIsAssistantOpen(true);
+  };
+  const openAssistant = () => {
+    assistant.greet();
+    setIsAssistantOpen(true);
+  };
+  const runAssistantAction = (action: AssistantAction) => {
+    if (action.kind === 'ask') return assistant.ask(action.text);
+    if (action.kind === 'reply') return assistant.say(action.text);
+    setIsAssistantOpen(false);
+    if (action.kind === 'pay') navigate('payment');
+    else if (action.kind === 'tasks') navigate('tasks');
+    else if (action.kind === 'sign') openOperations('sign');
+    else openOperations('all', action.query);
   };
 
   const updateHistory = (next: string[]) => {
@@ -366,6 +394,7 @@ export const App: React.FC = () => {
                   onPay={() => navigate('payment')}
                   tasksCount={visibleTasks(tasksState, insights.criticalTask).length}
                   onOpenTasks={() => navigate('tasks')}
+                  onAsk={askAssistant}
                 />
               ) : page === 'tasks' ? (
                 <TasksPage
@@ -381,7 +410,15 @@ export const App: React.FC = () => {
               )}
             </div>
           </main>
-          <FloatingActions />
+          <FloatingActions onOpenAssistant={openAssistant} />
+          <AssistantChat
+            isOpen={isAssistantOpen}
+            onClose={() => setIsAssistantOpen(false)}
+            messages={assistant.messages}
+            status={assistant.status}
+            onAsk={assistant.ask}
+            onAction={runAssistantAction}
+          />
         </div>
       ) : page === 'main' ? (
         <div className="app__body">
