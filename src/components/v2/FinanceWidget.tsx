@@ -194,7 +194,7 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
             <div className="finance-widget__sum">
               <span className="ts-400-s finance-widget__secondary">Всего на счетах</span>
               <span className="ts-600-3xl">3 422 785,37 ₽</span>
-              <span className="ts-500-s finance-widget__delta">{isAccountsList ? `↑ ${data.delta.replace('+ ', '')}` : data.delta}</span>
+              <span className="ts-500-s finance-widget__delta">{`↑ ${data.delta.replace('+ ', '')}`}</span>
             </div>
             {isAccountsList ? (
               // Переключатель вида слева: график или детализация остатков
