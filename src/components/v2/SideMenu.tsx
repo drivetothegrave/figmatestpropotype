@@ -156,8 +156,9 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           <ShortcutItem
             key={label}
             label={label}
-            isFavorite={favorites.includes(label)}
-            onToggleFavorite={() => toggleFavorite(label)}
+            // В «Недавних» всегда «В избранное»; если пункт уже в избранном — он там не дублируется
+            isFavorite={false}
+            onToggleFavorite={() => !favorites.includes(label) && onFavoritesChange([...favorites, label])}
             onOpen={() => onOpenShortcut(label)}
           />
         ))}
