@@ -2324,12 +2324,15 @@ button {
   max-width: calc(var(--spacing-40x) + var(--spacing-16x));
 }
 
+/* Форма 720px — по центру свободного места справа от навигации раздела, на широком экране тоже */
 .payment-page__content {
   display: flex;
-  flex: 0 1 calc(var(--spacing-40x) * 4 + var(--spacing-30x) - var(--spacing-10x));
+  flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
+  max-width: calc(var(--spacing-40x) * 4 + var(--spacing-30x) - var(--spacing-10x));
   min-height: calc(100dvh - var(--app-nav-height, 0px));
+  margin: 0 auto;
 }
 
 .payment-page__form {
