@@ -2407,8 +2407,7 @@ button {
   flex-direction: column;
   gap: var(--spacing-1-5x);
   width: 100%;
-  /* От приветствия и до ассистента — по 16px, как в макете */
-  margin-bottom: calc(var(--spacing-4x) - var(--content-group-list-spacing));
+  position: relative;
   padding: var(--spacing-4x) var(--spacing-5x);
   border: 0;
   border-radius: var(--rounding-3x);
@@ -2419,6 +2418,11 @@ button {
 
 .task-card--important {
   background: var(--bg-error-2);
+}
+
+/* На главной: от приветствия и до ассистента — по 16px, как в макете */
+.home > .task-card {
+  margin-bottom: calc(var(--spacing-4x) - var(--content-group-list-spacing));
 }
 
 /* Серые приписки в строках «Финансов»: номер счёта, количество фондов и депозитов */
@@ -2513,4 +2517,46 @@ button {
 .accounts-drawer__actions svg,
 .accounts-drawer__paused svg {
   fill: currentColor;
+}
+
+/* ---------- Экран «Задачи» (макет 300:257342) ---------- */
+
+.task-card--default {
+  background: var(--bg-brand-2);
+}
+
+.task-card__category {
+  color: var(--translucent-primitives-secondary);
+}
+
+/* Быстрые действия задачи — справа на фоне карточки, как у операций, но без подложки */
+.task-card .payment-row__actions {
+  border-radius: 0 var(--rounding-3x) var(--rounding-3x) 0;
+  background: inherit;
+}
+
+.task-card:hover .payment-row__actions,
+.task-card:focus-within .payment-row__actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tasks-page__tabs {
+  display: flex;
+  gap: var(--spacing-2-5x);
+}
+
+.tasks-page__tabs .chip {
+  padding-top: var(--spacing-1x);
+  padding-bottom: var(--spacing-1x);
+}
+
+.tasks-page__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.tasks-page__empty {
+  color: var(--primitive-secondary);
 }

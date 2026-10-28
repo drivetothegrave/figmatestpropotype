@@ -13,6 +13,8 @@ import { DemoPanel } from './components/DemoPanel';
 import { DEFAULT_FAVORITES, DEFAULT_RECENT, SideMenu } from './components/v2/SideMenu';
 import { HomePage } from './components/v2/HomePage';
 import { PaymentPage } from './components/v2/PaymentPage';
+import { TasksPage } from './components/v2/TasksPage';
+import { DEFAULT_TASKS_STATE, TasksState, visibleTasks } from './tasks';
 import { FloatingActions } from './components/v2/FloatingActions';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
 import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
@@ -39,7 +41,8 @@ const FAVORITES_KEY = 'menu-favorites';
 const RECENT_KEY = 'menu-recent';
 const RECENT_LIMIT = 5;
 /** Пункты избранного и недавних, которые ведут на страницы прототипа */
-const PAGE_LABELS: Partial<Record<AppPage, string>> = { payment: 'Платёж по реквизитам' };
+const PAGE_LABELS: Partial<Record<AppPage, string>> = { payment: 'Платёж по реквизитам', tasks: 'Задачи' };
+const TASKS_KEY = 'tasks-state';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -117,6 +120,12 @@ export const App: React.FC = () => {
   const updateRecent = (next: string[]) => {
     setRecent(next);
     save(RECENT_KEY, next);
+  };
+  // Задачи: удалённые и отложенные на следующую неделю
+  const [tasksState, setTasksState] = React.useState<TasksState>(() => load(TASKS_KEY, DEFAULT_TASKS_STATE));
+  const updateTasksState = (next: TasksState) => {
+    setTasksState(next);
+    save(TASKS_KEY, next);
   };
   // Высота закреплённой шапки — под неё встают контент и левое меню
   const [navHeight, setNavHeight] = React.useState(0);
@@ -214,7 +223,7 @@ export const App: React.FC = () => {
   };
 
   const resetPrototype = () => {
-    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY, RECENT_KEY].forEach((key) => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY, RECENT_KEY, TASKS_KEY].forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch {
@@ -229,6 +238,7 @@ export const App: React.FC = () => {
     setHomeWidgets(DEFAULT_HOME_WIDGETS);
     setFavorites(DEFAULT_FAVORITES);
     setRecent(DEFAULT_RECENT);
+    setTasksState(DEFAULT_TASKS_STATE);
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
   };
@@ -332,7 +342,11 @@ export const App: React.FC = () => {
               if (target) navigate(target);
             }}
           />
-          <main className={['app-v2__main', page === 'payment' ? 'app-v2__main--wide' : ''].filter(Boolean).join(' ')}>
+          <main
+            className={['app-v2__main', page === 'payment' || page === 'tasks' ? 'app-v2__main--wide' : '']
+              .filter(Boolean)
+              .join(' ')}
+          >
             <div className="app-v2__column">
               {page === 'main' ? (
                 <HomePage
@@ -348,6 +362,15 @@ export const App: React.FC = () => {
                   widgets={homeWidgets}
                   onWidgetsChange={updateHomeWidgets}
                   onPay={() => navigate('payment')}
+                  tasksCount={visibleTasks(tasksState, insights.criticalTask).length}
+                  onOpenTasks={() => navigate('tasks')}
+                />
+              ) : page === 'tasks' ? (
+                <TasksPage
+                  state={tasksState}
+                  onStateChange={updateTasksState}
+                  hasCritical={insights.criticalTask}
+                  onBack={() => navigate(previousPage === 'tasks' ? 'main' : previousPage)}
                 />
               ) : page === 'payment' ? (
                 <PaymentPage onBack={() => navigate(previousPage === 'payment' ? 'main' : previousPage)} />

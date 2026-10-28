@@ -25,6 +25,9 @@ interface HomePageProps {
   onWidgetsChange: (next: HomeWidgetId[]) => void;
   /** «Заплатить» — страница «Платёж по реквизитам» */
   onPay: () => void;
+  /** Сколько задач у клиента — «Все задачи · N» */
+  tasksCount: number;
+  onOpenTasks: () => void;
 }
 
 /** Главная в редизайне: приветствие, ассистент с задачами, быстрые действия и виджеты */
@@ -41,6 +44,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   widgets,
   onWidgetsChange,
   onPay,
+  tasksCount,
+  onOpenTasks,
 }) => {
   const [query, setQuery] = React.useState('');
   // Режим «Настройка главной»: правим черновик, на главную он попадает только по «Сохранить»
@@ -71,7 +76,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Критичная задача (настройка прототипа) — над ассистентом, остальные дела уходят в «менее важные» */}
       {settings.criticalTask && (
-        <button type="button" className="task-card task-card--important hoverOpacity">
+        <button type="button" className="task-card task-card--important hoverOpacity" onClick={onOpenTasks}>
           <span className="ts-600-s">Ответьте на запрос, чтобы избежать ограничений</span>
           <span className="ts-400-xs">До 29 ноября не позднее 23:59</span>
         </button>
@@ -113,8 +118,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </button>{' '}
             за VI квартал
           </p>
-          <button type="button" className="ts-500-s home-link hoverOpacity">
-            Все задачи · 5
+          <button type="button" className="ts-500-s home-link hoverOpacity" onClick={onOpenTasks}>
+            Все задачи · {tasksCount}
           </button>
         </div>
       </section>
