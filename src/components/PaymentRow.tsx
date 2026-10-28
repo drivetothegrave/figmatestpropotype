@@ -1,4 +1,5 @@
 import React from 'react';
+import { bankLogoOf } from '../bankLogos';
 import { Avatar, IconButton, Tag } from '@pluginwoman/t-ds';
 import { Payment, STATUS_COLOR, STATUS_LABEL, formatAmount } from '../data';
 
@@ -120,7 +121,7 @@ export const PaymentRow: React.FC<PaymentRowProps> = ({
       {!isCompact && <span className="ts-400-xs payment-row__secondary">{payment.meta}</span>}
     </div>
 
-    <Avatar size={isSmall ? 24 : 32} shape="circle" label={payment.avatarLabel} />
+    <Avatar size={isSmall ? 24 : 32} shape="circle" imageUrl={bankLogoOf(payment.counterparty)} label={payment.avatarLabel} />
 
     <QuickActionsBar actions={quickActions} />
   </div>
