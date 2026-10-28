@@ -14,6 +14,7 @@ import {
 import { FilePdf } from '@pluginwoman/t-ds/icons/20/Graphic';
 import { InformationCircle } from '@pluginwoman/t-ds/icons/20/Filled';
 import { Payment, STATUS_LABEL, formatAmount } from '../data';
+import russiaLogo from '../assets/logos/Russia.svg';
 
 interface DrawerAction {
   label: string;
@@ -182,7 +183,7 @@ export const PaymentDrawer: React.FC<PaymentDrawerProps> = ({
               title="50 275,37 ₽"
               description="Мой расчётный, **2324"
               verticalPadding="2x"
-              leftAccessory={<Avatar size={32} shape="circle" label="₽" />}
+              leftAccessory={<Avatar size={32} shape="circle" imageUrl={russiaLogo} label="Расчётный счёт" />}
             />
           </div>
         </div>
