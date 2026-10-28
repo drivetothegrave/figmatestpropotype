@@ -336,7 +336,6 @@ export const FinanceWidget: React.FC<FinanceWidgetProps> = ({ hasFinancePromo, h
                   verticalPadding="none"
                   leftAccessory={<img src={card.image} alt="" className="finance-widget__card" />}
                   rightAccessory={<CellRightAccessory variant="text-s" text={card.amount} />}
-                  onClick={() => setDrawerTab('cards')}
                 />
               ))}
             </div>

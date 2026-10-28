@@ -2495,20 +2495,19 @@ button {
   cursor: pointer;
 }
 
-/* Карта в дровере — по центру квадрата 48px, как аватары фондов */
+/* Превью карты в дровере — 60×38, скругление 4 и лёгкая тень, как в макете */
 .accounts-drawer__card {
   display: flex;
   flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: var(--spacing-12x);
-  height: var(--spacing-12x);
 }
 
 .accounts-drawer__card img {
-  width: var(--spacing-10x);
+  display: block;
+  width: calc(var(--spacing-14x) + var(--spacing-1x));
+  height: calc(var(--spacing-10x) - var(--spacing-0-5x));
   border-radius: var(--rounding-1x);
   box-shadow: var(--Card);
+  object-fit: cover;
 }
 
 .accounts-drawer__actions svg,
