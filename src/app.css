@@ -2541,16 +2541,6 @@ button {
   pointer-events: auto;
 }
 
-.tasks-page__tabs {
-  display: flex;
-  gap: var(--spacing-2-5x);
-}
-
-.tasks-page__tabs .chip {
-  padding-top: var(--spacing-1x);
-  padding-bottom: var(--spacing-1x);
-}
-
 .tasks-page__group {
   display: flex;
   flex-direction: column;

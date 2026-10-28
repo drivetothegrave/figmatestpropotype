@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chip, NavigationBar } from '@pluginwoman/t-ds';
+import { NavigationBar } from '@pluginwoman/t-ds';
 import { Trash, Watch } from '@pluginwoman/t-ds/icons/24/Stroked';
 import { QuickActionsBar } from '../PaymentRow';
 import { Task, TasksState, visibleTasks } from '../../tasks';
@@ -49,11 +49,9 @@ const TaskItem: React.FC<{ task: Task; isPostponed: boolean; onPostpone: () => v
 
 /** Экран «Задачи» (макет 300:257342): срочное, сегодня, на этой неделе; отложенные — на следующей неделе */
 export const TasksPage: React.FC<TasksPageProps> = ({ state, onStateChange, hasCritical, onBack }) => {
-  const [tab, setTab] = React.useState<'active' | 'postponed'>('active');
   const tasks = visibleTasks(state, hasCritical);
   const groupOf = (task: Task) => (state.postponed.includes(task.id) ? 'next' : task.group);
-  const groups = GROUPS.filter((g) => tab === 'active' || g.id === 'next')
-    .map((g) => ({ ...g, tasks: tasks.filter((t) => groupOf(t) === g.id) }))
+  const groups = GROUPS.map((g) => ({ ...g, tasks: tasks.filter((t) => groupOf(t) === g.id) }))
     .filter((g) => g.tasks.length > 0);
 
   const postpone = (id: string) => onStateChange({ ...state, postponed: [...state.postponed, id] });
@@ -68,15 +66,6 @@ export const TasksPage: React.FC<TasksPageProps> = ({ state, onStateChange, hasC
 
       <div className="payment-page__content">
         <div className="payment-page__form">
-          <div className="tasks-page__tabs">
-            <Chip variant="tab" isSelected={tab === 'active'} onClick={() => setTab('active')}>
-              Активные
-            </Chip>
-            <Chip variant="tab" isSelected={tab === 'postponed'} onClick={() => setTab('postponed')}>
-              Отложенные
-            </Chip>
-          </div>
-
           {groups.map((group) => (
             <section key={group.id} className="tasks-page__group">
               <h2 className="ts-600-xl">{group.title}</h2>
@@ -93,9 +82,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({ state, onStateChange, hasC
           ))}
 
           {groups.length === 0 && (
-            <p className="ts-400-m tasks-page__empty">
-              {tab === 'active' ? 'Все задачи выполнены' : 'Отложенных задач нет'}
-            </p>
+            <p className="ts-400-m tasks-page__empty">Все задачи выполнены</p>
           )}
         </div>
       </div>
