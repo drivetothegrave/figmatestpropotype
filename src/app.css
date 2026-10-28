@@ -2307,16 +2307,27 @@ button {
   max-width: none;
 }
 
+/* Форма — по центру области контента, как колонка главной и «Операций»; навигация раздела
+   слева её не сдвигает. Только на узком экране форма упирается в навигацию и уходит от центра */
 .payment-page {
-  display: flex;
-  align-items: flex-start;
+  --payment-nav-width: calc(var(--spacing-40x) + var(--spacing-30x));
+  --payment-form-width: calc(var(--spacing-40x) * 4 + var(--spacing-30x) - var(--spacing-10x));
+
+  position: relative;
   min-height: calc(100dvh - var(--app-nav-height, 0px));
 }
 
 .payment-page__nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--payment-nav-width);
+}
+
+.payment-page__nav > * {
   position: sticky;
   top: var(--app-nav-height, 0px);
-  flex: 0 0 calc(var(--spacing-40x) + var(--spacing-30x));
 }
 
 .payment-page__nav .navigation-bar__title,
@@ -2324,15 +2335,12 @@ button {
   max-width: calc(var(--spacing-40x) + var(--spacing-16x));
 }
 
-/* Форма 720px — по центру свободного места справа от навигации раздела, на широком экране тоже */
 .payment-page__content {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
-  min-width: 0;
-  max-width: calc(var(--spacing-40x) * 4 + var(--spacing-30x) - var(--spacing-10x));
+  width: min(var(--payment-form-width), 100% - var(--payment-nav-width));
   min-height: calc(100dvh - var(--app-nav-height, 0px));
-  margin: 0 auto;
+  margin-left: max(var(--payment-nav-width), (100% - var(--payment-form-width)) / 2);
 }
 
 .payment-page__form {
