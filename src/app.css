@@ -2613,3 +2613,14 @@ button {
   padding-right: var(--spacing-1-5x);
   padding-left: var(--spacing-1-5x);
 }
+
+/* Кнопка фильтров: иконка из набора 20px, ужатая до 16px — как в макете */
+.filters-button .ds-icon,
+.filters-chip .chip__accessory--left {
+  --icon-size: var(--icon-size-xs);
+}
+
+.filters-button svg {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}

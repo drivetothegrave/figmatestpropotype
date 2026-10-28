@@ -110,7 +110,7 @@ export const SignList: React.FC<SignListProps> = ({
   return (
     <div className="history-card sign-list">
       <div className="history-card__filters">
-        <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
+        <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" className="filters-button" />
         <SearchWithSuggest
           value={query}
           onChange={setQuery}

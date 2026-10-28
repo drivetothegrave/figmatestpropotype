@@ -268,7 +268,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
             </Chip>
           </span>
         ) : (
-          <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" />
+          <IconButton icon={<Filters />} ariaLabel="Фильтры" variant="secondary" size="xs" className="filters-button" />
         )}
         {isCombined ? (
           // Как в компактном таймлайне: итог, варианты запроса и превью операций в выпадашке;
