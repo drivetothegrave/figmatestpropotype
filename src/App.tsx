@@ -18,7 +18,8 @@ import { DEFAULT_TASKS_STATE, TasksState, visibleTasks } from './tasks';
 import { FloatingActions } from './components/v2/FloatingActions';
 import { AssistantChat, useAssistant } from './components/v2/AssistantChat';
 import { AssistantAction, nowTime } from './assistant';
-import { DEFAULT_FUTURE_STATE, DIALOG_QUESTIONS, DIALOG_THREAD_ID, DIALOG_TITLE, FutureState, FutureWidgetId, ThreadStatus } from './future';
+import { BusinessState, FutureState, FutureWidgetId, ThreadStatus } from './future';
+import { BUSINESSES, DEFAULT_FUTURE_STATE, currentProposal, dialogStateOf, nextDialog, routeQuestion } from './businesses';
 import { FutureHomePage } from './components/future/FutureHomePage';
 import { DialogPage } from './components/future/DialogPage';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
@@ -48,7 +49,8 @@ const RECENT_LIMIT = 5;
 /** Пункты избранного и недавних, которые ведут на страницы прототипа */
 const PAGE_LABELS: Partial<Record<AppPage, string>> = { payment: 'Платёж по реквизитам', tasks: 'Задачи' };
 const TASKS_KEY = 'tasks-state';
-const FUTURE_KEY = 'future-state';
+// v2: состояние концепта по типам бизнеса
+const FUTURE_KEY = 'future-state-v2';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -95,6 +97,7 @@ export const App: React.FC = () => {
       criticalTask: saved.criticalTask ?? DEFAULT_INSIGHTS.criticalTask,
       future: saved.future ?? DEFAULT_INSIGHTS.future,
       futureAssistant: saved.futureAssistant === 'proposal' ? 'proposal' : 'calm',
+      futureBusiness: saved.futureBusiness === 'solo' ? 'solo' : 'coffee',
       // Инсайт в «Истории» на главной — из макетов есть только дубль и рост риска
       notice: saved.notice === 'duplicate' || saved.notice === 'risk-medium' ? saved.notice : 'off',
     };
@@ -104,9 +107,13 @@ export const App: React.FC = () => {
     save(INSIGHTS_KEY, next);
     // Снова включили предложение виджета — ассистент приходит с ним заново
     if (next.futureAssistant === 'proposal' && insights.futureAssistant !== 'proposal') {
-      updateFuture((prev) => ({ ...prev, revenueDecided: false, pinned: prev.pinned.filter((id) => id !== 'revenue') }));
+      updateBusiness(
+        (prev) => ({ ...prev, decided: prev.decided.filter((id) => id !== 'revenue'), pinned: prev.pinned.filter((id) => id !== 'revenue') }),
+        'coffee',
+      );
     }
-    if (!next.future && page === 'thread') setPage('main');
+    // Другой тип бизнеса или обычный вариант — со страницы ветки на главную
+    if ((!next.future || next.futureBusiness !== insights.futureBusiness) && page === 'thread') setPage('main');
   };
   // Навигация: главная (компактный таймлайн) ↔ «Операции» (развёрнутый)
   const [page, setPage] = React.useState<AppPage>('main');
@@ -142,23 +149,30 @@ export const App: React.FC = () => {
     setTasksState(next);
     save(TASKS_KEY, next);
   };
-  // Концепт «из будущего»: ветки разговоров, закреплённые виджеты и ход диалога
+  // Концепт «из будущего»: у каждого типа бизнеса свои ветки, виджеты и ход разговоров
   const [future, setFuture] = React.useState<FutureState>(() => {
-    const saved = load(FUTURE_KEY, DEFAULT_FUTURE_STATE);
+    const saved = load<Partial<FutureState>>(FUTURE_KEY, {});
     // После перезагрузки ассистент уже не «думает» — ответ готов
+    const settle = (s: BusinessState): BusinessState => ({
+      ...s,
+      threads: s.threads.map((t) => (t.status === 'working' && s.dialogs[t.id] ? { ...t, status: 'unread' } : t)),
+    });
     return {
-      ...saved,
-      threads: saved.threads.map((t) => (t.id === DIALOG_THREAD_ID && t.status === 'working' ? { ...t, status: 'unread' } : t)),
+      coffee: settle(saved.coffee ?? DEFAULT_FUTURE_STATE.coffee),
+      solo: settle(saved.solo ?? DEFAULT_FUTURE_STATE.solo),
     };
   });
-  const updateFuture = (fn: (prev: FutureState) => FutureState) =>
+  const business = BUSINESSES[insights.futureBusiness];
+  const bizState = future[insights.futureBusiness];
+  const updateBusiness = (fn: (prev: BusinessState) => BusinessState, id = insights.futureBusiness) =>
     setFuture((prev) => {
-      const next = fn(prev);
+      const next = { ...prev, [id]: fn(prev[id]) };
       save(FUTURE_KEY, next);
       return next;
     });
   const [threadId, setThreadId] = React.useState<string>();
-  const [isThinking, setIsThinking] = React.useState(false);
+  // Ветка, в которой ассистент сейчас готовит ответ
+  const [thinkingId, setThinkingId] = React.useState<string>();
 
   // Высота закреплённой шапки — под неё встают контент и левое меню
   const [navHeight, setNavHeight] = React.useState(0);
@@ -233,69 +247,92 @@ export const App: React.FC = () => {
     else openOperations('all', action.query);
   };
 
-  const withThreadStatus = (prev: FutureState, id: string, status: ThreadStatus): FutureState => ({
+  const withThreadStatus = (prev: BusinessState, id: string, status: ThreadStatus): BusinessState => ({
     ...prev,
     threads: prev.threads.map((t) => (t.id === id ? { ...t, status } : t)),
   });
-  // Открыта ли ветка диалога прямо сейчас — чтобы вернувшийся ответ не стал «непрочитанным»
+  // Открыта ли ветка прямо сейчас — чтобы вернувшийся ответ не стал «непрочитанным»
   const openedThreadRef = React.useRef<string | undefined>(undefined);
   openedThreadRef.current = page === 'thread' ? threadId : undefined;
 
   const openThread = (id: string) => {
-    updateFuture((prev) => withThreadStatus(prev, id, prev.threads.find((t) => t.id === id)?.status === 'working' ? 'working' : 'read'));
-    // В прототипе разобран только один разговор — остальные ветки пока без страницы
-    if (id !== DIALOG_THREAD_ID) return;
+    updateBusiness((prev) => withThreadStatus(prev, id, prev.threads.find((t) => t.id === id)?.status === 'working' ? 'working' : 'read'));
+    // Страница есть только у разговоров из сценария — остальные ветки для вида
+    if (!business.dialogs.some((d) => d.id === id)) return;
     setThreadId(id);
     navigate('thread');
   };
 
   /** Вопрос по сценарию: ветка появляется в меню, ассистент «работает» и возвращается с ответом */
-  const askInDialog = (question: string) => {
-    if (isThinking || future.dialog.questions.length >= DIALOG_QUESTIONS.length) return;
+  const askInDialog = (dialogId: string, question: string) => {
+    const def = business.dialogs.find((d) => d.id === dialogId);
+    if (!def || thinkingId || dialogStateOf(bizState, dialogId).questions.length >= def.questions.length) return;
     const time = nowTime();
-    updateFuture((prev) => {
-      const hasThread = prev.threads.some((t) => t.id === DIALOG_THREAD_ID);
+    const biz = insights.futureBusiness;
+    updateBusiness((prev) => {
+      const dialog = dialogStateOf(prev, dialogId);
+      const hasThread = prev.threads.some((t) => t.id === dialogId);
       const threads = hasThread
-        ? prev.threads.map((t) => (t.id === DIALOG_THREAD_ID ? { ...t, status: 'working' as const } : t))
-        : [{ id: DIALOG_THREAD_ID, title: DIALOG_TITLE, status: 'working' as const }, ...prev.threads];
+        ? prev.threads.map((t) => (t.id === dialogId ? { ...t, status: 'working' as const } : t))
+        : [{ id: dialogId, title: def.title, status: 'working' as const }, ...prev.threads];
       return {
         ...prev,
         threads,
-        dialog: { ...prev.dialog, questions: [...prev.dialog.questions, question], times: [...prev.dialog.times, time] },
+        dialogs: { ...prev.dialogs, [dialogId]: { ...dialog, questions: [...dialog.questions, question], times: [...dialog.times, time] } },
       };
     });
-    setIsThinking(true);
+    setThinkingId(dialogId);
     window.setTimeout(() => {
-      setIsThinking(false);
-      updateFuture((prev) =>
-        withThreadStatus(prev, DIALOG_THREAD_ID, openedThreadRef.current === DIALOG_THREAD_ID ? 'read' : 'unread'),
-      );
+      setThinkingId(undefined);
+      updateBusiness((prev) => withThreadStatus(prev, dialogId, openedThreadRef.current === dialogId ? 'read' : 'unread'), biz);
     }, 1800);
   };
 
-  /** Вопрос с главной — открываем ветку разговора */
+  /** Вопрос с главной — в подходящий разговор по сценарию, его ветка открывается */
   const askFromFutureHome = (question: string) => {
-    askInDialog(question);
-    setThreadId(DIALOG_THREAD_ID);
+    const def = routeQuestion(business, bizState, question);
+    if (!def) return;
+    askInDialog(def.id, question);
+    setThreadId(def.id);
     navigate('thread');
   };
 
-  const decideCard = (decision: 'added' | 'dismissed') =>
-    updateFuture((prev) => ({
-      ...prev,
-      pinned: decision === 'added' && !prev.pinned.includes('products-salary') ? [...prev.pinned, 'products-salary'] : prev.pinned,
-      dialog: { ...prev.dialog, card: decision, cardTime: nowTime() },
-    }));
+  /** Закрепить виджет: встаёт последним и получает метку «Новый» */
+  const pin = (prev: BusinessState, id: FutureWidgetId): BusinessState => ({
+    ...prev,
+    pinned: prev.pinned.includes(id) ? prev.pinned : [...prev.pinned, id],
+    fresh: id,
+  });
 
-  const decideRevenue = (accept: boolean) =>
-    updateFuture((prev) => ({
-      ...prev,
-      revenueDecided: true,
-      pinned: accept && !prev.pinned.includes('revenue') ? [...prev.pinned, 'revenue'] : prev.pinned,
-    }));
+  const decideCard = (decision: 'added' | 'dismissed') => {
+    const def = business.dialogs.find((d) => d.id === threadId);
+    if (!def) return;
+    updateBusiness((prev) => {
+      const next = decision === 'added' ? pin(prev, def.offer.widget) : prev;
+      return { ...next, dialogs: { ...next.dialogs, [def.id]: { ...dialogStateOf(prev, def.id), card: decision, cardTime: nowTime() } } };
+    });
+  };
+
+  const proposal = currentProposal(business, bizState, insights);
+  const decideProposal = (accept: boolean) => {
+    if (!proposal) return;
+    updateBusiness((prev) => {
+      const next = accept ? pin(prev, proposal.widget) : prev;
+      return { ...next, decided: [...next.decided, proposal.id] };
+    });
+  };
 
   const unpinFuture = (id: FutureWidgetId) =>
-    updateFuture((prev) => ({ ...prev, pinned: prev.pinned.filter((p) => p !== id) }));
+    updateBusiness((prev) => ({ ...prev, pinned: prev.pinned.filter((p) => p !== id), fresh: prev.fresh === id ? undefined : prev.fresh }));
+
+  /** Этап для демо — главная ИП через 2 недели, 2 месяца, полгода */
+  const jumpToStage = (index: number) => {
+    const stage = business.stages?.[index];
+    if (!stage) return;
+    updateBusiness(() => stage.state());
+    setThinkingId(undefined);
+    navigate('main');
+  };
 
   const updateHistory = (next: string[]) => {
     setHistory(next);
@@ -364,7 +401,7 @@ export const App: React.FC = () => {
     setTasksState(DEFAULT_TASKS_STATE);
     setFuture(DEFAULT_FUTURE_STATE);
     setThreadId(undefined);
-    setIsThinking(false);
+    setThinkingId(undefined);
     if (page === 'thread') setPage('main');
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
@@ -468,7 +505,7 @@ export const App: React.FC = () => {
               const target = (Object.keys(PAGE_LABELS) as AppPage[]).find((p) => PAGE_LABELS[p] === label);
               if (target) navigate(target);
             }}
-            threads={insights.future ? future.threads : undefined}
+            threads={insights.future ? bizState.threads : undefined}
             activeThreadId={threadId}
             onOpenThread={openThread}
           />
@@ -484,20 +521,30 @@ export const App: React.FC = () => {
             <div className="app-v2__column">
               {insights.future && page === 'main' ? (
                 <FutureHomePage
-                  hasProposal={insights.futureAssistant === 'proposal' && !future.revenueDecided}
-                  onAcceptProposal={() => decideRevenue(true)}
-                  onDeclineProposal={() => decideRevenue(false)}
-                  pinned={future.pinned}
+                  name={business.name}
+                  proposal={proposal}
+                  onAcceptProposal={() => decideProposal(true)}
+                  onDeclineProposal={() => decideProposal(false)}
+                  line={business.homeLine(bizState)}
+                  onLineAction={(flag) => updateBusiness((prev) => ({ ...prev, flags: [...prev.flags, flag] }))}
+                  money={business.money(bizState)}
+                  pinned={bizState.pinned}
+                  fresh={bizState.fresh}
                   onUnpin={unpinFuture}
-                  onOpenWidgetThread={() => openThread(DIALOG_THREAD_ID)}
+                  widgetThread={(id) => {
+                    const def = business.dialogs.find((d) => d.offer.widget === id && dialogStateOf(bizState, d.id).card === 'added');
+                    return def ? () => openThread(def.id) : undefined;
+                  }}
+                  askPlaceholder={nextDialog(business, bizState)?.questions[0]}
                   onAsk={askFromFutureHome}
                   onPay={() => navigate('payment')}
                 />
-              ) : page === 'thread' ? (
+              ) : page === 'thread' && business.dialogs.some((d) => d.id === threadId) ? (
                 <DialogPage
-                  dialog={future.dialog}
-                  isThinking={isThinking}
-                  onAsk={askInDialog}
+                  def={business.dialogs.find((d) => d.id === threadId)!}
+                  dialog={dialogStateOf(bizState, threadId!)}
+                  isThinking={thinkingId === threadId}
+                  onAsk={(question) => askInDialog(threadId!, question)}
                   onCardDecision={decideCard}
                   onOpenHome={() => navigate('main')}
                 />
@@ -585,7 +632,13 @@ export const App: React.FC = () => {
         onSave={saveComment}
       />
 
-      <DemoPanel onReset={resetPrototype} settings={insights} onSettingsChange={updateInsights} />
+      <DemoPanel
+        onReset={resetPrototype}
+        settings={insights}
+        onSettingsChange={updateInsights}
+        stages={insights.future ? business.stages?.map((st) => st.label) : undefined}
+        onStage={jumpToStage}
+      />
 
       <SignConfirmModal
         isOpen={signRequest.length > 0}

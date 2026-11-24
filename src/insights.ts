@@ -1,4 +1,4 @@
-import type { FutureAssistantMode } from './future';
+import type { BusinessId, FutureAssistantMode } from './future';
 
 /**
  * Инсайд-нотификация на главной — одна за раз и только «в нужный момент».
@@ -33,6 +33,8 @@ export interface InsightSettings {
   future: boolean;
   /** Концепт: с чем ассистент пришёл на главную */
   futureAssistant: FutureAssistantMode;
+  /** Концепт: тип бизнеса — свои вопросы, предложения ассистента и виджеты */
+  futureBusiness: BusinessId;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -48,6 +50,7 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   criticalTask: false,
   future: false,
   futureAssistant: 'calm',
+  futureBusiness: 'coffee',
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

@@ -2925,11 +2925,18 @@ button {
 }
 
 /* Виджеты стопкой по 2 в ряд: в ряду одинаковой высоты, без перекосов (макет 367:21251) */
+/* Все ряды одной высоты (по самому высокому виджету); дырки после широкого заполняются маленькими */
 .future-home__widgets {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  grid-auto-flow: row dense;
   gap: var(--spacing-4x);
   align-items: stretch;
+}
+
+.future-widget--l {
+  grid-column: span 2;
 }
 
 .future-widget {
@@ -2974,6 +2981,17 @@ button {
 /* Предложенный виджет — пунктирная фиолетовая рамка, пока клиент не согласился */
 .future-widget--proposed .home-widget.widget--outlined {
   border: 1px dashed var(--primitive-brand);
+}
+
+/* Только что закреплённый — сплошная фиолетовая рамка и «Новый», пока не появится следующий */
+.future-widget--fresh .home-widget.widget--outlined {
+  border: 1px solid var(--primitive-brand);
+}
+
+.future-widget__accessory {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2-5x);
 }
 
 .future-tag {
@@ -3298,4 +3316,54 @@ button {
 /* Прокрутка к последнему сообщению — с запасом на поле ввода внизу */
 .future-dialog__end {
   scroll-margin-bottom: calc(var(--spacing-30x) + var(--spacing-8x));
+}
+
+/* Строка виджета концепта: «название — сумма», слева может быть точка статуса */
+.future-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+  color: var(--primitive-primary);
+}
+
+.future-row__dot {
+  flex: 0 0 auto;
+  width: var(--spacing-2x);
+  height: var(--spacing-2x);
+  border-radius: 50%;
+}
+
+.future-row__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.future-row__value--success {
+  color: var(--primitive-success);
+}
+
+/* «Клиенты за год» — столбики по убыванию, лидер фирменным цветом */
+.future-client-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-1-5x);
+  height: var(--spacing-10x);
+}
+
+.future-client-bars span {
+  flex: 1;
+  border-radius: var(--rounding-1x);
+  background: var(--bg-brand-2);
+}
+
+.future-client-bars span.is-top {
+  background: var(--primitive-brand);
+}
+
+.future-table--headless tr:first-child td {
+  padding-top: 0;
+  border-top: 0;
 }

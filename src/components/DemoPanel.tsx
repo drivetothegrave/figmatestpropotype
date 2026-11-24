@@ -2,12 +2,15 @@ import React from 'react';
 import { Button, Cell, CellRightAccessory, Chip, IconButton } from '@pluginwoman/t-ds';
 import { Cross, Gear } from '@pluginwoman/t-ds/icons';
 import { InsightNotice, InsightSettings, NOTICE_LABEL } from '../insights';
-import { FUTURE_ASSISTANT_LABEL, FutureAssistantMode } from '../future';
+import { BUSINESS_LABEL, BusinessId, FUTURE_ASSISTANT_LABEL, FutureAssistantMode } from '../future';
 
 interface DemoPanelProps {
   settings: InsightSettings;
   onSettingsChange: (next: InsightSettings) => void;
   onReset: () => void;
+  /** Концепт: этапы жизни главной для выбранного бизнеса — переход сразу к состоянию */
+  stages?: string[];
+  onStage?: (index: number) => void;
 }
 
 /** Инсайты в «Истории» на главной — по макетам «Инсайд 1» и «Инсайд 2» */
@@ -15,6 +18,7 @@ const NOTICES: InsightNotice[] = ['off', 'duplicate', 'risk-medium'];
 
 /** Концепт «из будущего»: с чем ассистент пришёл на главную */
 const FUTURE_MODES: FutureAssistantMode[] = ['calm', 'proposal'];
+const BUSINESS_IDS: BusinessId[] = ['coffee', 'solo'];
 
 type ToggleKey = 'criticalTask' | 'accountsList' | 'financePromo' | 'fundRecommendation';
 
@@ -35,7 +39,7 @@ const SECTIONS: { title: string; toggles: { key: ToggleKey; title: string }[] }[
 ];
 
 /** Служебная панель прототипа — не часть интерфейса банка, нужна для демо */
-export const DemoPanel: React.FC<DemoPanelProps> = ({ settings, onSettingsChange, onReset }) => {
+export const DemoPanel: React.FC<DemoPanelProps> = ({ settings, onSettingsChange, onReset, stages, onStage }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -68,6 +72,35 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({ settings, onSettingsChange
             }
           />
           {settings.future && (
+            <>
+              <p className="ts-400-s demo-panel__label">Тип бизнеса</p>
+              <div className="demo-panel__chips" role="radiogroup" aria-label="Тип бизнеса">
+                {BUSINESS_IDS.map((id) => (
+                  <Chip
+                    key={id}
+                    variant="chip"
+                    isSelected={settings.futureBusiness === id}
+                    onClick={() => onSettingsChange({ ...settings, futureBusiness: id })}
+                  >
+                    {BUSINESS_LABEL[id]}
+                  </Chip>
+                ))}
+              </div>
+            </>
+          )}
+          {settings.future && stages && (
+            <>
+              <p className="ts-400-s demo-panel__label">Перейти к этапу</p>
+              <div className="demo-panel__chips">
+                {stages.map((label, i) => (
+                  <Chip key={label} variant="chip" onClick={() => onStage?.(i)}>
+                    {label}
+                  </Chip>
+                ))}
+              </div>
+            </>
+          )}
+          {settings.future && settings.futureBusiness === 'coffee' && (
             <>
               <p className="ts-400-s demo-panel__label">Ассистент на главной</p>
               <div className="demo-panel__chips" role="radiogroup" aria-label="Ассистент на главной">

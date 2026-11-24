@@ -2,48 +2,62 @@ import React from 'react';
 import { Button, IconButton } from '@pluginwoman/t-ds';
 import { DotsThreeHorizontal } from '@pluginwoman/t-ds/icons/20/Stroked';
 import { FutureWidgetId } from '../../future';
+import type { HomeLine, ProposalDef } from '../../businesses';
 import { AskField } from './AskField';
 import { FutureWidget } from './FutureWidgets';
 
 interface FutureHomePageProps {
-  /** Ассистент пришёл с предложением виджета «Выручка» (и клиент ещё не ответил) */
-  hasProposal: boolean;
+  /** Имя в приветствии */
+  name: string;
+  /** Предложение ассистента — виджет пунктиром и кнопки «Добавить» / «Не сейчас» */
+  proposal?: ProposalDef;
   onAcceptProposal: () => void;
   onDeclineProposal: () => void;
+  /** Реплика ассистента, когда предлагать нечего */
+  line: HomeLine;
+  onLineAction: (flag: string) => void;
+  money: string;
   pinned: FutureWidgetId[];
+  fresh?: FutureWidgetId;
   onUnpin: (id: FutureWidgetId) => void;
-  /** Виджет собран в разговоре — «⋯ → Открыть разговор» */
-  onOpenWidgetThread: (id: FutureWidgetId) => void;
+  /** «⋯ → Открыть разговор» — у виджетов, собранных в разговоре */
+  widgetThread: (id: FutureWidgetId) => (() => void) | undefined;
+  /** Подсказка в поле — следующий вопрос сценария; пустой Enter его задаёт */
+  askPlaceholder?: string;
   onAsk: (question: string) => void;
   onPay: () => void;
 }
 
 /**
  * Главная концепта «из будущего»: приветствие, ассистент и только то, что банк принёс сам
- * или клиент закрепил. Если всё хорошо — «Всё спокойно» и ничего лишнего.
+ * или клиент закрепил. Виджеты по 2 в ряд (широкий — один), все одной высоты.
  */
 export const FutureHomePage: React.FC<FutureHomePageProps> = ({
-  hasProposal,
+  name,
+  proposal,
   onAcceptProposal,
   onDeclineProposal,
+  line,
+  onLineAction,
+  money,
   pinned,
+  fresh,
   onUnpin,
-  onOpenWidgetThread,
+  widgetThread,
+  askPlaceholder,
   onAsk,
   onPay,
 }) => (
   <div className="future-home">
     <div className="future-home__header">
-      <h1 className="ts-600-4xl">Доброе утро, Тимур!</h1>
-      <AskField onAsk={onAsk}>
-        {hasProposal ? (
+      <h1 className="ts-600-4xl">Доброе утро, {name}!</h1>
+      <AskField onAsk={onAsk} placeholder={askPlaceholder} isPlaceholderSendable={!!askPlaceholder}>
+        {proposal ? (
           <>
-            <p className="ts-500-s">
-              Вы подключили эквайринг и кассу — могу показывать выручку за сегодня и статус терминалов
-            </p>
+            <p className="ts-500-s">{proposal.text}</p>
             <div className="future-buttons">
               <Button variant="secondary" size="xs" isHugWidth className="future-button--inverse" onClick={onAcceptProposal}>
-                Хорошо, оставляй
+                {proposal.accept}
               </Button>
               <Button variant="secondary" size="xs" isHugWidth onClick={onDeclineProposal}>
                 Не сейчас
@@ -51,7 +65,25 @@ export const FutureHomePage: React.FC<FutureHomePageProps> = ({
             </div>
           </>
         ) : (
-          <p className="ts-500-s">Всё спокойно. Если что-то изменится — скажу.</p>
+          <>
+            <p className="ts-500-s">{line.text}</p>
+            {line.actions && (
+              <div className="future-buttons">
+                {line.actions.map((action) => (
+                  <Button
+                    key={action.flag}
+                    variant="secondary"
+                    size="xs"
+                    isHugWidth
+                    className={action.isPrimary ? 'future-button--inverse' : ''}
+                    onClick={() => onLineAction(action.flag)}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </AskField>
     </div>
@@ -59,7 +91,7 @@ export const FutureHomePage: React.FC<FutureHomePageProps> = ({
     <div className="future-home__money">
       <div className="home-widget-total">
         <span className="ts-400-s home-widget-secondary">Всего денег</span>
-        <span className="ts-500-l">3 422 785,37 ₽</span>
+        <span className="ts-500-l">{money}</span>
       </div>
       <div className="future-buttons">
         <Button variant="primary" size="s" isHugWidth onClick={onPay}>
@@ -75,18 +107,18 @@ export const FutureHomePage: React.FC<FutureHomePageProps> = ({
       </div>
     </div>
 
-    {(hasProposal || pinned.length > 0) && (
+    {(proposal || pinned.length > 0) && (
       <div className="future-home__widgets">
         {pinned.map((id) => (
           <FutureWidget
             key={id}
             id={id}
-            state="pinned"
+            state={id === fresh ? 'fresh' : 'pinned'}
             onUnpin={() => onUnpin(id)}
-            onOpenThread={id === 'products-salary' ? () => onOpenWidgetThread(id) : undefined}
+            onOpenThread={widgetThread(id)}
           />
         ))}
-        {hasProposal && <FutureWidget id="revenue" state="proposed" />}
+        {proposal && <FutureWidget id={proposal.widget} state="proposed" />}
       </div>
     )}
   </div>
