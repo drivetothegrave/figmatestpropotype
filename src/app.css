@@ -2858,3 +2858,413 @@ button {
   color: var(--primitive-secondary);
   white-space: nowrap;
 }
+
+/* ---------- Концепт «из будущего»: главная, ветки разговоров, диалог ---------- */
+
+/* Колонка 680px — как в макетах концепта (344:26498, 360:19774) */
+.app-v2__main--future .app-v2__column {
+  max-width: calc(var(--spacing-40x) * 4 + var(--spacing-10x));
+}
+
+/* «⋯» в быстрых действиях — иконка 20px, как у кнопок с текстом */
+.future-home__money .icon-button .ds-icon {
+  --icon-size: var(--icon-size-s);
+}
+
+.side-menu__dot {
+  flex: 0 0 auto;
+  width: var(--spacing-2x);
+  height: var(--spacing-2x);
+  border-radius: 50%;
+  background: var(--bg-brand);
+}
+
+.side-menu__spinner.ds-spinner {
+  --spinner-size: var(--spacing-4x);
+  --spinner-color: var(--primitive-brand);
+  color: var(--primitive-brand);
+}
+
+/* Главная концепта: воздух сверху, всё по центру колонки */
+.future-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8x);
+  padding-top: calc(var(--spacing-30x) - var(--page-top-padding));
+}
+
+.future-home__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+}
+
+.future-home__header h1 {
+  margin: 0;
+}
+
+.future-home__money {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2-5x);
+}
+
+.future-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2-5x);
+}
+
+/* Чёрная кнопка согласия — «Хорошо, оставляй», «Добавить на главную» */
+.future-button--inverse {
+  --button-bg: var(--primitive-primary);
+  --button-bg-hovered: var(--primitive-primary);
+  --button-color: var(--primitive-default);
+}
+
+.future-home__widgets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-4x);
+  align-items: start;
+}
+
+.future-widget {
+  display: flex;
+  min-width: 0;
+}
+
+.future-widget .widget {
+  flex: 1;
+}
+
+/* Предложенный виджет — пунктирная фиолетовая рамка, пока клиент не согласился */
+.future-widget--proposed .home-widget.widget--outlined {
+  border: 1px dashed var(--primitive-brand);
+}
+
+.future-tag {
+  display: inline-flex;
+  align-items: center;
+  height: var(--spacing-5x);
+  padding: 0 var(--spacing-2x);
+  border-radius: var(--rounding-5x);
+  background: var(--bg-brand-2);
+  color: var(--primitive-brand);
+}
+
+.future-widget__more {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primitive-neutral-4);
+  cursor: pointer;
+}
+
+/* Таблицы в ответах и в виджете: подписи слева, цифры справа, выше нормы — оранжевым */
+.future-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--primitive-primary);
+}
+
+.future-table th {
+  padding: 0 0 var(--spacing-2-5x);
+  color: var(--primitive-secondary);
+  font-weight: inherit;
+  text-align: right;
+}
+
+.future-table td {
+  padding: var(--spacing-3x) 0;
+  border-top: 0.5px solid var(--primitive-neutral-2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.future-table th:first-child,
+.future-table td:first-child {
+  text-align: left;
+}
+
+.future-table th + th,
+.future-table td + td {
+  padding-left: var(--spacing-4x);
+}
+
+.future-table td.future-table__high,
+.future-table__row--high td + td {
+  color: var(--primitive-warning);
+}
+
+.future-table--compact td {
+  padding: var(--spacing-2-5x) 0;
+}
+
+/* ---------- Страница ветки: вопросы баблами, ответы текстом с карточками ---------- */
+
+.future-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8x);
+}
+
+.future-dialog__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+}
+
+.future-dialog__header h1,
+.future-dialog__header p {
+  margin: 0;
+}
+
+.future-dialog__question {
+  max-width: 400px;
+}
+
+.future-answer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4x);
+  color: var(--primitive-primary);
+}
+
+.future-answer p {
+  margin: 0;
+}
+
+.future-answer b {
+  font-weight: 600;
+}
+
+.future-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2-5x);
+  padding: var(--spacing-5x);
+  border: 0.5px solid var(--primitive-neutral-2);
+  border-radius: var(--rounding-4x);
+}
+
+.future-card__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3x);
+}
+
+.future-segments {
+  display: flex;
+  gap: 1px;
+  height: var(--spacing-2x);
+  overflow: hidden;
+  border-radius: var(--rounding-2x);
+}
+
+.future-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1x) var(--spacing-4x);
+  color: var(--primitive-secondary);
+}
+
+.future-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1-5x);
+}
+
+.future-legend i {
+  width: var(--spacing-2x);
+  height: var(--spacing-2x);
+  border-radius: 50%;
+}
+
+.future-note {
+  margin: 0;
+  color: var(--primitive-secondary);
+}
+
+/* Иконка — в строке текста, чтобы ссылка «проверить» шла сразу за ним */
+.future-note__icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  margin-right: var(--spacing-1-5x);
+  vertical-align: -2px;
+}
+
+.future-note__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.future-note .home-link {
+  font: inherit;
+}
+
+.future-followups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2-5x);
+}
+
+.future-line-chart svg {
+  display: block;
+  width: 100%;
+  height: 128px;
+  overflow: visible;
+}
+
+.future-line-chart__line {
+  fill: none;
+  stroke: var(--primitive-brand);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.future-line-chart__line--forecast {
+  stroke-dasharray: 8 8;
+}
+
+.future-line-chart__now {
+  stroke: var(--primitive-neutral-2);
+  stroke-width: 1;
+}
+
+.future-line-chart__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-2-5x);
+  color: var(--primitive-neutral-4);
+}
+
+.future-thinking {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2x);
+  margin: 0;
+  color: var(--primitive-secondary);
+}
+
+.future-thinking__spinner.ds-spinner {
+  --spinner-size: var(--spacing-4x);
+  color: var(--primitive-brand);
+}
+
+/* Предложение карточки в конце разговора */
+.future-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-4x);
+  padding: var(--spacing-5x);
+  border-radius: var(--rounding-4x);
+  background: var(--bg-brand-1);
+}
+
+.future-offer p {
+  margin: 0;
+}
+
+.future-offer__widget {
+  width: 340px;
+  max-width: 100%;
+  background: var(--container-default);
+  border-radius: var(--rounding-4x);
+}
+
+/* Что нажал клиент — серой кнопкой справа и временем */
+.future-pressed {
+  display: flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: var(--spacing-2x);
+  margin: 0;
+  color: var(--primitive-neutral-4);
+}
+
+.future-pressed__button {
+  display: inline-flex;
+  align-items: center;
+  height: var(--spacing-8x);
+  padding: 0 var(--spacing-3x);
+  border-radius: var(--rounding-2x);
+  background: var(--bg-neutral-3);
+  color: var(--primitive-default);
+}
+
+.future-done {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+  padding: var(--spacing-3x) var(--spacing-4x);
+  border: 0.5px solid var(--primitive-neutral-2);
+  border-radius: var(--rounding-4x);
+}
+
+.future-done__icon {
+  --icon-size: var(--icon-size-s);
+  color: var(--primitive-success);
+}
+
+.future-done > .ts-400-s {
+  flex: 1;
+}
+
+.future-done__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1x);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primitive-brand);
+  cursor: pointer;
+}
+
+.future-done__link .ds-icon {
+  --icon-size: var(--icon-size-s);
+}
+
+/* Поле внизу страницы ветки — залипает, контент уходит под него */
+.future-dialog__composer {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: var(--spacing-4x) 0 var(--spacing-8x);
+  background: linear-gradient(to bottom, transparent, var(--container-default) var(--spacing-4x));
+}
+
+.future-dialog__composer .future-ask {
+  background-color: var(--container-default);
+}
+
+/* Страница ветки на всю высоту — поле ввода внизу экрана даже в коротком разговоре */
+.app-v2__main--future:has(.future-dialog) {
+  padding-bottom: 0;
+}
+
+.future-dialog {
+  min-height: calc(100dvh - var(--app-nav-height, 0px) - var(--page-top-padding));
+}
+
+/* Предложение карточки — продолжение последнего ответа, без большого отступа */
+.future-answer + .future-offer {
+  margin-top: calc(var(--spacing-4x) - var(--spacing-8x));
+}
+
+.future-button--muted {
+  --button-color: var(--primitive-secondary);
+}
+
+/* Прокрутка к последнему сообщению — с запасом на поле ввода внизу */
+.future-dialog__end {
+  scroll-margin-bottom: calc(var(--spacing-30x) + var(--spacing-8x));
+}

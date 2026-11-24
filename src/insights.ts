@@ -1,3 +1,5 @@
+import type { FutureAssistantMode } from './future';
+
 /**
  * Инсайд-нотификация на главной — одна за раз и только «в нужный момент».
  * В прототипе момент выбирается в панели настроек.
@@ -27,6 +29,10 @@ export interface InsightSettings {
   accountsList: boolean;
   /** Главная: критичная задача — красная карточка над ассистентом */
   criticalTask: boolean;
+  /** Концепт «из будущего»: главная собирается ассистентом и клиентом, разговоры — ветками в меню */
+  future: boolean;
+  /** Концепт: с чем ассистент пришёл на главную */
+  futureAssistant: FutureAssistantMode;
 }
 
 export const DEFAULT_INSIGHTS: InsightSettings = {
@@ -40,6 +46,8 @@ export const DEFAULT_INSIGHTS: InsightSettings = {
   fundRecommendation: false,
   accountsList: false,
   criticalTask: false,
+  future: false,
+  futureAssistant: 'calm',
 };
 
 export const NOTICE_LABEL: Record<InsightNotice, string> = {

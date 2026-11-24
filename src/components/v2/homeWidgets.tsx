@@ -14,7 +14,7 @@ export interface HomeWidgetDef {
 }
 
 /** Строка «название — сумма» */
-const AmountRow: React.FC<{ label: string; amount: string }> = ({ label, amount }) => (
+export const AmountRow: React.FC<{ label: string; amount: string }> = ({ label, amount }) => (
   <Cell
     title={label}
     titleClassName="ts-400-s"
@@ -24,12 +24,12 @@ const AmountRow: React.FC<{ label: string; amount: string }> = ({ label, amount 
 );
 
 /** Пункт с зелёной точкой */
-const DotItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const DotItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="ts-400-s home-widget-dot">{children}</p>
 );
 
 /** Крупная сумма с подписью сверху */
-const Total: React.FC<{ caption: string; amount: string }> = ({ caption, amount }) => (
+export const Total: React.FC<{ caption: string; amount: string }> = ({ caption, amount }) => (
   <div className="home-widget-total">
     <span className="ts-400-s home-widget-secondary">{caption}</span>
     <span className="ts-500-xl">{amount}</span>

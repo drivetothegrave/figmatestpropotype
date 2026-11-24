@@ -1,6 +1,7 @@
 import React from 'react';
-import { Badge, ContextMenu } from '@pluginwoman/t-ds';
-import { CapGraduation, CoinsRuble, House, LayoutBento, PaperPin, PlusMinusRectangle, Watch } from '@pluginwoman/t-ds/icons/32/Filled';
+import { Badge, ContextMenu, Spinner } from '@pluginwoman/t-ds';
+import { CapGraduation, CoinsRuble, House, LayoutBento, PaperPin, PlusMinusRectangle, Wallet, Watch } from '@pluginwoman/t-ds/icons/32/Filled';
+import type { AssistantThread } from '../../future';
 import { DotsThreeHorizontal } from '@pluginwoman/t-ds/icons/20/Stroked';
 import type { AppPage } from '../AppNavigationBar';
 
@@ -16,6 +17,10 @@ interface SideMenuProps {
   recent: string[];
   /** Клик по пункту избранного или недавних — переход на его страницу, если она есть в прототипе */
   onOpenShortcut: (label: string) => void;
+  /** Концепт «из будущего»: вместо избранного и недавних — ветки разговоров с ассистентом */
+  threads?: AssistantThread[];
+  activeThreadId?: string;
+  onOpenThread?: (id: string) => void;
 }
 
 /** По умолчанию в избранном и в недавних — как в макете; переходы добавим позже */
@@ -28,9 +33,11 @@ const MenuItem: React.FC<{
   icon?: React.ReactNode;
   isActive?: boolean;
   badge?: number;
+  /** Справа: точка «есть новое» или крутилка «ассистент работает» */
+  status?: 'dot' | 'spinner';
   tone?: 'default' | 'muted' | 'brand';
   onClick?: () => void;
-}> = ({ label, icon, isActive, badge, tone = 'default', onClick }) => {
+}> = ({ label, icon, isActive, badge, status, tone = 'default', onClick }) => {
   const className = [
     'side-menu__item',
     isActive || tone === 'brand' ? 'side-menu__item--brand' : '',
@@ -47,6 +54,8 @@ const MenuItem: React.FC<{
       )}
       <span className="ts-500-s side-menu__label">{label}</span>
       {badge ? <Badge value={badge} size="s" color="var(--bg-brand)" textColor="var(--primitive-default)" /> : null}
+      {status === 'dot' && <span className="side-menu__dot" aria-label="Есть новое" />}
+      {status === 'spinner' && <Spinner className="side-menu__spinner" />}
     </>
   );
   return tone === 'muted' ? (
@@ -111,9 +120,50 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   onFavoritesChange,
   recent,
   onOpenShortcut,
+  threads,
+  activeThreadId,
+  onOpenThread,
 }) => {
   const toggleFavorite = (label: string) =>
     onFavoritesChange(favorites.includes(label) ? favorites.filter((f) => f !== label) : [...favorites, label]);
+
+  if (threads) {
+    return (
+      <aside className="side-menu">
+        <nav className="side-menu__group side-menu__group--main">
+          <MenuItem label="Главная" icon={<House />} isActive={page === 'main'} onClick={() => onNavigate('main')} />
+          <MenuItem label="Финансы" icon={<Wallet />} />
+          <MenuItem
+            label="Операции"
+            icon={<Watch />}
+            isActive={page === 'operations'}
+            status={operationsBadge > 0 ? 'dot' : undefined}
+            onClick={() => onNavigate('operations')}
+          />
+          <MenuItem label="Платежи" icon={<CoinsRuble />} isActive={page === 'payment'} />
+          <MenuItem label="Сервисы" icon={<LayoutBento />} />
+          <MenuItem label="Знания" icon={<CapGraduation />} />
+          <MenuItem label="Бухгалтерия" icon={<PlusMinusRectangle />} />
+        </nav>
+
+        <hr className="side-menu__divider" />
+
+        {/* Разговоры с ассистентом — ветки со статусами, новые сверху */}
+        <div className="side-menu__group">
+          {threads.map((thread) => (
+            <MenuItem
+              key={thread.id}
+              label={thread.title}
+              isActive={page === 'thread' && thread.id === activeThreadId}
+              status={thread.status === 'working' ? 'spinner' : thread.status === 'unread' ? 'dot' : undefined}
+              onClick={() => onOpenThread?.(thread.id)}
+            />
+          ))}
+          <MenuItem label="Вся история" tone="brand" />
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="side-menu">

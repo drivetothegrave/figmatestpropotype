@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { MainPageNavigationBar, SCINavigationButton } from '@pluginwoman/t-ds';
 
-export type AppPage = 'main' | 'operations' | 'payment' | 'tasks';
+export type AppPage = 'main' | 'operations' | 'payment' | 'tasks' | 'thread';
 
 interface AppNavigationBarProps {
   page: AppPage;

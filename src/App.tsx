@@ -17,7 +17,10 @@ import { TasksPage } from './components/v2/TasksPage';
 import { DEFAULT_TASKS_STATE, TasksState, visibleTasks } from './tasks';
 import { FloatingActions } from './components/v2/FloatingActions';
 import { AssistantChat, useAssistant } from './components/v2/AssistantChat';
-import { AssistantAction } from './assistant';
+import { AssistantAction, nowTime } from './assistant';
+import { DEFAULT_FUTURE_STATE, DIALOG_QUESTIONS, DIALOG_THREAD_ID, DIALOG_TITLE, FutureState, FutureWidgetId, ThreadStatus } from './future';
+import { FutureHomePage } from './components/future/FutureHomePage';
+import { DialogPage } from './components/future/DialogPage';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
 import { InsightNoticeBanner, RecommendationBanner, TaskChips } from './components/InsightBanners';
 import { DEFAULT_INSIGHTS, InsightSettings, riskOf } from './insights';
@@ -45,6 +48,7 @@ const RECENT_LIMIT = 5;
 /** Пункты избранного и недавних, которые ведут на страницы прототипа */
 const PAGE_LABELS: Partial<Record<AppPage, string>> = { payment: 'Платёж по реквизитам', tasks: 'Задачи' };
 const TASKS_KEY = 'tasks-state';
+const FUTURE_KEY = 'future-state';
 // Примеры из макета — чтобы подсказки были видны с первого открытия
 const DEFAULT_HISTORY = ['Аренда офиса', 'Аренда склада', 'Покупка оборудования'];
 
@@ -89,6 +93,8 @@ export const App: React.FC = () => {
       fundRecommendation: saved.fundRecommendation ?? DEFAULT_INSIGHTS.fundRecommendation,
       accountsList: saved.accountsList ?? DEFAULT_INSIGHTS.accountsList,
       criticalTask: saved.criticalTask ?? DEFAULT_INSIGHTS.criticalTask,
+      future: saved.future ?? DEFAULT_INSIGHTS.future,
+      futureAssistant: saved.futureAssistant === 'proposal' ? 'proposal' : 'calm',
       // Инсайт в «Истории» на главной — из макетов есть только дубль и рост риска
       notice: saved.notice === 'duplicate' || saved.notice === 'risk-medium' ? saved.notice : 'off',
     };
@@ -96,6 +102,11 @@ export const App: React.FC = () => {
   const updateInsights = (next: InsightSettings) => {
     setInsights(next);
     save(INSIGHTS_KEY, next);
+    // Снова включили предложение виджета — ассистент приходит с ним заново
+    if (next.futureAssistant === 'proposal' && insights.futureAssistant !== 'proposal') {
+      updateFuture((prev) => ({ ...prev, revenueDecided: false, pinned: prev.pinned.filter((id) => id !== 'revenue') }));
+    }
+    if (!next.future && page === 'thread') setPage('main');
   };
   // Навигация: главная (компактный таймлайн) ↔ «Операции» (развёрнутый)
   const [page, setPage] = React.useState<AppPage>('main');
@@ -131,6 +142,24 @@ export const App: React.FC = () => {
     setTasksState(next);
     save(TASKS_KEY, next);
   };
+  // Концепт «из будущего»: ветки разговоров, закреплённые виджеты и ход диалога
+  const [future, setFuture] = React.useState<FutureState>(() => {
+    const saved = load(FUTURE_KEY, DEFAULT_FUTURE_STATE);
+    // После перезагрузки ассистент уже не «думает» — ответ готов
+    return {
+      ...saved,
+      threads: saved.threads.map((t) => (t.id === DIALOG_THREAD_ID && t.status === 'working' ? { ...t, status: 'unread' } : t)),
+    };
+  });
+  const updateFuture = (fn: (prev: FutureState) => FutureState) =>
+    setFuture((prev) => {
+      const next = fn(prev);
+      save(FUTURE_KEY, next);
+      return next;
+    });
+  const [threadId, setThreadId] = React.useState<string>();
+  const [isThinking, setIsThinking] = React.useState(false);
+
   // Высота закреплённой шапки — под неё встают контент и левое меню
   const [navHeight, setNavHeight] = React.useState(0);
 
@@ -204,6 +233,70 @@ export const App: React.FC = () => {
     else openOperations('all', action.query);
   };
 
+  const withThreadStatus = (prev: FutureState, id: string, status: ThreadStatus): FutureState => ({
+    ...prev,
+    threads: prev.threads.map((t) => (t.id === id ? { ...t, status } : t)),
+  });
+  // Открыта ли ветка диалога прямо сейчас — чтобы вернувшийся ответ не стал «непрочитанным»
+  const openedThreadRef = React.useRef<string | undefined>(undefined);
+  openedThreadRef.current = page === 'thread' ? threadId : undefined;
+
+  const openThread = (id: string) => {
+    updateFuture((prev) => withThreadStatus(prev, id, prev.threads.find((t) => t.id === id)?.status === 'working' ? 'working' : 'read'));
+    // В прототипе разобран только один разговор — остальные ветки пока без страницы
+    if (id !== DIALOG_THREAD_ID) return;
+    setThreadId(id);
+    navigate('thread');
+  };
+
+  /** Вопрос по сценарию: ветка появляется в меню, ассистент «работает» и возвращается с ответом */
+  const askInDialog = (question: string) => {
+    if (isThinking || future.dialog.questions.length >= DIALOG_QUESTIONS.length) return;
+    const time = nowTime();
+    updateFuture((prev) => {
+      const hasThread = prev.threads.some((t) => t.id === DIALOG_THREAD_ID);
+      const threads = hasThread
+        ? prev.threads.map((t) => (t.id === DIALOG_THREAD_ID ? { ...t, status: 'working' as const } : t))
+        : [{ id: DIALOG_THREAD_ID, title: DIALOG_TITLE, status: 'working' as const }, ...prev.threads];
+      return {
+        ...prev,
+        threads,
+        dialog: { ...prev.dialog, questions: [...prev.dialog.questions, question], times: [...prev.dialog.times, time] },
+      };
+    });
+    setIsThinking(true);
+    window.setTimeout(() => {
+      setIsThinking(false);
+      updateFuture((prev) =>
+        withThreadStatus(prev, DIALOG_THREAD_ID, openedThreadRef.current === DIALOG_THREAD_ID ? 'read' : 'unread'),
+      );
+    }, 1800);
+  };
+
+  /** Вопрос с главной — открываем ветку разговора */
+  const askFromFutureHome = (question: string) => {
+    askInDialog(question);
+    setThreadId(DIALOG_THREAD_ID);
+    navigate('thread');
+  };
+
+  const decideCard = (decision: 'added' | 'dismissed') =>
+    updateFuture((prev) => ({
+      ...prev,
+      pinned: decision === 'added' && !prev.pinned.includes('products-salary') ? [...prev.pinned, 'products-salary'] : prev.pinned,
+      dialog: { ...prev.dialog, card: decision, cardTime: nowTime() },
+    }));
+
+  const decideRevenue = (accept: boolean) =>
+    updateFuture((prev) => ({
+      ...prev,
+      revenueDecided: true,
+      pinned: accept && !prev.pinned.includes('revenue') ? [...prev.pinned, 'revenue'] : prev.pinned,
+    }));
+
+  const unpinFuture = (id: FutureWidgetId) =>
+    updateFuture((prev) => ({ ...prev, pinned: prev.pinned.filter((p) => p !== id) }));
+
   const updateHistory = (next: string[]) => {
     setHistory(next);
     save(HISTORY_KEY, next);
@@ -253,7 +346,7 @@ export const App: React.FC = () => {
   };
 
   const resetPrototype = () => {
-    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY, RECENT_KEY, TASKS_KEY].forEach((key) => {
+    [COMMENTS_KEY, HISTORY_KEY, SIGNED_KEY, EXTRA_KEY, INSIGHTS_KEY, HOME_WIDGETS_KEY, FAVORITES_KEY, RECENT_KEY, TASKS_KEY, FUTURE_KEY].forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch {
@@ -269,6 +362,10 @@ export const App: React.FC = () => {
     setFavorites(DEFAULT_FAVORITES);
     setRecent(DEFAULT_RECENT);
     setTasksState(DEFAULT_TASKS_STATE);
+    setFuture(DEFAULT_FUTURE_STATE);
+    setThreadId(undefined);
+    setIsThinking(false);
+    if (page === 'thread') setPage('main');
     setIsDrawerOpen(false);
     setSuccessMessage(undefined);
   };
@@ -371,14 +468,40 @@ export const App: React.FC = () => {
               const target = (Object.keys(PAGE_LABELS) as AppPage[]).find((p) => PAGE_LABELS[p] === label);
               if (target) navigate(target);
             }}
+            threads={insights.future ? future.threads : undefined}
+            activeThreadId={threadId}
+            onOpenThread={openThread}
           />
           <main
-            className={['app-v2__main', page === 'payment' || page === 'tasks' ? 'app-v2__main--wide' : '']
+            className={[
+              'app-v2__main',
+              page === 'payment' || page === 'tasks' ? 'app-v2__main--wide' : '',
+              insights.future && (page === 'main' || page === 'thread') ? 'app-v2__main--future' : '',
+            ]
               .filter(Boolean)
               .join(' ')}
           >
             <div className="app-v2__column">
-              {page === 'main' ? (
+              {insights.future && page === 'main' ? (
+                <FutureHomePage
+                  hasProposal={insights.futureAssistant === 'proposal' && !future.revenueDecided}
+                  onAcceptProposal={() => decideRevenue(true)}
+                  onDeclineProposal={() => decideRevenue(false)}
+                  pinned={future.pinned}
+                  onUnpin={unpinFuture}
+                  onOpenWidgetThread={() => openThread(DIALOG_THREAD_ID)}
+                  onAsk={askFromFutureHome}
+                  onPay={() => navigate('payment')}
+                />
+              ) : page === 'thread' ? (
+                <DialogPage
+                  dialog={future.dialog}
+                  isThinking={isThinking}
+                  onAsk={askInDialog}
+                  onCardDecision={decideCard}
+                  onOpenHome={() => navigate('main')}
+                />
+              ) : page === 'main' ? (
                 <HomePage
                   settings={insights}
                   payments={days.flatMap((day) => day.payments)}
@@ -410,7 +533,7 @@ export const App: React.FC = () => {
               )}
             </div>
           </main>
-          <FloatingActions onOpenAssistant={openAssistant} />
+          <FloatingActions onOpenAssistant={openAssistant} hasAssistant={!insights.future} />
           <AssistantChat
             isOpen={isAssistantOpen}
             onClose={() => setIsAssistantOpen(false)}

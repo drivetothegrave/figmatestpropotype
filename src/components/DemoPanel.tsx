@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Cell, CellRightAccessory, Chip, IconButton } from '@pluginwoman/t-ds';
 import { Cross, Gear } from '@pluginwoman/t-ds/icons';
 import { InsightNotice, InsightSettings, NOTICE_LABEL } from '../insights';
+import { FUTURE_ASSISTANT_LABEL, FutureAssistantMode } from '../future';
 
 interface DemoPanelProps {
   settings: InsightSettings;
@@ -11,6 +12,9 @@ interface DemoPanelProps {
 
 /** Инсайты в «Истории» на главной — по макетам «Инсайд 1» и «Инсайд 2» */
 const NOTICES: InsightNotice[] = ['off', 'duplicate', 'risk-medium'];
+
+/** Концепт «из будущего»: с чем ассистент пришёл на главную */
+const FUTURE_MODES: FutureAssistantMode[] = ['calm', 'proposal'];
 
 type ToggleKey = 'criticalTask' | 'accountsList' | 'financePromo' | 'fundRecommendation';
 
@@ -49,7 +53,40 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({ settings, onSettingsChange
             />
           </div>
 
-          {SECTIONS.map((section) => (
+          <p className="ts-500-s demo-panel__section">Концепт</p>
+          <Cell
+            title="Вариант из будущего"
+            titleClassName="ts-400-s"
+            verticalPadding="none"
+            className="demo-panel__toggle-row"
+            rightAccessory={
+              <CellRightAccessory
+                variant="switch"
+                isChecked={settings.future}
+                onCheckedChange={(value) => onSettingsChange({ ...settings, future: value })}
+              />
+            }
+          />
+          {settings.future && (
+            <>
+              <p className="ts-400-s demo-panel__label">Ассистент на главной</p>
+              <div className="demo-panel__chips" role="radiogroup" aria-label="Ассистент на главной">
+                {FUTURE_MODES.map((mode) => (
+                  <Chip
+                    key={mode}
+                    variant="chip"
+                    isSelected={settings.futureAssistant === mode}
+                    onClick={() => onSettingsChange({ ...settings, futureAssistant: mode })}
+                  >
+                    {FUTURE_ASSISTANT_LABEL[mode]}
+                  </Chip>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Настройки реалистичного варианта — в концепте главная другая */}
+          {!settings.future && SECTIONS.map((section) => (
             <React.Fragment key={section.title}>
               <p className="ts-500-s demo-panel__section">{section.title}</p>
               {section.title === 'Главная' && (
