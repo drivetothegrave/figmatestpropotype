@@ -2924,11 +2924,12 @@ button {
   --button-color: var(--primitive-default);
 }
 
+/* Виджеты стопкой по 2 в ряд: в ряду одинаковой высоты, без перекосов (макет 367:21251) */
 .future-home__widgets {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-4x);
-  align-items: start;
+  align-items: stretch;
 }
 
 .future-widget {
@@ -2938,6 +2939,36 @@ button {
 
 .future-widget .widget {
   flex: 1;
+}
+
+/* «Продукты и зарплата»: значения в колонках по 64px, подписи колонок — над первой строкой */
+.future-shares {
+  position: relative;
+}
+
+.future-shares__head,
+.future-shares__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3x);
+}
+
+.future-shares__head {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--spacing-1x));
+  color: var(--primitive-secondary);
+}
+
+.future-shares__row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.future-shares__head > span,
+.future-shares__row > span + span {
+  width: var(--spacing-16x);
+  text-align: right;
 }
 
 /* Предложенный виджет — пунктирная фиолетовая рамка, пока клиент не согласился */

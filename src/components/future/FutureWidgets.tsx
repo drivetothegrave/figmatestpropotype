@@ -28,26 +28,22 @@ const WIDGETS: Record<FutureWidgetId, { title: string; content: React.ReactNode 
     title: 'Продукты и зарплата',
     content: (
       <>
-        <Total caption="Доля от выручки · ноябрь" amount="31% · 29%" />
-        <table className="future-table future-table--compact">
-          <thead>
-            <tr className="ts-400-xs">
-              <th />
-              <th>Продукты</th>
-              <th>Зарплата</th>
-            </tr>
-          </thead>
-          <tbody className="ts-400-s">
-            {POINT_SHARES.map((row) => (
-              <tr key={row.point} className={row.isHigh ? 'future-table__row--high' : ''}>
-                <td>{row.point}</td>
-                <td className="ts-500-s">{row.products}</td>
-                <td className="ts-500-s">{row.salary}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="ts-400-xs home-widget-secondary">Предупрежу, если продукты выше 33%</p>
+        <Total caption="Доля от выручки · Ноябрь" amount="31% · 29%" />
+        {/* Те же слоты, что у «Выручки»: две строки списка, подписи колонок висят над ними и высоту не добавляют */}
+        <div className="home-widget-list future-shares">
+          <div className="future-shares__head ts-500-xxs" aria-hidden="true">
+            <span>Продукты</span>
+            <span>Зарплата</span>
+          </div>
+          {POINT_SHARES.map((row) => (
+            <div key={row.point} className="future-shares__row">
+              <span className="ts-400-s">{row.point}</span>
+              <span className="ts-500-s" aria-label={`Продукты ${row.products}`}>{row.products}</span>
+              <span className="ts-500-s" aria-label={`Зарплата ${row.salary}`}>{row.salary}</span>
+            </div>
+          ))}
+        </div>
+        <p className="ts-400-s home-widget-secondary">Предупрежу, если продукты выше 33%</p>
       </>
     ),
   },
