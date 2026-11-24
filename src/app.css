@@ -3356,3 +3356,21 @@ button {
   padding-top: 0;
   border-top: 0;
 }
+
+/* Меню «⋯» виджета концепта не обрезается карточкой и лежит поверх соседних виджетов */
+.future-widget .home-widget.widget {
+  overflow: visible;
+}
+
+.future-widget:has(.future-widget__more[aria-expanded='true']) {
+  position: relative;
+  z-index: 20;
+}
+
+.future-widget__menu .context-menu {
+  top: calc(100% + var(--spacing-1x));
+  right: 0;
+  left: auto;
+  max-width: none;
+  white-space: nowrap;
+}
