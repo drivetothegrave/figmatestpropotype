@@ -18,10 +18,10 @@ interface FutureHomePageProps {
   onLineAction: (flag: string) => void;
   money: string;
   pinned: FutureWidgetId[];
-  fresh?: FutureWidgetId;
-  onUnpin: (id: FutureWidgetId) => void;
-  /** «⋯ → Открыть разговор» — у виджетов, собранных в разговоре */
-  widgetThread: (id: FutureWidgetId) => (() => void) | undefined;
+  /** «⋯ → Скрыть» */
+  onHide: (id: FutureWidgetId) => void;
+  /** «⋯ → Изменить» — ветка чата с ассистентом про этот виджет */
+  onEdit: (id: FutureWidgetId) => void;
   /** Подсказка в поле — следующий вопрос сценария; пустой Enter его задаёт */
   askPlaceholder?: string;
   onAsk: (question: string) => void;
@@ -41,9 +41,8 @@ export const FutureHomePage: React.FC<FutureHomePageProps> = ({
   onLineAction,
   money,
   pinned,
-  fresh,
-  onUnpin,
-  widgetThread,
+  onHide,
+  onEdit,
   askPlaceholder,
   onAsk,
   onPay,
@@ -110,13 +109,7 @@ export const FutureHomePage: React.FC<FutureHomePageProps> = ({
     {(proposal || pinned.length > 0) && (
       <div className="future-home__widgets">
         {pinned.map((id) => (
-          <FutureWidget
-            key={id}
-            id={id}
-            state={id === fresh ? 'fresh' : 'pinned'}
-            onUnpin={() => onUnpin(id)}
-            onOpenThread={widgetThread(id)}
-          />
+          <FutureWidget key={id} id={id} state="pinned" onHide={() => onHide(id)} onEdit={() => onEdit(id)} />
         ))}
         {proposal && <FutureWidget id={proposal.widget} state="proposed" />}
       </div>

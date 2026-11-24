@@ -2983,17 +2983,6 @@ button {
   border: 1px dashed var(--primitive-brand);
 }
 
-/* Только что закреплённый — сплошная фиолетовая рамка и «Новый», пока не появится следующий */
-.future-widget--fresh .home-widget.widget--outlined {
-  border: 1px solid var(--primitive-brand);
-}
-
-.future-widget__accessory {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2-5x);
-}
-
 .future-tag {
   display: inline-flex;
   align-items: center;

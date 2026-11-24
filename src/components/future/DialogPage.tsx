@@ -29,7 +29,8 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
   const endRef = React.useRef<HTMLDivElement | null>(null);
   const answered = dialog.questions.length - (isThinking ? 1 : 0);
   const nextQuestion = def.questions[dialog.questions.length];
-  const isCardOffered = answered === def.questions.length;
+  const offer = def.offer;
+  const isCardOffered = !!offer && answered === def.questions.length;
 
   // Новый вопрос, ответ или решение по карточке — прокручиваем к ним
   React.useEffect(() => {
@@ -41,15 +42,17 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
       <header className="future-dialog__header">
         <h1 className="ts-600-4xl">{def.title}</h1>
         <p className="ts-400-s home-widget-secondary">
-          Сегодня, {dialog.times[0]} · {def.source}
+          Сегодня{dialog.times[0] ? `, ${dialog.times[0]}` : ''} · {def.source}
         </p>
       </header>
+
+      {def.intro && <div className="future-answer ts-500-s">{def.intro}</div>}
 
       {dialog.questions.map((question, i) => (
         <React.Fragment key={i}>
           <UserMessage text={question} time={dialog.times[i]} />
           {i < answered && (
-            <div className="future-answer ts-500-s">{def.answers[i]?.({ ask: onAsk, isLast: i === answered - 1 && !isCardOffered, next: def.questions[i + 1] })}</div>
+            <div className="future-answer ts-500-s">{def.answers[i]?.({ ask: onAsk, isLast: i === answered - 1 && !isCardOffered, next: def.questions[i + 1], question })}</div>
           )}
         </React.Fragment>
       ))}
@@ -61,12 +64,12 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
         </p>
       )}
 
-      {isCardOffered && (
+      {offer && isCardOffered && (
         <>
           <div className="future-offer">
-            <p className="ts-500-s">{def.offer.text}</p>
+            <p className="ts-500-s">{offer.text}</p>
             <div className="future-offer__widget">
-              <FutureWidget id={def.offer.widget} state="proposed" />
+              <FutureWidget id={offer.widget} state="preview" />
             </div>
             {dialog.card === 'pending' && (
               <div className="future-buttons">
@@ -74,7 +77,7 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
                   Добавить на главную
                 </Button>
                 {/* Порог есть только у карточек с предупреждением */}
-                {def.offer.widget === 'products-salary' && (
+                {offer.widget === 'products-salary' && (
                   <Button variant="secondary" size="s" isHugWidth>
                     Изменить порог
                   </Button>
@@ -100,7 +103,7 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
                     <span className="ds-icon future-done__icon" aria-hidden="true">
                       <CheckmarkCircle />
                     </span>
-                    <span className="ts-400-s">Карточка «{widgetTitle(def.offer.widget)}» на главной</span>
+                    <span className="ts-400-s">Карточка «{widgetTitle(offer.widget)}» на главной</span>
                     <button type="button" className="future-done__link ts-500-s hoverOpacity" onClick={onOpenHome}>
                       Открыть главную
                       <span className="ds-icon" aria-hidden="true">
@@ -108,7 +111,7 @@ export const DialogPage: React.FC<DialogPageProps> = ({ def, dialog, isThinking,
                       </span>
                     </button>
                   </div>
-                  <p>{def.offer.addedText}</p>
+                  <p>{offer.addedText}</p>
                 </div>
               ) : (
                 <div className="future-answer ts-500-s">

@@ -148,12 +148,8 @@ const WIDGETS: Record<FutureWidgetId, { title: string; size: 's' | 'l'; content:
 
 export const widgetTitle = (id: FutureWidgetId) => WIDGETS[id].title;
 
-/** Меню «⋯» закреплённого виджета: вернуться в разговор, где его собрали, или убрать с главной */
-const WidgetMenu: React.FC<{ title: string; onOpenThread?: () => void; onUnpin: () => void }> = ({
-  title,
-  onOpenThread,
-  onUnpin,
-}) => {
+/** Меню «⋯» закреплённого виджета: изменить — в ветке чата с ассистентом, или скрыть с главной */
+const WidgetMenu: React.FC<{ title: string; onEdit: () => void; onHide: () => void }> = ({ title, onEdit, onHide }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <ContextMenu
@@ -161,8 +157,8 @@ const WidgetMenu: React.FC<{ title: string; onOpenThread?: () => void; onUnpin: 
       onClose={() => setIsOpen(false)}
       className="future-widget__menu"
       items={[
-        ...(onOpenThread ? [{ key: 'thread', label: 'Открыть разговор', onClick: onOpenThread }] : []),
-        { key: 'unpin', label: 'Убрать с главной', onClick: onUnpin },
+        { key: 'edit', label: 'Изменить', onClick: onEdit },
+        { key: 'hide', label: 'Скрыть', onClick: onHide },
       ]}
       trigger={
         <button
@@ -184,37 +180,30 @@ const WidgetMenu: React.FC<{ title: string; onOpenThread?: () => void; onUnpin: 
 interface FutureWidgetProps {
   id: FutureWidgetId;
   /**
-   * proposed — ассистент только предлагает: пунктирная рамка и «Новый»;
-   * fresh — только что закреплён: фиолетовая рамка и «Новый»; pinned — обычный
+   * proposed — ассистент предлагает на главной: пунктирная рамка и «Новый»;
+   * preview — показан в разговоре до добавления; pinned — на главной, с меню «⋯»
    */
-  state: 'proposed' | 'fresh' | 'pinned';
-  onOpenThread?: () => void;
-  onUnpin?: () => void;
-  className?: string;
+  state: 'proposed' | 'preview' | 'pinned';
+  onEdit?: () => void;
+  onHide?: () => void;
 }
 
-export const FutureWidget: React.FC<FutureWidgetProps> = ({ id, state, onOpenThread, onUnpin, className = '' }) => {
+export const FutureWidget: React.FC<FutureWidgetProps> = ({ id, state, onEdit, onHide }) => {
   const widget = WIDGETS[id];
-  const menu = onUnpin ? (
-    <WidgetMenu title={widget.title} onOpenThread={onOpenThread} onUnpin={onUnpin} />
-  ) : (
-    <span className="ds-icon ds-icon--m home-widget-more" aria-hidden="true">
-      <DotsThreeHorizontal />
-    </span>
-  );
   return (
-    <div className={['future-widget', `future-widget--${state}`, `future-widget--${widget.size}`, className].filter(Boolean).join(' ')}>
+    <div className={['future-widget', `future-widget--${state}`, `future-widget--${widget.size}`].join(' ')}>
       <Widget
         title={widget.title}
         hasChevron={false}
         hasDescription={false}
         rightAccessory={
-          state === 'pinned' ? (
-            menu
+          state === 'proposed' ? (
+            <span className="future-tag ts-500-xs">Новый</span>
+          ) : state === 'pinned' && onEdit && onHide ? (
+            <WidgetMenu title={widget.title} onEdit={onEdit} onHide={onHide} />
           ) : (
-            <span className="future-widget__accessory">
-              <span className="future-tag ts-500-xs">Новый</span>
-              {state === 'fresh' && menu}
+            <span className="ds-icon ds-icon--m home-widget-more" aria-hidden="true">
+              <DotsThreeHorizontal />
             </span>
           )
         }

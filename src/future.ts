@@ -56,8 +56,6 @@ export interface BusinessState {
   threads: AssistantThread[];
   /** Виджеты на главной — в порядке закрепления */
   pinned: FutureWidgetId[];
-  /** Только что закреплённый виджет — с меткой «Новый», пока не появится следующий */
-  fresh?: FutureWidgetId;
   /** Предложения ассистента на главной, на которые клиент уже ответил */
   decided: string[];
   /** Ход разговоров по сценарию — по id ветки */

@@ -19,7 +19,7 @@ import { FloatingActions } from './components/v2/FloatingActions';
 import { AssistantChat, useAssistant } from './components/v2/AssistantChat';
 import { AssistantAction, nowTime } from './assistant';
 import { BusinessState, FutureState, FutureWidgetId, ThreadStatus } from './future';
-import { BUSINESSES, DEFAULT_FUTURE_STATE, currentProposal, dialogStateOf, nextDialog, routeQuestion } from './businesses';
+import { BUSINESSES, DEFAULT_FUTURE_STATE, currentProposal, dialogStateOf, editDialogOf, nextDialog, routeQuestion } from './businesses';
 import { FutureHomePage } from './components/future/FutureHomePage';
 import { DialogPage } from './components/future/DialogPage';
 import { DEFAULT_HOME_WIDGETS, HomeWidgetId } from './components/v2/homeWidgets';
@@ -297,18 +297,18 @@ export const App: React.FC = () => {
     navigate('thread');
   };
 
-  /** Закрепить виджет: встаёт последним и получает метку «Новый» */
+  /** Закрепить виджет — встаёт последним */
   const pin = (prev: BusinessState, id: FutureWidgetId): BusinessState => ({
     ...prev,
     pinned: prev.pinned.includes(id) ? prev.pinned : [...prev.pinned, id],
-    fresh: id,
   });
 
   const decideCard = (decision: 'added' | 'dismissed') => {
     const def = business.dialogs.find((d) => d.id === threadId);
-    if (!def) return;
+    const widget = def?.offer?.widget;
+    if (!def || !widget) return;
     updateBusiness((prev) => {
-      const next = decision === 'added' ? pin(prev, def.offer.widget) : prev;
+      const next = decision === 'added' ? pin(prev, widget) : prev;
       return { ...next, dialogs: { ...next.dialogs, [def.id]: { ...dialogStateOf(prev, def.id), card: decision, cardTime: nowTime() } } };
     });
   };
@@ -322,8 +322,21 @@ export const App: React.FC = () => {
     });
   };
 
-  const unpinFuture = (id: FutureWidgetId) =>
-    updateBusiness((prev) => ({ ...prev, pinned: prev.pinned.filter((p) => p !== id), fresh: prev.fresh === id ? undefined : prev.fresh }));
+  const hideWidget = (id: FutureWidgetId) =>
+    updateBusiness((prev) => ({ ...prev, pinned: prev.pinned.filter((p) => p !== id) }));
+
+  /** «⋯ → Изменить»: ветка разговора про виджет; у виджета из предложения она появляется в меню */
+  const editWidget = (id: FutureWidgetId) => {
+    const def = editDialogOf(business, id);
+    if (!def) return;
+    updateBusiness((prev) =>
+      prev.threads.some((t) => t.id === def.id)
+        ? prev
+        : { ...prev, threads: [{ id: def.id, title: def.title, status: 'read' }, ...prev.threads] },
+    );
+    setThreadId(def.id);
+    navigate('thread');
+  };
 
   /** Этап для демо — главная ИП через 2 недели, 2 месяца, полгода */
   const jumpToStage = (index: number) => {
@@ -529,12 +542,8 @@ export const App: React.FC = () => {
                   onLineAction={(flag) => updateBusiness((prev) => ({ ...prev, flags: [...prev.flags, flag] }))}
                   money={business.money(bizState)}
                   pinned={bizState.pinned}
-                  fresh={bizState.fresh}
-                  onUnpin={unpinFuture}
-                  widgetThread={(id) => {
-                    const def = business.dialogs.find((d) => d.offer.widget === id && dialogStateOf(bizState, d.id).card === 'added');
-                    return def ? () => openThread(def.id) : undefined;
-                  }}
+                  onHide={hideWidget}
+                  onEdit={editWidget}
                   askPlaceholder={nextDialog(business, bizState)?.questions[0]}
                   onAsk={askFromFutureHome}
                   onPay={() => navigate('payment')}

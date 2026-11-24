@@ -22,6 +22,8 @@ export interface AnswerContext {
   isLast: boolean;
   /** Следующий вопрос сценария */
   next?: string;
+  /** Вопрос, на который отвечаем, — как клиент его написал */
+  question: string;
 }
 
 export interface DialogDef {
@@ -33,8 +35,12 @@ export interface DialogDef {
   keywords: RegExp;
   questions: string[];
   answers: ((ctx: AnswerContext) => React.ReactNode)[];
+  /** Реплика ассистента до первого вопроса — в ветке «Изменить» виджета */
+  intro?: React.ReactNode;
   /** В конце разговора ассистент предлагает закрепить виджет */
-  offer: { text: string; widget: FutureWidgetId; addedText: string };
+  offer?: { text: string; widget: FutureWidgetId; addedText: string };
+  /** Ветка правки виджета — не подсказывается и не ловит вопросы с главной */
+  isEdit?: boolean;
   /** Когда разговор становится актуальным — пока нет, его вопрос не подсказывается */
   isAvailable?: (s: BusinessState) => boolean;
 }
@@ -45,6 +51,8 @@ export interface ProposalDef {
   widget: FutureWidgetId;
   accept: string;
   isAvailable: (s: BusinessState, settings: InsightSettings) => boolean;
+  /** Что можно поменять в виджете — подсказки в ветке «Изменить» */
+  editIdeas: string[];
 }
 
 /** Реплика ассистента на главной, когда предлагать нечего; кнопки ставят флаг */
@@ -197,6 +205,7 @@ const COFFEE: BusinessDef = {
       text: 'Вы подключили эквайринг и кассу — могу показывать выручку за сегодня и статус терминалов',
       widget: 'revenue',
       accept: 'Хорошо, оставляй',
+      editIdeas: ['Показывай выручку по точкам', 'Добавь сравнение со вчера'],
       // Момент для предложения выбирается в настройках прототипа
       isAvailable: (_s, settings) => settings.futureAssistant === 'proposal',
     },
@@ -352,6 +361,7 @@ const SOLO: BusinessDef = {
       text: 'Вы выставили 5 счетов, 3 ещё не оплачены. Показывать, кто должен?',
       widget: 'debtors',
       accept: 'Добавить на главную',
+      editIdeas: ['Покажи, сколько дней просрочки', 'Добавь кнопку «Напомнить»'],
       isAvailable: (s) => s.pinned.includes('withdraw'),
     },
     {
@@ -359,6 +369,7 @@ const SOLO: BusinessDef = {
       text: 'Каждую пятницу вы переводите себе деньги вручную. Делать это автоматически — за вычетом налога?',
       widget: 'self-transfer',
       accept: 'Настроить',
+      editIdeas: ['Переводи по понедельникам', 'Оставляй резерв 50 000 ₽'],
       // После разговора о налогах и ответа про должника
       isAvailable: (s) => s.pinned.includes('taxes') && s.flags.some((f) => f.startsWith('remind')),
     },
@@ -367,6 +378,7 @@ const SOLO: BusinessDef = {
       text: 'Посмотреть, какие клиенты приносят больше всего?',
       widget: 'clients',
       accept: 'Добавить на главную',
+      editIdeas: ['Покажи за последние 3 месяца', 'Добавь, кто платит с опозданием'],
       isAvailable: (s) => s.decided.includes('self-transfer'),
     },
   ],
@@ -403,7 +415,6 @@ const SOLO: BusinessDef = {
         ...initialState(SOLO),
         threads: soloThreadsWith(['withdraw', 'year-tax']),
         pinned: ['withdraw', 'debtors', 'taxes'],
-        fresh: 'taxes',
         decided: ['debtors'],
         dialogs: { withdraw: doneDialog(WITHDRAW_QUESTIONS), 'year-tax': doneDialog(YEAR_TAX_QUESTIONS) },
       }),
@@ -414,7 +425,6 @@ const SOLO: BusinessDef = {
         ...initialState(SOLO),
         threads: soloThreadsWith(['withdraw', 'year-tax']),
         pinned: ['withdraw', 'debtors', 'taxes', 'self-transfer'],
-        fresh: 'self-transfer',
         decided: ['debtors', 'self-transfer'],
         flags: ['remind-sent'],
         dialogs: { withdraw: doneDialog(WITHDRAW_QUESTIONS), 'year-tax': doneDialog(YEAR_TAX_QUESTIONS) },
@@ -423,7 +433,55 @@ const SOLO: BusinessDef = {
   ],
 };
 
-export const BUSINESSES: Record<BusinessId, BusinessDef> = { coffee: COFFEE, solo: SOLO };
+/**
+ * «⋯ → Изменить» у виджета из предложения ассистента: своя ветка, где ассистент спрашивает,
+ * что поменять. Виджеты из разговоров правятся в том разговоре, где их собрали.
+ */
+const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
+const editDialog = (p: ProposalDef, widgetTitle: string): DialogDef => ({
+  id: `edit-${p.widget}`,
+  title: `Карточка «${widgetTitle}»`,
+  source: 'настройка карточки на главной',
+  keywords: /$^/,
+  isEdit: true,
+  intro: (
+    <p>
+      Что поменять в карточке «{widgetTitle}»? Можно попросить своими словами — например, «{lowerFirst(p.editIdeas[0])}»
+      или «{lowerFirst(p.editIdeas[1])}».
+    </p>
+  ),
+  questions: p.editIdeas,
+  answers: p.editIdeas.map(() => ({ question }: AnswerContext) => (
+    <p>
+      Принято: «{question}». Поменяю карточку «{widgetTitle}» — на главной она обновится после следующего пересчёта.
+    </p>
+  )),
+});
+
+const WIDGET_TITLES: Record<FutureWidgetId, string> = {
+  revenue: 'Выручка',
+  'products-salary': 'Продукты и зарплата',
+  withdraw: 'Можно вывести себе',
+  debtors: 'Мне должны',
+  taxes: 'Налоги',
+  clients: 'Клиенты за год',
+  'self-transfer': 'Перевод себе',
+};
+
+const withEditDialogs = (def: BusinessDef): BusinessDef => ({
+  ...def,
+  dialogs: [...def.dialogs, ...def.proposals.map((p) => editDialog(p, WIDGET_TITLES[p.widget]))],
+});
+
+export const BUSINESSES: Record<BusinessId, BusinessDef> = {
+  coffee: withEditDialogs(COFFEE),
+  solo: withEditDialogs(SOLO),
+};
+
+/** Ветка, где правят виджет: разговор, в котором его собрали, или отдельная ветка «Карточка «…»» */
+export const editDialogOf = (def: BusinessDef, widget: FutureWidgetId) =>
+  def.dialogs.find((d) => d.offer?.widget === widget) ?? def.dialogs.find((d) => d.id === `edit-${widget}`);
 
 export function initialState(def: BusinessDef): BusinessState {
   return { threads: def.threads, pinned: [], decided: [], dialogs: {}, flags: [] };
@@ -444,11 +502,11 @@ export const currentProposal = (def: BusinessDef, s: BusinessState, settings: In
 
 /** Разговор, который ещё не начинали, — его первый вопрос подсказывается в поле на главной */
 export const nextDialog = (def: BusinessDef, s: BusinessState) =>
-  def.dialogs.find((d) => dialogStateOf(s, d.id).questions.length === 0 && (d.isAvailable?.(s) ?? true));
+  def.dialogs.find((d) => !d.isEdit && dialogStateOf(s, d.id).questions.length === 0 && (d.isAvailable?.(s) ?? true));
 
 /** Вопрос с главной: в разговор по ключевым словам, иначе — в следующий по сценарию */
 export function routeQuestion(def: BusinessDef, s: BusinessState, question: string): DialogDef | undefined {
-  const unfinished = def.dialogs.filter((d) => dialogStateOf(s, d.id).questions.length < d.questions.length);
+  const unfinished = def.dialogs.filter((d) => !d.isEdit && dialogStateOf(s, d.id).questions.length < d.questions.length);
   return (
     unfinished.find((d) => d.keywords.test(question) && (d.isAvailable?.(s) ?? true)) ??
     nextDialog(def, s) ??
