@@ -790,6 +790,279 @@ const MARKETPLACE: BusinessDef = {
   ],
 };
 
+/* ---------- Директор компании ---------- */
+
+const DIRECTOR_APPROVAL_QUESTIONS = ['Покажи, какие платежи ждут подписи', 'Сколько всего нужно подписать?'];
+const DIRECTOR_FORECAST_QUESTIONS = ['Хватит ли денег до конца месяца?', 'Что сильнее всего повлияет на остаток?'];
+const DIRECTOR_ACCOUNTING_QUESTIONS = ['Какие задачи у Ольги на этой неделе?', 'Что ещё требует моего решения?'];
+const DIRECTOR_MONTH_QUESTIONS = ['Сколько заработали за месяц?', 'Как это соотносится с прошлым месяцем?'];
+const DIRECTOR_DEBTORS_QUESTIONS = ['Сколько нам должны клиенты?', 'Есть ли просроченные счета?'];
+
+const DIRECTOR_DIALOGS: DialogDef[] = [
+  {
+    id: 'director-signatures',
+    title: 'Платежи, которые ждут подписи',
+    source: 'платёжные поручения компании',
+    keywords: /подпис|платеж|платёж|поручен|ждут/i,
+    questions: DIRECTOR_APPROVAL_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Сейчас на подписи <b>3 платежа на 452 000 ₽</b>. Все в пределах обычных сумм и подходят под договоры.</p>
+          <Card title="Платежи на подпись" aside="сегодня">
+            <Table head={['Получатель', 'Сумма']} rows={[
+              { cells: ['Вектор, ООО', '202 000 ₽'] },
+              { cells: ['Лаванда, ООО', '250 000 ₽'] },
+              { cells: ['Связь и сервисы', 'до 50 000 ₽'] },
+            ]} />
+          </Card>
+          <p>Показывать на главной только то, что ждёт вашего решения?</p>
+          {isLast && <FollowUps items={['Добавить подписи на главную', 'Сколько всего платежей за месяц']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>Всего за месяц подготовлено 12 платежей на 2,6 млн ₽. 9 уже подписаны, ещё 3 ждут вас. Ольга подготовила их сегодня утром.</p>,
+    ],
+    offer: {
+      text: 'Добавить на главную платежи, которые ждут вашей подписи? Покажу сумму и получателей.',
+      widget: 'director-signatures',
+      addedText: 'Готово. Показываю новые платежи, когда Ольга подготовит их к подписи.',
+    },
+  },
+  {
+    id: 'director-forecast',
+    title: 'Хватит ли денег до конца месяца?',
+    source: 'остатки по счетам, план платежей и зарплатная ведомость',
+    keywords: /хватит|остат|денег|конца месяца|прогноз/i,
+    questions: DIRECTOR_FORECAST_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Да. Даже после зарплаты и налогов к концу месяца останется около <b>8,4 млн ₽</b>. Самая низкая точка — 4,8 млн ₽ 10 декабря.</p>
+          <Card title="Прогноз остатка" aside="30 дней">
+            <LineChart nowIndex={2} points={[
+              { label: 'сейчас', value: 82 },
+              { label: '10 дек', value: 28 },
+              { label: '20 дек', value: 68 },
+              { label: '30 дек', value: 52 },
+            ]} />
+          </Card>
+          <Note>Учёл платежи на подписи, налоги и ведомость на 25 сотрудников</Note>
+          <p>Следить за прогнозом и предупреждать, если денег станет мало?</p>
+          {isLast && <FollowUps items={['Добавить прогноз на главную', 'Показать крупные платежи']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => (
+        <>
+          <p>Больше всего на остаток повлияют зарплата 2,1 млн ₽ и налоговый платёж 640 000 ₽. Оба уже учтены, резерв не опустится ниже 4,8 млн ₽.</p>
+          <Card title="Крупные списания до конца месяца">
+            <Table head={['Дата', 'Платёж', 'Сумма']} rows={[
+              { cells: ['10 декабря', 'Зарплата', '2,1 млн ₽'] },
+              { cells: ['18 декабря', 'Налоги', '640 000 ₽'] },
+              { cells: ['22 декабря', 'Аренда и сервисы', '380 000 ₽'] },
+            ]} />
+          </Card>
+        </>
+      ),
+    ],
+    offer: {
+      text: 'Добавить прогноз остатка на главную? Буду пересчитывать его после платежей и поступлений.',
+      widget: 'director-forecast',
+      addedText: 'Готово. Пересчитываю прогноз каждый день и после крупных операций.',
+    },
+  },
+  {
+    id: 'director-accounting',
+    title: 'Как идут дела у бухгалтерии?',
+    source: 'задачи бухгалтера Ольги и календарь отчётности',
+    keywords: /бухгалтер|ольг|отчет|отчёт|документ|задач/i,
+    questions: DIRECTOR_ACCOUNTING_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>У Ольги всё по плану. Налоги и отчётность в срок, два акта сверки ждут контрагентов.</p>
+          <Card title="Статус бухгалтерии">
+            <Table head={['Задача', 'Статус', 'Срок']} rows={[
+              { cells: ['Налоги', 'в срок', '18 декабря'] },
+              { cells: ['Отчётность', 'в срок', '25 декабря'] },
+              { cells: ['Акты сверки · 2', 'ждём ответ', 'до 12 декабря'] },
+            ]} />
+          </Card>
+          <p>Показывать только задачи, где понадобится ваше решение?</p>
+          {isLast && <FollowUps items={['Добавить статус бухгалтерии', 'Какие задачи просрочены']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>Сейчас от вас ничего не требуется. Если появится просрочка или документ на согласование, вынесу это наверх.</p>,
+    ],
+    offer: {
+      text: 'Добавить на главную короткий статус бухгалтерии: налоги, отчётность и документы, которые ждут ответа?',
+      widget: 'director-accounting',
+      addedText: 'Готово. Показываю только исключения и ближайшие сроки.',
+    },
+  },
+  {
+    id: 'director-month',
+    title: 'Итоги месяца',
+    source: 'поступления, расходы и управленческий учёт за ноябрь',
+    keywords: /итог|прибыл|заработ|месяц|динамик/i,
+    questions: DIRECTOR_MONTH_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Прогноз прибыли за ноябрь — <b>1,4 млн ₽</b>, это на 9% больше октября. Выручка выросла за счёт двух новых договоров.</p>
+          <Card title="Итоги месяца" aside="ноябрь">
+            <Table head={['Показатель', 'Ноябрь', 'К октябрю']} rows={[
+              { cells: ['Выручка', '12,8 млн ₽', '+12%'] },
+              { cells: ['Расходы', '11,4 млн ₽', '+8%'] },
+              { cells: ['Прибыль', '1,4 млн ₽', '+9%'], isTotal: true },
+            ]} />
+          </Card>
+          {isLast && <FollowUps items={['Добавить итоги месяца', 'Показать новые договоры']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>В октябре прибыль была 1,28 млн ₽. В ноябре рост дали договоры с «Вектором» и «Промснабом»; расходы на аренду и зарплату остались стабильными.</p>,
+    ],
+    offer: {
+      text: 'Добавить итоги месяца на главную? Покажу прибыль и изменение к прошлому месяцу.',
+      widget: 'director-month',
+      addedText: 'Готово. Итоги обновятся после закрытия месяца и загрузки отчётов.',
+    },
+  },
+  {
+    id: 'director-debtors',
+    title: 'Нам должны клиенты',
+    source: 'выставленные счета и поступления за последние 90 дней',
+    keywords: /долж|дебитор|клиент не оплат|просроч/i,
+    questions: DIRECTOR_DEBTORS_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Клиенты должны <b>3,2 млн ₽</b> по трём счетам. Просроченных пока нет — ближайшая дата оплаты 12 декабря.</p>
+          <Card title="Ожидаемые поступления">
+            <Table head={['Клиент', 'Сумма', 'Срок']} rows={[
+              { cells: ['Вектор, ООО', '2,6 млн ₽', '12 декабря'] },
+              { cells: ['Промснаб', '600 000 ₽', '18 декабря'] },
+              { cells: ['Лаванда, ООО', 'до 50 000 ₽', '20 декабря'] },
+            ]} />
+          </Card>
+          {isLast && <FollowUps items={['Показывать долги клиентов', 'Кто оплатит позже всех']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>Просрочек нет. Если срок оплаты пройдёт, отмечу счёт и предложу отправить напоминание.</p>,
+    ],
+    offer: {
+      text: 'Показывать на главной, сколько должны клиенты и когда ждать оплату?',
+      widget: 'director-debtors',
+      addedText: 'Готово. Сумма обновляется после каждого поступления.',
+    },
+  },
+];
+
+const DIRECTOR_THREADS: AssistantThread[] = [
+  { id: 'director-budget', title: 'Согласование бюджета на декабрь', status: 'working' },
+  { id: 'director-contract', title: 'Новые условия договора с Вектором', status: 'unread' },
+  { id: 'director-plan', title: 'План на следующий квартал', status: 'read' },
+];
+
+const directorThreadsWith = (ids: string[]): AssistantThread[] => [
+  ...DIRECTOR_DIALOGS.filter((d) => ids.includes(d.id))
+    .reverse()
+    .map((d) => ({ id: d.id, title: d.title, status: 'read' as const })),
+  ...DIRECTOR_THREADS,
+];
+
+const DIRECTOR: BusinessDef = {
+  id: 'director',
+  name: 'Сергей',
+  threads: DIRECTOR_THREADS,
+  dialogs: DIRECTOR_DIALOGS,
+  proposals: [
+    {
+      id: 'director-forecast',
+      text: 'Ольга подготовила платежи на подпись. Хотите видеть, сколько останется после крупных списаний?',
+      widget: 'director-forecast',
+      accept: 'Добавить прогноз',
+      editIdeas: ['Показывай прогноз на 60 дней', 'Предупреждай, если остаток ниже 5 млн ₽'],
+      isAvailable: (s) => s.pinned.includes('director-signatures'),
+    },
+    {
+      id: 'director-accounting',
+      text: 'Могу показывать, всё ли в порядке у Ольги: сроки отчётности, налоги и документы на согласовании.',
+      widget: 'director-accounting',
+      accept: 'Добавить статус',
+      editIdeas: ['Показывай только просрочки', 'Напоминай за 3 дня до срока'],
+      isAvailable: (s) => s.pinned.includes('director-forecast'),
+    },
+    {
+      id: 'director-month',
+      text: 'Могу подводить итоги месяца: прибыль, динамика к прошлому месяцу и главные изменения.',
+      widget: 'director-month',
+      accept: 'Добавить итоги',
+      editIdeas: ['Сравнивай с планом', 'Показывай только ключевые отклонения'],
+      isAvailable: (s) => s.pinned.includes('director-accounting'),
+    },
+    {
+      id: 'director-debtors',
+      text: 'По счетам ожидается 3,2 млн ₽. Следить за поступлениями и сообщить, если появится просрочка?',
+      widget: 'director-debtors',
+      accept: 'Добавить дебиторку',
+      editIdeas: ['Показывай долги старше 10 дней', 'Учитывай только суммы от 100 000 ₽'],
+      isAvailable: (s) => s.pinned.includes('director-month'),
+    },
+  ],
+  homeLine: (s) => {
+    if (s.pinned.includes('director-debtors')) return { text: 'Остаток закрыт: прогноз прибыли 1,4 млн ₽. Просроченных счетов и задач бухгалтерии нет.' };
+    if (s.pinned.includes('director-forecast')) return { text: 'Всё спокойно. После зарплаты 10 декабря останется около 4,8 млн ₽.' };
+    if (s.pinned.includes('director-signatures')) return { text: 'Ольга подготовила 3 платежа на 452 000 ₽ — все в пределах обычных сумм.' };
+    return { text: 'Компания подключена. Пригласите бухгалтера — буду показывать только то, что требует вашего решения.' };
+  },
+  money: (s) => {
+    if (s.pinned.includes('director-month')) return '8,2 млн ₽';
+    if (s.pinned.includes('director-forecast')) return '7,1 млн ₽';
+    if (s.pinned.includes('director-signatures')) return '6,2 млн ₽';
+    return '0 ₽';
+  },
+  stages: [
+    { label: 'День 1', state: () => initialState(DIRECTOR) },
+    {
+      label: '2 недели',
+      state: () => ({
+        ...initialState(DIRECTOR),
+        threads: directorThreadsWith(['director-signatures']),
+        pinned: ['director-signatures'],
+        dialogs: { 'director-signatures': doneDialog(DIRECTOR_APPROVAL_QUESTIONS) },
+      }),
+    },
+    {
+      label: '2 месяца',
+      state: () => ({
+        ...initialState(DIRECTOR),
+        threads: directorThreadsWith(['director-signatures', 'director-forecast', 'director-accounting']),
+        pinned: ['director-signatures', 'director-forecast', 'director-accounting'],
+        dialogs: {
+          'director-signatures': doneDialog(DIRECTOR_APPROVAL_QUESTIONS),
+          'director-forecast': doneDialog(DIRECTOR_FORECAST_QUESTIONS),
+          'director-accounting': doneDialog(DIRECTOR_ACCOUNTING_QUESTIONS),
+        },
+      }),
+    },
+    {
+      label: 'Полгода',
+      state: () => ({
+        ...initialState(DIRECTOR),
+        threads: directorThreadsWith(['director-signatures', 'director-forecast', 'director-accounting', 'director-month', 'director-debtors']),
+        pinned: ['director-signatures', 'director-month', 'director-forecast', 'director-debtors', 'director-accounting'],
+        dialogs: {
+          'director-signatures': doneDialog(DIRECTOR_APPROVAL_QUESTIONS),
+          'director-forecast': doneDialog(DIRECTOR_FORECAST_QUESTIONS),
+          'director-accounting': doneDialog(DIRECTOR_ACCOUNTING_QUESTIONS),
+          'director-month': doneDialog(DIRECTOR_MONTH_QUESTIONS),
+          'director-debtors': doneDialog(DIRECTOR_DEBTORS_QUESTIONS),
+        },
+      }),
+    },
+  ],
+};
+
 /**
  * «⋯ → Изменить» у виджета из предложения ассистента: своя ветка, где ассистент спрашивает,
  * что поменять. Виджеты из разговоров правятся в том разговоре, где их собрали.
@@ -830,6 +1103,11 @@ const WIDGET_TITLES: Record<FutureWidgetId, string> = {
   'market-stock': 'Закупка к Новому году',
   'market-inventory': 'Остатки на складах',
   'market-ads': 'Реклама товаров',
+  'director-signatures': 'Ждут вашей подписи',
+  'director-forecast': 'Прогноз остатка',
+  'director-accounting': 'Бухгалтерия',
+  'director-month': 'Итоги месяца',
+  'director-debtors': 'Нам должны',
 };
 
 const withEditDialogs = (def: BusinessDef): BusinessDef => ({
@@ -841,6 +1119,7 @@ export const BUSINESSES: Record<BusinessId, BusinessDef> = {
   coffee: withEditDialogs(COFFEE),
   solo: withEditDialogs(SOLO),
   marketplace: withEditDialogs(MARKETPLACE),
+  director: withEditDialogs(DIRECTOR),
 };
 
 /** Ветка, где правят виджет: разговор, в котором его собрали, или отдельная ветка «Карточка «…»» */
@@ -855,6 +1134,7 @@ export const DEFAULT_FUTURE_STATE = {
   coffee: initialState(COFFEE),
   solo: initialState(SOLO),
   marketplace: initialState(MARKETPLACE),
+  director: initialState(DIRECTOR),
 };
 
 export const dialogStateOf = (s: BusinessState, id: string): DialogState => s.dialogs[id] ?? EMPTY_DIALOG;

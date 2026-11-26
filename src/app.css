@@ -2924,12 +2924,12 @@ button {
   --button-color: var(--primitive-default);
 }
 
-/* Виджеты стопкой по 2 в ряд: в ряду одинаковой высоты, без перекосов (макет 367:21251) */
-/* Все ряды одной высоты (по самому высокому виджету); дырки после широкого заполняются маленькими */
+/* Виджеты стопкой по 2 в ряд: высота строки определяется её содержимым,
+   чтобы высокий график не растягивал остальные ряды пустым пространством. */
 .future-home__widgets {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: auto;
   grid-auto-flow: row dense;
   gap: var(--spacing-4x);
   align-items: stretch;
@@ -3159,6 +3159,10 @@ button {
   overflow: visible;
 }
 
+.future-forecast-chart .future-line-chart svg {
+  height: var(--spacing-20x);
+}
+
 .future-line-chart__line {
   fill: none;
   stroke: var(--primitive-brand);
@@ -3344,6 +3348,23 @@ button {
   align-items: flex-end;
   gap: var(--spacing-1-5x);
   height: var(--spacing-10x);
+}
+
+.future-month-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-1-5x);
+  height: var(--spacing-10x);
+}
+
+.future-month-bars span {
+  flex: 1;
+  border-radius: var(--rounding-1x);
+  background: var(--bg-brand-2);
+}
+
+.future-month-bars span.is-current {
+  background: var(--primitive-brand);
 }
 
 .future-client-bars span {

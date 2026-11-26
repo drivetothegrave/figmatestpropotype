@@ -1,8 +1,9 @@
 import React from 'react';
-import { ContextMenu, LinearProgress, Widget } from '@pluginwoman/t-ds';
+import { Button, ContextMenu, LinearProgress, Widget } from '@pluginwoman/t-ds';
 import { DotsThreeHorizontal } from '@pluginwoman/t-ds/icons/24/Stroked';
 import { DotItem, Total } from '../v2/homeWidgets';
 import { FutureWidgetId } from '../../future';
+import { LineChart } from './answerParts';
 
 /** Строка «название — сумма» 18px; точка слева — статус, tone — цвет суммы */
 const Row: React.FC<{ label: string; value: string; dot?: string; tone?: 'success' | 'error' }> = ({ label, value, dot, tone }) => (
@@ -232,6 +233,81 @@ const WIDGETS: Record<FutureWidgetId, { title: string; size: 's' | 'l'; content:
           <Row label="ДРР" value="26%" />
           <Row label="Цель" value="до 20%" />
         </Rows>
+      </>
+    ),
+  },
+  'director-signatures': {
+    title: 'Ждут вашей подписи',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Платежи · 3" amount="−452 000 ₽" />
+        <Rows>
+          <Row label="Вектор, ООО" value="202 000 ₽" />
+          <Row label="Лаванда, ООО" value="250 000 ₽" />
+        </Rows>
+        <Button variant="secondary" size="xs" isHugWidth>Подписать все</Button>
+      </>
+    ),
+  },
+  'director-forecast': {
+    title: 'Прогноз остатка',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Через 20 дней, если всё пойдёт как сейчас" amount="8,4 млн ₽" />
+        <div className="future-forecast-chart">
+          <LineChart nowIndex={2} points={[
+            { label: 'сейчас', value: 82 },
+            { label: '10 дек', value: 28 },
+            { label: '20 дек', value: 68 },
+            { label: '30 дек', value: 52 },
+          ]} />
+        </div>
+        <DotItem>Самая низкая точка · 10 дек · 4,8 млн ₽</DotItem>
+      </>
+    ),
+  },
+  'director-accounting': {
+    title: 'Бухгалтерия',
+    size: 's',
+    content: (
+      <>
+        <Rows>
+          <Row label="Налоги" value="в срок" dot="var(--primitive-success)" />
+          <Row label="Отчётность" value="в срок" dot="var(--primitive-success)" />
+          <Row label="Документы" value="2 акта ждут" dot="var(--primitive-warning)" />
+        </Rows>
+        <DotItem>Последнее обновление · сегодня</DotItem>
+      </>
+    ),
+  },
+  'director-month': {
+    title: 'Итоги месяца',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Прогноз прибыли · ноябрь" amount="1,4 млн ₽" />
+        <div className="future-month-bars" aria-hidden="true">
+          {[42, 68, 50, 76, 58, 92].map((height, i) => <span key={i} className={i === 5 ? 'is-current' : ''} style={{ height: `${height}%` }} />)}
+        </div>
+        <Rows>
+          <Row label="К прошлому месяцу" value="+9%" tone="success" />
+        </Rows>
+      </>
+    ),
+  },
+  'director-debtors': {
+    title: 'Нам должны',
+    size: 's',
+    content: (
+      <>
+        <Total caption="3 клиента" amount="3,2 млн ₽" />
+        <Rows>
+          <Row label="Вектор, ООО" value="2,6 млн ₽" dot="var(--primitive-success)" />
+          <Row label="Промснаб" value="600 000 ₽" dot="var(--primitive-warning)" />
+        </Rows>
+        <DotItem>Просроченных счетов нет</DotItem>
       </>
     ),
   },

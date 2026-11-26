@@ -14,12 +14,13 @@ export interface AssistantThread {
 }
 
 /** Тип бизнеса — выбирается в настройках прототипа */
-export type BusinessId = 'coffee' | 'solo' | 'marketplace';
+export type BusinessId = 'coffee' | 'solo' | 'marketplace' | 'director';
 
 export const BUSINESS_LABEL: Record<BusinessId, string> = {
   coffee: 'Кофейни',
   solo: 'ИП-одиночка',
   marketplace: 'Селлер на маркетплейсах',
+  director: 'Директор компании',
 };
 
 /** Кофейни: с чем ассистент пришёл на главную — выбирается в настройках прототипа */
@@ -44,7 +45,12 @@ export type FutureWidgetId =
   | 'market-holdbacks'
   | 'market-stock'
   | 'market-inventory'
-  | 'market-ads';
+  | 'market-ads'
+  | 'director-signatures'
+  | 'director-forecast'
+  | 'director-accounting'
+  | 'director-month'
+  | 'director-debtors';
 
 /** Что клиент решил про карточку, которую ассистент предложил в конце разговора */
 export type CardDecision = 'pending' | 'added' | 'dismissed';
