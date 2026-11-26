@@ -5,7 +5,7 @@ import { DotItem, Total } from '../v2/homeWidgets';
 import { FutureWidgetId } from '../../future';
 
 /** Строка «название — сумма» 18px; точка слева — статус, tone — цвет суммы */
-const Row: React.FC<{ label: string; value: string; dot?: string; tone?: 'success' }> = ({ label, value, dot, tone }) => (
+const Row: React.FC<{ label: string; value: string; dot?: string; tone?: 'success' | 'error' }> = ({ label, value, dot, tone }) => (
   <div className="future-row">
     {dot && <i className="future-row__dot" style={{ background: dot }} />}
     <span className="ts-400-s future-row__label">{label}</span>
@@ -140,6 +140,97 @@ const WIDGETS: Record<FutureWidgetId, { title: string; size: 's' | 'l'; content:
           <Row label="Следующий" value="28 ноября" />
           <Row label="Прошлый" value="21 ноября · 44 200 ₽" />
           <Row label="Считаю" value="за вычетом налога и резерва" />
+        </Rows>
+      </>
+    ),
+  },
+  'market-payouts': {
+    title: 'Выплаты площадок',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Следующая выплата · 12 ноября" amount="412 300 ₽" />
+        <Rows>
+          <Row label="Ozon · 12 ноя" value="412 300 ₽" />
+          <Row label="Wildberries · 14 ноя" value="286 900 ₽" />
+        </Rows>
+        <DotItem>Обновляю после отчёта площадки</DotItem>
+      </>
+    ),
+  },
+  'market-profit': {
+    title: 'Прибыль по товарам',
+    size: 's',
+    content: (
+      <>
+        <Total caption="После комиссии и логистики" amount="612 000 ₽" />
+        <Rows>
+          <Row label="Складные стулья" value="+148 000 ₽" tone="success" />
+          <Row label="Набор контейнеров" value="+96 000 ₽" tone="success" />
+          <Row label="Подставка бамбук" value="−18 400 ₽" tone="error" />
+        </Rows>
+      </>
+    ),
+  },
+  'market-holdbacks': {
+    title: 'Удержания площадок',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Октябрь · 38% от продаж" amount="1,02 млн ₽" />
+        <Rows>
+          <Row label="Комиссия" value="459 000 ₽" />
+          <Row label="Логистика" value="357 000 ₽" />
+          <Row label="Реклама" value="204 000 ₽" />
+        </Rows>
+      </>
+    ),
+  },
+  'market-stock': {
+    title: 'Закупка к НГ',
+    size: 's',
+    content: (
+      <>
+        <Total caption="По прогнозу продаж" amount="1,8 млн ₽" />
+        <Rows>
+          <Row label="Бюджет закупки" value="1,3 млн ₽" />
+          <Row label="На счёте сейчас" value="1,1 млн ₽" />
+          <Row label="Не хватает" value="200 000 ₽" />
+        </Rows>
+      </>
+    ),
+  },
+  'market-inventory': {
+    title: 'Остатки на складах',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Хватит примерно на" amount="9 дней" />
+        <Rows>
+          <Row label="Склад Ozon" value="124 шт." dot="var(--primitive-success)" />
+          <Row label="Склад WB" value="86 шт." dot="var(--primitive-warning)" />
+          <Row label="В пути" value="240 шт." dot="var(--primitive-neutral-3)" />
+        </Rows>
+        <LinearProgress
+          variant="percent"
+          value={38}
+          progressColor="var(--primitive-brand)"
+          trackColor="var(--translucent-primitives-neutral-1)"
+          ariaLabel="Запас товара на складах: 9 дней"
+        />
+      </>
+    ),
+  },
+  'market-ads': {
+    title: 'Реклама товаров',
+    size: 's',
+    content: (
+      <>
+        <Total caption="Октябрь · расходы" amount="204 000 ₽" />
+        <Rows>
+          <Row label="Продажи с рекламы" value="786 000 ₽" tone="success" />
+          <Row label="ДРР" value="26%" />
+          <Row label="Цель" value="до 20%" />
         </Rows>
       </>
     ),

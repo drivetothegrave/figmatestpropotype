@@ -433,6 +433,363 @@ const SOLO: BusinessDef = {
   ],
 };
 
+/* ---------- Селлер на маркетплейсах ---------- */
+
+const MARKET_PAYOUT_QUESTIONS = [
+  'Когда придут выплаты от Ozon и Wildberries?',
+  'Сколько всего придёт в этом месяце?',
+];
+const MARKET_PROFIT_QUESTIONS = [
+  'Сколько я зарабатываю на каждом товаре?',
+  'Какие товары приносят больше всего?',
+];
+const MARKET_HOLDBACK_QUESTIONS = [
+  'Почему площадки столько удержали?',
+  'На чём можно сэкономить?',
+];
+const MARKET_STOCK_QUESTIONS = [
+  'Сколько денег нужно на закупку к Новому году?',
+  'А если продажи вырастут?',
+];
+const MARKET_INVENTORY_QUESTIONS = ['На сколько дней хватит остатков?', 'Что пора заказать в первую очередь?'];
+const MARKET_AD_QUESTIONS = ['Сколько уходит на рекламу и что она приносит?', 'Какие товары рекламировать выгоднее?'];
+
+const MARKETPLACE_DIALOGS: DialogDef[] = [
+  {
+    id: 'market-payouts',
+    title: 'Выплаты от Ozon и Wildberries',
+    source: 'отчёты маркетплейсов и движения по счёту',
+    keywords: /выплат|ozon|озон|wildberries|вай|поступ|когда придут/i,
+    questions: MARKET_PAYOUT_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Ближайшая выплата от Ozon — <b>412 300 ₽, 12 ноября</b>. Wildberries перечислит 286 900 ₽ 14 ноября.</p>
+          <Card title="Ожидаемые выплаты" aside="ноябрь">
+            <Table head={['Площадка', 'Дата', 'Сумма']} rows={[
+              { cells: ['Ozon', '12 ноября', '412 300 ₽'] },
+              { cells: ['Wildberries', '14 ноября', '286 900 ₽'] },
+            ]} />
+          </Card>
+          <Note>Даты и суммы пересчитаю, когда площадки опубликуют новые отчёты</Note>
+          <p>Показывать такие выплаты на главной?</p>
+          {isLast && <FollowUps items={['Показывать выплаты на главной', 'Сколько придёт за месяц']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => (
+        <>
+          <p>В ноябре ожидается <b>1 284 600 ₽</b> от двух площадок. Из этой суммы 699 200 ₽ уже в обработке.</p>
+          <Card title="Поступления за ноябрь" aside="прогноз">
+            <SegmentedBar segments={[
+              { label: 'Ozon', amount: '742 300 ₽', share: 58, color: 'var(--category-indigo)' },
+              { label: 'Wildberries', amount: '542 300 ₽', share: 42, color: 'var(--category-emerald)' },
+            ]} />
+          </Card>
+          <p>Учту комиссии и возможные корректировки после финального отчёта.</p>
+        </>
+      ),
+    ],
+    offer: {
+      text: 'Хотите, добавлю выплаты на главную? Буду показывать, когда и сколько перечислит каждая площадка.',
+      widget: 'market-payouts',
+      addedText: 'Готово. Обновляю прогноз по мере появления новых отчётов и поступлений.',
+    },
+  },
+  {
+    id: 'market-profit',
+    title: 'Прибыль по товарам',
+    source: 'отчёты о продажах, комиссиях и логистике за октябрь',
+    keywords: /прибыл|маржин|товар|что принос|зарабатыва/i,
+    questions: MARKET_PROFIT_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>После комиссии, логистики и рекламы осталось <b>612 000 ₽</b>. Складные стулья дают больше всего, а подставка из бамбука продаётся в минус.</p>
+          <Card title="Прибыль по товарам" aside="октябрь">
+            <Table head={['Товар', 'Продажи', 'Прибыль']} rows={[
+              { cells: ['Складные стулья', '1 240 000 ₽', '+148 000 ₽'] },
+              { cells: ['Набор контейнеров', '890 000 ₽', '+96 000 ₽'] },
+              { cells: ['Подставка бамбук', '186 000 ₽', '−18 400 ₽'], high: [2] },
+            ]} />
+          </Card>
+          <Note>Считаю после комиссии площадки, логистики, хранения и рекламы</Note>
+          <p>Разобрать товары подробнее?</p>
+          {isLast && <FollowUps items={['Показывать прибыль на главной', 'Почему подставка в минусе']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => (
+        <>
+          <p>Больше всего прибыли приносят складные стулья: <b>148 000 ₽</b> за месяц. Контейнеры дают стабильную маржу, а подставку стоит пересчитать по цене или остановить рекламу.</p>
+          <Card title="Что влияет на результат">
+            <Table head={['Товар', 'Маржа', 'Изменение к сентябрю']} rows={[
+              { cells: ['Складные стулья', '18%', '+3 п.п.'] },
+              { cells: ['Набор контейнеров', '11%', 'без изменений'] },
+              { cells: ['Подставка бамбук', '−10%', '−6 п.п.'], high: [1, 2] },
+            ]} />
+          </Card>
+          <p>Могу следить за прибылью по каждому товару и отмечать, если она уходит ниже нуля.</p>
+        </>
+      ),
+    ],
+    offer: {
+      text: 'Добавить на главную прибыль по товарам? Покажу продажи, расходы и чистый результат.',
+      widget: 'market-profit',
+      addedText: 'Готово. Прибыль пересчитывается после загрузки отчётов площадок.',
+    },
+  },
+  {
+    id: 'market-holdbacks',
+    title: 'Удержания площадок',
+    source: 'отчёты Ozon и Wildberries за октябрь',
+    keywords: /удерж|комисс|логист|расход площад|списал|сэконом/i,
+    questions: MARKET_HOLDBACK_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>В октябре площадки удержали <b>1,02 млн ₽</b> — это 38% продаж. Больше всего ушло на комиссии и логистику.</p>
+          <Card title="Из чего состоят удержания" aside="октябрь">
+            <Table head={['Статья', 'Сумма', 'Доля']} rows={[
+              { cells: ['Комиссия', '459 000 ₽', '45%'] },
+              { cells: ['Логистика и хранение', '357 000 ₽', '35%'] },
+              { cells: ['Продвижение', '204 000 ₽', '20%'] },
+            ]} />
+          </Card>
+          <p>Сравнить с прошлым месяцем и найти, где расходы выросли?</p>
+          {isLast && <FollowUps items={['Следить за удержаниями', 'Сравнить с сентябрём']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => (
+        <>
+          <p>Расходы на хранение выросли на <b>18%</b>: два товара лежат на складе дольше 45 дней. Если переместить запас на склад ближе к покупателям, логистика может снизиться примерно на 32 000 ₽.</p>
+          <Card title="Где выросли расходы">
+            <Table head={['Статья', 'Сентябрь', 'Октябрь']} rows={[
+              { cells: ['Хранение', '81 000 ₽', '95 600 ₽'], high: [2] },
+              { cells: ['Логистика', '248 000 ₽', '261 400 ₽'], high: [2] },
+              { cells: ['Комиссия', '451 000 ₽', '459 000 ₽'] },
+            ]} />
+          </Card>
+          <Note>Оценка экономии — по текущим тарифам и географии заказов</Note>
+        </>
+      ),
+    ],
+    offer: {
+      text: 'Могу вынести удержания на главную и показывать комиссию, логистику и рекламу отдельно.',
+      widget: 'market-holdbacks',
+      addedText: 'Готово. Подсвечу, если доля удержаний заметно изменится.',
+    },
+  },
+  {
+    id: 'market-stock',
+    title: 'Закупка к Новому году',
+    source: 'продажи за прошлый год, темп продаж и текущие остатки',
+    keywords: /закуп|новому году|остат|склад|заказать|запас/i,
+    questions: MARKET_STOCK_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>Чтобы поддержать продажи до конца декабря, понадобится около <b>1,3 млн ₽</b> на закупку. Сейчас на счёте 1,1 млн ₽ — не хватает примерно 200 000 ₽.</p>
+          <Card title="План закупки" aside="до 1 декабря">
+            <Table head={['', 'Сумма']} rows={[
+              { cells: ['Складные стулья', '720 000 ₽'] },
+              { cells: ['Набор контейнеров', '430 000 ₽'] },
+              { cells: ['Запас на рост спроса', '150 000 ₽'] },
+              { cells: ['Всего', '1 300 000 ₽'], isTotal: true },
+            ]} />
+          </Card>
+          <p>Показывать план и сколько ещё нужно накопить?</p>
+          {isLast && <FollowUps items={['Добавить план закупки', 'Если спрос вырастет на 20%']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => (
+        <>
+          <p>При росте продаж на 20% закупку лучше увеличить до <b>1,55 млн ₽</b>. Основной запас направить на складные стулья — по текущему темпу их хватит на 9 дней.</p>
+          <Card title="Сценарии закупки">
+            <Table head={['Сценарий', 'Сумма', 'Запас']} rows={[
+              { cells: ['Текущий спрос', '1,3 млн ₽', '14 дней'] },
+              { cells: ['Рост на 20%', '1,55 млн ₽', '18 дней'] },
+            ]} />
+          </Card>
+        </>
+      ),
+    ],
+    offer: {
+      text: 'Добавить план закупки на главную? Буду обновлять его по остаткам и прогнозу продаж.',
+      widget: 'market-stock',
+      addedText: 'Готово. Покажу целевой бюджет и сколько осталось до закупки.',
+    },
+  },
+  {
+    id: 'market-inventory',
+    title: 'Остатки на складах',
+    source: 'остатки Ozon и Wildberries и средние продажи',
+    keywords: /сколько дней|хватит|остат|заканчива|склад/i,
+    questions: MARKET_INVENTORY_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>По текущему темпу складных стульев хватит примерно на <b>9 дней</b>, контейнеров — на 24 дня. Заказы в пути учёл.</p>
+          <Card title="Запас по товарам">
+            <Table head={['Товар', 'На складе', 'Хватит на']} rows={[
+              { cells: ['Складные стулья', '124 шт.', '9 дней'], high: [2] },
+              { cells: ['Набор контейнеров', '306 шт.', '24 дня'] },
+              { cells: ['В пути', '240 шт.', 'до 18 ноября'] },
+            ]} />
+          </Card>
+          {isLast && <FollowUps items={['Показывать остатки на главной', 'Что заказать первым']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>В первую очередь закажите складные стулья: их запас закончится раньше следующей поставки. Могу напомнить, когда остаток опустится до 5 дней продаж.</p>,
+    ],
+    offer: {
+      text: 'Добавить остатки на главную? Отмечу товары, которых скоро не хватит.',
+      widget: 'market-inventory',
+      addedText: 'Готово. Остатки обновляются после отчётов площадок и отгрузок.',
+    },
+  },
+  {
+    id: 'market-ads',
+    title: 'Реклама товаров',
+    source: 'расходы на продвижение и продажи за октябрь',
+    keywords: /реклам|продвиж|ддр|окупаем/i,
+    questions: MARKET_AD_QUESTIONS,
+    answers: [
+      ({ ask, isLast, next }) => (
+        <>
+          <p>В октябре на рекламу ушло <b>204 000 ₽</b>, с неё пришло продаж на 786 000 ₽. Средняя ДРР — 26%.</p>
+          <Card title="Результат продвижения" aside="октябрь">
+            <Table head={['Товар', 'Расходы', 'Продажи']} rows={[
+              { cells: ['Складные стулья', '82 000 ₽', '410 000 ₽'] },
+              { cells: ['Контейнеры', '64 000 ₽', '286 000 ₽'] },
+              { cells: ['Подставка бамбук', '58 000 ₽', '90 000 ₽'], high: [1, 2] },
+            ]} />
+          </Card>
+          {isLast && <FollowUps items={['Следить за рекламой на главной', 'Что продвигать выгоднее']} question={next} onAsk={ask} />}
+        </>
+      ),
+      () => <p>Складные стулья окупают продвижение лучше остальных. У подставки расходы почти сравнялись с продажами — бюджет стоит сократить.</p>,
+    ],
+    offer: {
+      text: 'Добавить на главную эффективность рекламы? Покажу расходы, продажи и долю рекламных затрат.',
+      widget: 'market-ads',
+      addedText: 'Готово. Обновляю показатели по отчётам рекламных кампаний.',
+    },
+  },
+];
+
+const MARKET_THREADS: AssistantThread[] = [
+  { id: 'market-docs', title: 'Отчёт площадки за октябрь', status: 'working' },
+  { id: 'market-return', title: 'Возвраты выросли на Ozon', status: 'unread' },
+  { id: 'market-warehouse', title: 'Склад ближе к покупателям', status: 'read' },
+];
+
+const marketplaceThreadsWith = (ids: string[]): AssistantThread[] => [
+  ...MARKETPLACE_DIALOGS.filter((d) => ids.includes(d.id))
+    .reverse()
+    .map((d) => ({ id: d.id, title: d.title, status: 'read' as const })),
+  ...MARKET_THREADS,
+];
+
+const MARKETPLACE: BusinessDef = {
+  id: 'marketplace',
+  name: 'Марина',
+  threads: MARKET_THREADS,
+  dialogs: MARKETPLACE_DIALOGS,
+  proposals: [
+    {
+      id: 'market-profit',
+      text: 'По отчётам видно, что товары приносят разную прибыль. Показать результат по каждому на главной?',
+      widget: 'market-profit',
+      accept: 'Добавить на главную',
+      editIdeas: ['Показывай только товары в минусе', 'Сравнивай с прошлым месяцем'],
+      isAvailable: (s) => s.pinned.includes('market-payouts'),
+    },
+    {
+      id: 'market-holdbacks',
+      text: 'Удержания площадок выросли. Разложить комиссию, логистику и продвижение по отдельности?',
+      widget: 'market-holdbacks',
+      accept: 'Показывать удержания',
+      editIdeas: ['Сравнивай с прошлым месяцем', 'Подсвечивай рост выше 10%'],
+      isAvailable: (s) => s.pinned.includes('market-profit'),
+    },
+    {
+      id: 'market-stock',
+      text: 'До Нового года спрос обычно растёт. Рассчитать бюджет закупки под ваши остатки и продажи?',
+      widget: 'market-stock',
+      accept: 'Добавить план закупки',
+      editIdeas: ['Рассчитай запас на 3 недели', 'Оставь резерв 200 000 ₽'],
+      isAvailable: (s) => s.pinned.includes('market-holdbacks'),
+    },
+    {
+      id: 'market-inventory',
+      text: 'У складных стульев осталось примерно 9 дней запаса. Показывать остатки и срок до пополнения?',
+      widget: 'market-inventory',
+      accept: 'Следить за остатками',
+      editIdeas: ['Предупреждай за 5 дней', 'Учитывай товары в пути'],
+      isAvailable: (s) => s.pinned.includes('market-stock'),
+    },
+    {
+      id: 'market-ads',
+      text: 'Могу сравнить расходы на рекламу с продажами по каждому товару и подсказать, где бюджет окупается.',
+      widget: 'market-ads',
+      accept: 'Добавить аналитику рекламы',
+      editIdeas: ['Показывай ДРР по площадкам', 'Подсвечивай кампании в минусе'],
+      isAvailable: (s) => s.pinned.includes('market-inventory'),
+    },
+  ],
+  homeLine: (s) => {
+    if (s.pinned.includes('market-inventory')) {
+      return { text: 'По складным стульям запас на 9 дней — проверьте план поставки. Остальные показатели в норме.' };
+    }
+    if (s.pinned.includes('market-payouts')) {
+      return { text: 'Ближайшая выплата Ozon — 412 300 ₽ 12 ноября. Всё спокойно.' };
+    }
+    return {
+      text: 'Счёт открыт. Подключите кабинеты Ozon и Wildberries — буду собирать выплаты, комиссии и остатки в одном месте.',
+    };
+  },
+  money: (s) => (s.pinned.includes('market-payouts') ? '1 184 600 ₽' : '0 ₽'),
+  stages: [
+    { label: 'День 1', state: () => initialState(MARKETPLACE) },
+    {
+      label: '2 недели',
+      state: () => ({
+        ...initialState(MARKETPLACE),
+        threads: marketplaceThreadsWith(['market-payouts']),
+        pinned: ['market-payouts'],
+        dialogs: { 'market-payouts': doneDialog(MARKET_PAYOUT_QUESTIONS) },
+      }),
+    },
+    {
+      label: '2 месяца',
+      state: () => ({
+        ...initialState(MARKETPLACE),
+        threads: marketplaceThreadsWith(['market-payouts', 'market-profit', 'market-holdbacks']),
+        pinned: ['market-payouts', 'market-profit', 'market-holdbacks'],
+        dialogs: {
+          'market-payouts': doneDialog(MARKET_PAYOUT_QUESTIONS),
+          'market-profit': doneDialog(MARKET_PROFIT_QUESTIONS),
+          'market-holdbacks': doneDialog(MARKET_HOLDBACK_QUESTIONS),
+        },
+      }),
+    },
+    {
+      label: 'Полгода',
+      state: () => ({
+        ...initialState(MARKETPLACE),
+        threads: marketplaceThreadsWith(['market-payouts', 'market-profit', 'market-holdbacks', 'market-stock', 'market-inventory']),
+        pinned: ['market-payouts', 'market-profit', 'market-stock', 'market-inventory', 'market-holdbacks'],
+        dialogs: {
+          'market-payouts': doneDialog(MARKET_PAYOUT_QUESTIONS),
+          'market-profit': doneDialog(MARKET_PROFIT_QUESTIONS),
+          'market-holdbacks': doneDialog(MARKET_HOLDBACK_QUESTIONS),
+          'market-stock': doneDialog(MARKET_STOCK_QUESTIONS),
+          'market-inventory': doneDialog(MARKET_INVENTORY_QUESTIONS),
+        },
+      }),
+    },
+  ],
+};
+
 /**
  * «⋯ → Изменить» у виджета из предложения ассистента: своя ветка, где ассистент спрашивает,
  * что поменять. Виджеты из разговоров правятся в том разговоре, где их собрали.
@@ -467,6 +824,12 @@ const WIDGET_TITLES: Record<FutureWidgetId, string> = {
   taxes: 'Налоги',
   clients: 'Клиенты за год',
   'self-transfer': 'Перевод себе',
+  'market-payouts': 'Выплаты площадок',
+  'market-profit': 'Прибыль по товарам',
+  'market-holdbacks': 'Удержания площадок',
+  'market-stock': 'Закупка к Новому году',
+  'market-inventory': 'Остатки на складах',
+  'market-ads': 'Реклама товаров',
 };
 
 const withEditDialogs = (def: BusinessDef): BusinessDef => ({
@@ -477,6 +840,7 @@ const withEditDialogs = (def: BusinessDef): BusinessDef => ({
 export const BUSINESSES: Record<BusinessId, BusinessDef> = {
   coffee: withEditDialogs(COFFEE),
   solo: withEditDialogs(SOLO),
+  marketplace: withEditDialogs(MARKETPLACE),
 };
 
 /** Ветка, где правят виджет: разговор, в котором его собрали, или отдельная ветка «Карточка «…»» */
@@ -490,6 +854,7 @@ export function initialState(def: BusinessDef): BusinessState {
 export const DEFAULT_FUTURE_STATE = {
   coffee: initialState(COFFEE),
   solo: initialState(SOLO),
+  marketplace: initialState(MARKETPLACE),
 };
 
 export const dialogStateOf = (s: BusinessState, id: string): DialogState => s.dialogs[id] ?? EMPTY_DIALOG;

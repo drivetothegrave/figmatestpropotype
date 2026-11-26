@@ -97,7 +97,7 @@ export const App: React.FC = () => {
       criticalTask: saved.criticalTask ?? DEFAULT_INSIGHTS.criticalTask,
       future: saved.future ?? DEFAULT_INSIGHTS.future,
       futureAssistant: saved.futureAssistant === 'proposal' ? 'proposal' : 'calm',
-      futureBusiness: saved.futureBusiness === 'solo' ? 'solo' : 'coffee',
+      futureBusiness: saved.futureBusiness === 'solo' || saved.futureBusiness === 'marketplace' ? saved.futureBusiness : 'coffee',
       // Инсайт в «Истории» на главной — из макетов есть только дубль и рост риска
       notice: saved.notice === 'duplicate' || saved.notice === 'risk-medium' ? saved.notice : 'off',
     };
@@ -160,6 +160,7 @@ export const App: React.FC = () => {
     return {
       coffee: settle(saved.coffee ?? DEFAULT_FUTURE_STATE.coffee),
       solo: settle(saved.solo ?? DEFAULT_FUTURE_STATE.solo),
+      marketplace: settle(saved.marketplace ?? DEFAULT_FUTURE_STATE.marketplace),
     };
   });
   const business = BUSINESSES[insights.futureBusiness];

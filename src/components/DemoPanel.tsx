@@ -18,7 +18,7 @@ const NOTICES: InsightNotice[] = ['off', 'duplicate', 'risk-medium'];
 
 /** Концепт «из будущего»: с чем ассистент пришёл на главную */
 const FUTURE_MODES: FutureAssistantMode[] = ['calm', 'proposal'];
-const BUSINESS_IDS: BusinessId[] = ['coffee', 'solo'];
+const BUSINESS_IDS: BusinessId[] = ['coffee', 'solo', 'marketplace'];
 
 type ToggleKey = 'criticalTask' | 'accountsList' | 'financePromo' | 'fundRecommendation';
 
